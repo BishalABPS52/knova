@@ -76,7 +76,7 @@ export default function TextContentCard({ item, onShare }) {
           className="text-secondary font-bold hover:text-on-secondary-fixed-variant hover:underline flex items-center gap-1 mb-4"
           href="#"
         >
-          Read more <span className="material-symbols-outlined text-sm">arrow_forward</span>
+          Read more...
         </a>
       </div>
       <EngagementBar

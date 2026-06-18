@@ -239,3 +239,24 @@ body {
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Add these styles to your existing globals.css */
+
+.glass-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #D9D9D9;
+}
+
+.floating-anim {
+  animation: floating 6s ease-in-out infinite;
+}
+
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+.stagger-1 { animation-delay: 0s; }
+.stagger-2 { animation-delay: 1.5s; }
+.stagger-3 { animation-delay: 3s; }
