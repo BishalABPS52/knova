@@ -1,275 +1,241 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@source "../**/*.{js,jsx,ts,tsx}";
 
-/* ── Knova CSS Custom Properties ─────────────────────────────── */
-:root {
-  /* Primary — Orange */
-  --primary:           #a14000;
-  --primary-container: #f36710;
-  --on-primary:        #ffffff;
-  --primary-tint:      #FEF3EA;
-  --primary-dark:      #7b2f00;
+@theme {
+  /* ===== DESKTOP COLORS ===== */
+  --color-inverse-on-surface: #f0f1f2;
+  --color-on-surface-variant: #594137;
+  --color-surface-container-highest: #e1e3e4;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+  --color-surface-tint: #a14000;
+  --color-surface-container: #edeeef;
+  --color-inverse-primary: #ffb694;
+  --color-on-secondary-container: #004866;
+  --color-outline: #8d7165;
+  --color-secondary: #00658d;
+  --color-surface: #f8f9fa;
+  --color-on-secondary: #ffffff;
+  --color-on-surface: #191c1d;
+  --color-surface-variant: #e1e3e4;
+  --color-tertiary-fixed: #d6e4f9;
+  --color-primary: #a14000;
+  --color-on-secondary-fixed: #001e2d;
+  --color-primary-fixed-dim: #ffb694;
+  --color-surface-container-high: #e7e8e9;
+  --color-on-tertiary-fixed: #0f1c2c;
+  --color-error: #ba1a1a;
+  --color-tertiary-fixed-dim: #bac8dc;
+  --color-inverse-surface: #2e3132;
+  --color-primary-fixed: #ffdbcc;
+  --color-on-primary: #ffffff;
+  --color-surface-container-lowest: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-surface-dim: #d9dadb;
+  --color-on-tertiary-container: #1f2c3c;
+  --color-surface-container-low: #f3f4f5;
+  --color-tertiary: #525f71;
+  --color-secondary-fixed-dim: #82cfff;
+  --color-secondary-container: #2dbcfe;
+  --color-surface-bright: #f8f9fa;
+  --color-on-secondary-fixed-variant: #004c6b;
+  --color-primary-container: #f36710;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #8593a6;
+  --color-on-tertiary-fixed-variant: #3a4859;
+  --color-background: #f8f9fa;
+  --color-on-primary-container: #4e1b00;
+  --color-outline-variant: #e1bfb1;
+  --color-on-primary-fixed: #351000;
+  --color-on-primary-fixed-variant: #7b2f00;
+  --color-secondary-fixed: #c6e7ff;
+  --color-on-background: #191c1d;
 
-  /* Secondary — Sky Blue */
-  --secondary:           #00658c;
-  --secondary-container: #2cbcfd;
-  --on-secondary:        #ffffff;
-  --secondary-tint:      #E0F6FE;
-  --secondary-dark:      #004c6a;
+  /* ===== MOBILE COLORS ===== */
+  --color-heading-text: #1A1A1A;
+  --color-tertiary-mobile: #c00012;
+  --color-surface-container-highest-mobile: #e4e2e2;
+  --color-surface-variant-mobile: #e4e2e2;
+  --color-surface-tint-mobile: #a14000;
+  --color-on-error-container-mobile: #93000a;
+  --color-on-primary-fixed-variant-mobile: #7b2f00;
+  --color-surface-dim-mobile: #dbdad9;
+  --color-surface-container-high-mobile: #e9e8e7;
+  --color-outline-mobile: #8d7165;
+  --color-surface-mobile: #fbf9f8;
+  --color-on-tertiary-fixed-variant-mobile: #93000b;
+  --color-inverse-surface-mobile: #303030;
+  --color-background-mobile: #fbf9f8;
+  --color-surface-container-lowest-mobile: #ffffff;
+  --color-secondary-mobile: #00658c;
+  --color-on-tertiary-container-mobile: #5f0004;
+  --color-on-secondary-container-mobile: #004966;
+  --color-surface-container-mobile: #efeded;
+  --color-secondary-fixed-dim-mobile: #80cfff;
+  --color-on-tertiary-mobile: #ffffff;
+  --color-primary-fixed-dim-mobile: #ffb694;
+  --color-on-primary-container-mobile: #4e1b00;
+  --color-outline-variant-mobile: #e1bfb1;
+  --color-inverse-on-surface-mobile: #f2f0f0;
+  --color-surface-container-low-mobile: #f5f3f3;
+  --color-on-surface-variant-mobile: #594137;
+  --color-surface-bright-mobile: #fbf9f8;
+  --color-error-container-mobile: #ffdad6;
+  --color-error-mobile: #ba1a1a;
+  --color-on-secondary-fixed-mobile: #001e2d;
+  --color-on-primary-fixed-mobile: #351000;
+  --color-card-bg: #FFFFFF;
+  --color-on-secondary-mobile: #ffffff;
+  --color-border-subtle: #D9D9D9;
+  --color-tertiary-container-mobile: #ff584d;
+  --color-on-secondary-fixed-variant-mobile: #004c6a;
+  --color-on-tertiary-fixed-mobile: #410002;
+  --color-secondary-fixed-mobile: #c5e7ff;
+  --color-on-error-mobile: #ffffff;
+  --color-tertiary-fixed-mobile: #ffdad6;
+  --color-orange-tint: #FEF3EA;
+  --color-inverse-primary-mobile: #ffb694;
+  --color-secondary-container-mobile: #2cbcfd;
+  --color-on-primary-mobile: #ffffff;
+  --color-primary-fixed-mobile: #ffdbcc;
+  --color-primary-mobile: #f36710;
+  --color-on-surface-mobile: #1b1c1c;
+  --color-on-background-mobile: #1b1c1c;
+  --color-blue-tint: #E0F6FE;
+  --color-page-bg: #F5F5F5;
 
-  /* Tertiary — Red */
-  --tertiary:           #c00012;
-  --tertiary-container: #ff584d;
-  --on-tertiary:        #ffffff;
-
-  /* Error */
-  --error:           #ba1a1a;
-  --error-container: #ffdad6;
-
-  /* Surfaces */
-  --surface:          #fbf9f8;
-  --surface-dim:      #dbdad9;
-  --surface-lowest:   #ffffff;
-  --surface-low:      #f5f3f3;
-  --surface-container:#efeded;
-  --surface-high:     #e9e8e7;
-  --surface-highest:  #e4e2e2;
-  --surface-variant:  #e4e2e2;
-
-  /* Text */
-  --on-surface:         #1b1c1c;
-  --on-surface-variant: #594137;
-  --inverse-surface:    #303030;
-  --inverse-on-surface: #f2f0f0;
-
-  /* Outline */
-  --outline:         #8d7165;
-  --outline-variant: #e1bfb1;
-
-  /* Semantic shorthands */
-  --page-bg:       #F5F5F5;
-  --card-bg:       #FFFFFF;
-  --heading-text:  #1A1A1A;
-  --border-subtle: #D9D9D9;
-  --orange-tint:   #FEF3EA;
-  --blue-tint:     #E0F6FE;
-
-  /* Elevation / shadow */
-  --shadow-card:       0 4px 12px rgba(0, 0, 0, 0.05);
-  --shadow-card-hover: 0 8px 20px rgba(0, 0, 0, 0.09);
-  --shadow-btn:        0 2px 8px  rgba(161, 64, 0, 0.25);
-  --shadow-btn-hover:  0 4px 12px rgba(161, 64, 0, 0.35);
-
-  /* Spacing */
-  --space-xs:  4px;
-  --space-sm:  8px;
-  --space-md:  16px;
-  --space-lg:  24px;
-  --space-xl:  32px;
-  --space-xxl: 48px;
-
-  /* Border radius */
-  --radius-sm:   0.25rem;
-  --radius:      0.5rem;
-  --radius-md:   0.75rem;
-  --radius-lg:   1rem;
-  --radius-xl:   1.5rem;
-  --radius-full: 9999px;
+  /* ===== SPACING ===== */
+  --spacing-unit: 8px;
+  --spacing-gutter: 24px;
+  --spacing-margin-mobile: 20px;
+  --spacing-container-max: 1280px;
+  --spacing-margin-desktop: 64px;
+  --spacing-base: 4px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  --spacing-sm: 8px;
+  --spacing-xs: 4px;
+  --spacing-gutter-md: 20px;
 }
 
-/* ── Base Reset ───────────────────────────────────────────────── */
-@layer base {
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+/* ===== GLOBAL STYLES ===== */
+body {
+  background-color: var(--color-page-bg);
+  color: var(--color-on-surface);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  font-family: "Inter", sans-serif;
+}
 
-  html {
-    font-family: 'Inter', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+/* ===== Material Symbols - SIMPLE LIKE SCHOLAR ===== */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  display: inline-block;
+  vertical-align: middle;
+}
 
-  body {
-    background-color: var(--page-bg);
-    color: var(--on-surface);
-    font-size: 15px;
-    line-height: 22px;
-  }
+.active-icon {
+  font-variation-settings: 'FILL' 1;
+}
 
-  h1, h2, h3, h4, h5, h6 {
-    color: var(--heading-text);
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
+/* Desktop Glass Card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid #E9ECEF;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.04);
+}
 
-  a {
-    color: var(--secondary);
-    text-decoration: none;
-  }
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.08);
+}
 
-  a:hover {
-    color: var(--secondary-dark);
-    text-decoration: underline;
-  }
+/* Desktop Comments */
+.comments-section {
+  display: none;
+}
 
-  input, textarea, select {
-    font-family: 'Inter', sans-serif;
+.comments-section.active {
+  display: block;
+}
+
+/* Desktop Flashcard Flip */
+.flashcard-inner {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.flashcard-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front,
+.flashcard-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flashcard-back {
+  transform: rotateY(180deg);
+}
+
+/* Mobile Flashcard Flip */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.card-flip-inner {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-flipped {
+  transform: rotateY(180deg);
+}
+
+/* Mobile Comment Section */
+.comment-section {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+}
+
+.comment-section.expanded {
+  max-height: 500px;
+  padding-top: 16px;
+}
+
+/* Hide Scrollbar */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
 
-/* ── Reusable Component Classes ───────────────────────────────── */
-@layer components {
-
-  /* Card */
-  .knova-card {
-    background-color: var(--card-bg);
-    border-radius: var(--radius-md);       /* 12px */
-    box-shadow: var(--shadow-card);
-    padding: var(--space-lg);              /* 24px desktop */
-  }
-
-  .knova-card:hover {
-    box-shadow: var(--shadow-card-hover);
-  }
-
-  /* Primary Button — Orange */
-  .btn-primary {
-    background-color: var(--primary-container);  /* #f36710 */
-    color: var(--on-primary);
-    border-radius: var(--radius-lg);             /* 16px */
-    padding: 10px 20px;
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.02em;
-    box-shadow: var(--shadow-btn);
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
-  }
-
-  .btn-primary:hover {
-    background-color: var(--primary);
-    box-shadow: var(--shadow-btn-hover);
-    transform: translateY(-1px);
-  }
-
-  .btn-primary:active {
-    transform: translateY(0);
-  }
-
-  /* Secondary Button — Blue outline */
-  .btn-secondary {
-    background-color: transparent;
-    color: var(--secondary);
-    border: 1.5px solid var(--secondary);
-    border-radius: var(--radius-lg);
-    padding: 10px 20px;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-  }
-
-  .btn-secondary:hover {
-    background-color: var(--secondary-tint);
-  }
-
-  /* Solid Secondary Button */
-  .btn-secondary-solid {
-    background-color: var(--secondary-container);  /* #2cbcfd */
-    color: var(--on-secondary);
-    border-radius: var(--radius-lg);
-    padding: 10px 20px;
-    font-weight: 600;
-    font-size: 14px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  .btn-secondary-solid:hover {
-    background-color: var(--secondary);
-  }
-
-  /* Input Field */
-  .knova-input {
-    width: 100%;
-    background-color: var(--card-bg);
-    border: 1.5px solid var(--border-subtle);
-    border-radius: var(--radius);            /* 8px */
-    padding: 10px 14px;
-    font-size: 15px;
-    color: var(--on-surface);
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .knova-input::placeholder {
-    color: var(--on-surface-variant);
-  }
-
-  .knova-input:focus {
-    border-color: var(--secondary);
-    box-shadow: 0 0 0 3px rgba(0, 101, 140, 0.12);
-  }
-
-  /* Chips / Badges */
-  .chip-orange {
-    background-color: var(--orange-tint);
-    color: var(--primary-dark);
-    border-radius: var(--radius-full);
-    padding: 3px 10px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    display: inline-block;
-  }
-
-  .chip-blue {
-    background-color: var(--blue-tint);
-    color: var(--secondary-dark);
-    border-radius: var(--radius-full);
-    padding: 3px 10px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    display: inline-block;
-  }
-
-  /* Progress bar */
-  .knova-progress {
-    background-color: var(--border-subtle);
-    border-radius: var(--radius-full);
-    height: 6px;
-    overflow: hidden;
-  }
-
-  .knova-progress-fill {
-    background-color: var(--primary-container);
-    height: 100%;
-    border-radius: var(--radius-full);
-    transition: width 0.3s ease;
-  }
-
-  /* Page container */
-  .page-container {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 var(--space-xl);
-  }
-
-  @media (max-width: 768px) {
-    .page-container {
-      padding: 0 var(--space-md);
-    }
-
-    .knova-card {
-      padding: var(--space-md);   /* 16px on mobile */
-    }
-  }
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
