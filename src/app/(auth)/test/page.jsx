@@ -1,15 +1,144 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const animRefs = useRef([]);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  useEffect(() => {
+    animRefs.current.forEach((el, i) => {
+      if (!el) return;
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(10px)';
+      el.style.transition = 'all 0.4s ease-out';
+      setTimeout(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }, 100 + i * 60);
+    });
+  }, []);
+
+  const ref = (i) => (el) => { animRefs.current[i] = el; };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle login logic
   };
 
+  // Mobile View
+  if (isMobile) {
+    return (
+      <div className="auth-page flex flex-col min-h-screen items-center text-center">
+        <main className="auth-container flex flex-col items-center px-5 pt-12 pb-8 flex-grow">
+          {/* Brand Header */}
+          <header ref={ref(0)} className="flex flex-col items-center mb-10">
+            <img
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWiSc93XM13_6nr4A9T9WbJYlLy2aVPdqx96zvMKRVRMO-0rNq7q-_FoRTzim2jaGDbHATA1-xbKMXE7wPn3ioCheB4M_9QJQRz3g4D1XjhVjS-ElBEOb9iwiHGMqCdoje4AFkjwFIBCwPLZLJdFQtN1E8Rurd2fkUhARQiu3xLZ4tXcRFEqVqNDRpbe5aS7k1tqsLIi2oKB0agSW6253G7cmNjHfxghYCL5S5UQ5wMgVsUKac1U3XAVkAV3rF3lP9eqhwQXMjUrk"
+              alt="Knova Sparkle Logo"
+              className="auth-logo mb-3"
+            />
+            <h1 className="font-extrabold text-[28px] leading-none flex items-center">
+              <span className="text-[#f36710]">K</span>
+              <span className="text-[#00afef]">nova</span>
+            </h1>
+            <p className="text-[#5c5c5c] text-[13px] mt-3 tracking-wide">
+              Learn. Create. Grow.
+            </p>
+          </header>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
+            <div ref={ref(1)} className="form-group">
+              <input
+                type="text"
+                required
+                placeholder="Email or username"
+                className="form-input"
+              />
+            </div>
+
+            <div ref={ref(2)} className="form-group">
+              <input
+                required
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                className="form-input password-input"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  {showPassword ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
+
+            <button ref={ref(3)} type="submit" className="btn-primary">
+              Log In
+            </button>
+
+            <div ref={ref(4)} className="text-center -mt-1.5">
+              <Link href="/forget_password" className="auth-forgot-link">
+                Forgot password?
+              </Link>
+            </div>
+
+            <div ref={ref(5)} className="auth-divider">
+              <div className="auth-divider-line" />
+              <span className="auth-divider-text">or</span>
+              <div className="auth-divider-line" />
+            </div>
+
+            <Link href="/register" className="block">
+              <button ref={ref(6)} type="button" className="btn-secondary">
+                Create New Account
+              </button>
+            </Link>
+          </form>
+        </main>
+
+        {/* Footer */}
+        <footer ref={ref(7)} className="w-full mt-auto pb-10 flex flex-col items-center gap-3.5">
+          <nav className="auth-footer-nav">
+            <a href="#">About</a>
+            <span className="text-[#d9d9d9]">•</span>
+            <a href="#">Help</a>
+            <span className="text-[#d9d9d9]">•</span>
+            <a href="#">Contact</a>
+          </nav>
+
+          <div className="auth-footer-copy">
+            <img
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWiSc93XM13_6nr4A9T9WbJYlLy2aVPdqx96zvMKRVRMO-0rNq7q-_FoRTzim2jaGDbHATA1-xbKMXE7wPn3ioCheB4M_9QJQRz3g4D1XjhVjS-ElBEOb9iwiHGMqCdoje4AFkjwFIBCwPLZLJdFQtN1E8Rurd2fkUhARQiu3xLZ4tXcRFEqVqNDRpbe5aS7k1tqsLIi2oKB0agSW6253G7cmNjHfxghYCL5S5UQ5wMgVsUKac1U3XAVkAV3rF3lP9eqhwQXMjUrk"
+              alt="Knova small icon"
+              className="auth-logo-small"
+            />
+            <span className="text-[#5c5c5c] text-[11px]">
+              Knova © 2025
+            </span>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  // Desktop View
   return (
     <main className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
       {/* Left Half: Branding & Collage */}
@@ -114,7 +243,7 @@ export default function LoginPage() {
               every day.
             </p>
           </div>
-          <p className="text-body-lg text-[#5c5c5c] max-w-md">
+          <p className="text-body-lg text-[#5c5c5c] max-w-md min-w-[300px]">
             Create flashcards, MCQs, and text content. Learn your way.
           </p>
         </div>
@@ -169,12 +298,12 @@ export default function LoginPage() {
             </button>
 
             <div className="text-center pt-2">
-              <a 
+              <Link
                 className="text-[#00afef] text-[13px] font-medium hover:underline" 
-                href="#"
+                href="/forget_password"
               >
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
             <div className="relative py-4 flex items-center justify-center">
@@ -186,12 +315,12 @@ export default function LoginPage() {
               </span>
             </div>
 
-            <button 
-              type="button"
-              className="w-full h-11 border-2 border-[#00afef] text-[#00afef] font-bold rounded-lg hover:bg-[#e0f6fe] transition-colors"
+            <Link 
+              href="/register"
+              className="w-full h-11 flex items-center justify-center border-2 border-[#00afef] text-[#00afef] font-bold rounded-lg hover:bg-[#e0f6fe] transition-colors"
             >
               Create new account
-            </button>
+            </Link>
           </form>
 
           <div className="mt-16 flex justify-center opacity-30">
