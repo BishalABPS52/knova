@@ -51,6 +51,7 @@
   --color-on-primary-fixed-variant: #7b2f00;
   --color-secondary-fixed: #c6e7ff;
   --color-on-background: #191c1d;
+  --color-page-bg: #F5F5F5
 
   /* ===== MOBILE COLORS ===== */
   --color-heading-text: #1A1A1A;
@@ -221,6 +222,7 @@ body {
   padding-top: 16px;
 }
 
+
 /* Hide Scrollbar */
 ::-webkit-scrollbar {
   display: none;
@@ -260,3 +262,31 @@ body {
 .stagger-1 { animation-delay: 0s; }
 .stagger-2 { animation-delay: 1.5s; }
 .stagger-3 { animation-delay: 3s; }
+
+/* Add to globals.css */
+.focus-ring-custom:focus {
+  outline: none;
+  border-color: #00afef !important;
+  box-shadow: 0 0 0 3px rgba(0, 175, 239, 0.2);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+.achievement-card {
+  animation: float 6s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+
+/* glass-effect is used on cards but defined as glass-card in your CSS — add the alias */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+}
+
+
+.icon-filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
