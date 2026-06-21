@@ -3,6 +3,9 @@ import "./globals.css";
 export const metadata = {
   title: "Knova – Learning Platform for you all.",
   description: "A telemetry-driven educational platform applying social media engagement mechanics to personalize learning content.",
+  icons: {
+    icon: '/knova.png',
+  },
 };
 
 export const viewport = {
@@ -12,7 +15,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Load Material Symbols - EXACTLY like Scholar */}
         <link 
