@@ -164,28 +164,28 @@ body {
   display: block;
 }
 
-/* Desktop Flashcard Flip */
-.flashcard-inner {
+/* Desktop FlashCard Flip */
+.FlashCard-inner {
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
   cursor: pointer;
 }
 
-.flashcard-inner.is-flipped {
+.FlashCard-inner.is-flipped {
   transform: rotateY(180deg);
 }
 
-.flashcard-front,
-.flashcard-back {
+.FlashCard-front,
+.FlashCard-back {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-.flashcard-back {
+.FlashCard-back {
   transform: rotateY(180deg);
 }
 
-/* Mobile Flashcard Flip */
+/* Mobile FlashCard Flip */
 .perspective-1000 {
   perspective: 1000px;
 }

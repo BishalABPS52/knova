@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Headset, Users } from 'lucide-react';
 
-export default function ContactScreen({ setCurrentScreen }: any) {
+export default function ContactScreen({ setCurrentScreen }) {
   const [isSent, setIsSent] = useState(false);
 
   return (

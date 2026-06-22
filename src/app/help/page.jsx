@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Search, Rocket, ChevronDown, BarChart2, TrendingUp, Settings } from 'lucide-react';
 
-export default function HelpScreen({ setCurrentScreen }: any) {
+export default function HelpScreen({ setCurrentScreen }) {
   const [openCategory, setOpenCategory] = useState<string | null>('getting-started');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 

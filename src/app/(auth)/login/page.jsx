@@ -185,7 +185,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Floating Flashcard */}
+            {/* Floating FlashCard */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 glass-card bg-card-bg rounded-xl p-4 z-40 floating-anim stagger-2">
               <div className="flex justify-between items-center mb-4">
                 <div className="flex gap-1">
@@ -244,7 +244,7 @@ export default function LoginPage() {
             </p>
           </div>
           <p className="text-body-lg text-[#5c5c5c] max-w-md min-w-[300px]">
-            Create flashcards, MCQs, and text content. Learn your way.
+            Create FlashCards, MCQs, and text content. Learn your way.
           </p>
         </div>
       </div>

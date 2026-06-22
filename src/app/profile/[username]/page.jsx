@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Grid, BarChart2, ArrowUp, X } from 'lucide-react';
 import Image from 'next/image';
 
-export default function ProfileScreen({ setCurrentScreen }: any) {
+export default function ProfileScreen({ setCurrentScreen }) {
   const [activeTab, setActiveTab] = useState('posts');
   const [isEditing, setIsEditing] = useState(false);
 
@@ -79,7 +79,7 @@ export default function ProfileScreen({ setCurrentScreen }: any) {
               <div className="flex justify-between items-start">
                  <span className="text-[10px] font-bold text-[#00afef]">{i % 2 !== 0 ? 'Note' : ''}</span>
                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${i % 2 === 0 ? 'bg-white/80 text-[#f36710]' : 'bg-[#e0f6fe] text-[#00afef]'}`}>
-                   {i % 2 === 0 ? 'Flashcard' : 'Deep Dive'}
+                   {i % 2 === 0 ? 'FlashCard' : 'Deep Dive'}
                  </span>
               </div>
               <h3 className="text-sm font-bold text-[#1b1c1c] leading-tight line-clamp-3">

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-export function FeedActions({ upvotes, downvotes, comments }: any) {
+export function FeedActions({ upvotes, downvotes, comments }) {
   return (
     <div className="p-4 border-t border-surface-variant flex justify-between items-center bg-white">
       <div className="flex items-center gap-6">
@@ -27,7 +27,7 @@ export function FeedActions({ upvotes, downvotes, comments }: any) {
   );
 }
 
-export function ReelActions({ upvotes, comments, onCommentToggle }: any) {
+export function ReelActions({ upvotes, comments, onCommentToggle }) {
   const [voted, setVoted] = useState(false);
 
   return (

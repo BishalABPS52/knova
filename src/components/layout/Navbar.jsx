@@ -11,7 +11,7 @@ export default function Navbar() {
 
   const links = [
     { name: 'Home', href: '/', icon: 'home' },
-    { name: 'Space', href: '/space', icon: 'school' },
+    { name: 'Space', href: '/learnspace', icon: 'school' },
     { name: 'Explore', href: '/explore', icon: 'explore' },
     { name: 'Profile', href: '/profile', icon: 'person' },
     { name: 'Settings', href: '/settings', icon: 'settings' },
@@ -22,7 +22,7 @@ export default function Navbar() {
       <div className="flex items-center gap-6 flex-1">
         <div className="flex items-center gap-2">
           <Image
-            src="/knova.png"
+            src="/KnovaWordmark.png"
             alt="Knova Logo"
             width={56}
             height={56}

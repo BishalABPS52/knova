@@ -1,8 +1,9 @@
 "use client";
+
 import React from 'react';
 import { BookOpen, TrendingUp, GraduationCap } from 'lucide-react';
 
-export default function AboutScreen({ setCurrentScreen }: any) {
+export default function AboutScreen({ setCurrentScreen }) {
   return (
     <div className="max-w-[860px] mx-auto p-6 md:p-10 space-y-12 md:space-y-16">
       
@@ -63,7 +64,7 @@ export default function AboutScreen({ setCurrentScreen }: any) {
             <BookOpen className="w-8 h-8 text-[#00afef]" />
           </div>
           <h3 className="text-xl font-bold text-[#1b1c1c]">Micro-Learning Made Social</h3>
-          <p className="text-[#594137] leading-relaxed">Instead of facing long, exhausting textbooks, Knova delivers knowledge in bite-sized, meaningful units like flashcards, short notes, and interactive multiple-choice questions.</p>
+          <p className="text-[#594137] leading-relaxed">Instead of facing long, exhausting textbooks, Knova delivers knowledge in bite-sized, meaningful units like FlashCards, short notes, and interactive multiple-choice questions.</p>
         </div>
         <div className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-[#efeded] flex flex-col gap-5 hover:shadow-md transition-shadow">
           <div className="w-16 h-16 bg-[#fef3ea] rounded-2xl flex items-center justify-center">

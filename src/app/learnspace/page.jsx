@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Flashcard } from '@/components/newCard/flashCard';
-import { MCQCard } from '@/components/newCard/MCQCard';
-import { TextCard } from '@/components/newCard/textCard';
+import  FlashCard  from '@/components/cards/FlashCard';
+import  McqCard  from '@/components/cards/McqCard';
+import  TextCard  from '@/components/cards/TextContentCard';
 import { spacePosts } from '@/data/mockData';
 
 export default function SpaceReel() {
@@ -43,11 +43,11 @@ export default function SpaceReel() {
       </div>
 
       <div className="h-screen overflow-y-scroll snap-y snap-mandatory scrollbar-hide z-10 relative">
-        {spacePosts.map((post: any) => {
-          if (post.type === 'flashcard') {
-            return <Flashcard key={post.id} variant="reel" onCommentToggle={() => setCommentsOpen(!commentsOpen)} {...post} />;
+        {spacePosts.map((post) => {
+          if (post.type === 'FlashCard') {
+            return <FlashCard key={post.id} variant="reel" onCommentToggle={() => setCommentsOpen(!commentsOpen)} {...post} />;
           } else if (post.type === 'mcq') {
-            return <MCQCard key={post.id} variant="reel" onCommentToggle={() => setCommentsOpen(!commentsOpen)} {...post} />;
+            return <McqCard key={post.id} variant="reel" onCommentToggle={() => setCommentsOpen(!commentsOpen)} {...post} />;
           } else if (post.type === 'text') {
             return <TextCard key={post.id} variant="reel" onCommentToggle={() => setCommentsOpen(!commentsOpen)} {...post} />;
           }

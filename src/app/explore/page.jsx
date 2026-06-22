@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Flashcard } from '@/components/newCard/flashCard';
-import { MCQCard } from '@/components/newCard/MCQCard';
-import { TextCard } from '@/components/newCard/textCard';
+import  FlashCard  from '@/components/cards/FlashCard';
+import  McqCard  from '@/components/cards/McqCard';
+import  TextCard  from '@/components/cards/TextContentCard';
 import { exploreFilters, explorePosts } from '@/data/mockData';
 
 export default function Explore() {
@@ -19,7 +19,7 @@ export default function Explore() {
             <span className="material-symbols-outlined text-outline mr-3">search</span>
             <input 
               className="bg-transparent border-none focus:ring-0 w-full text-body-md text-on-surface placeholder:text-outline outline-none" 
-              placeholder="Search for flashcards, notes, or creators..." 
+              placeholder="Search for FlashCards, notes, or creators..." 
               type="text" 
             />
             <button className="flex items-center gap-1 bg-surface-container-high px-4 py-1.5 rounded-full text-label-md text-on-surface-variant hover:bg-surface-container transition-colors ml-2">
@@ -52,11 +52,11 @@ export default function Explore() {
       {/* Grid */}
       <section className="flex justify-center w-full">
         <div className="max-w-[1440px] w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {explorePosts.map((post: any) => {
-            if (post.type === 'flashcard') {
-              return <Flashcard key={post.id} variant="explore" {...post} />;
+          {explorePosts.map((post) => {
+            if (post.type === 'FlashCard') {
+              return <FlashCard key={post.id} variant="explore" {...post} />;
             } else if (post.type === 'mcq') {
-              return <MCQCard key={post.id} variant="explore" {...post} />;
+              return <McqCard key={post.id} variant="explore" {...post} />;
             } else if (post.type === 'text') {
               return <TextCard key={post.id} variant="explore" {...post} />;
             }

@@ -315,7 +315,7 @@ export default function RegisterPage() {
             </div>
             <div>
               <p className="font-bold text-[15px] text-[#1a1a1a]">
-                50 Flashcards created
+                50 FlashCards created
               </p>
               <p className="text-[10px] uppercase font-bold tracking-wider text-[#5c5c5c] mt-0.5 flex items-center gap-1">
                 🎯 Streak Active
