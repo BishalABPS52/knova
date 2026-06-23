@@ -3,18 +3,19 @@
 import { useState } from 'react';
 
 interface FeedActionsProps {
-  upvotes: number;
+  upvotes: number | string;
   downvotes: number;
   comments: number;
+  onShare?: () => void;
 }
 
 interface ReelActionsProps {
-  upvotes: number;
+  upvotes: number | string;
   comments: number;
   onCommentToggle?: () => void;
 }
 
-export function FeedActions({ upvotes, downvotes, comments }: FeedActionsProps) {
+export function FeedActions({ upvotes, downvotes, comments, onShare }: FeedActionsProps) {
   return (
     <div className="p-4 border-t border-surface-variant flex justify-between items-center bg-white">
       <div className="flex items-center gap-6">
@@ -31,7 +32,10 @@ export function FeedActions({ upvotes, downvotes, comments }: FeedActionsProps) 
         </button>
       </div>
       <div className="flex gap-2">
-        <button className="material-symbols-outlined text-secondary p-2 hover:bg-surface-container rounded-full transition-colors">
+        <button 
+          onClick={onShare}
+          className="material-symbols-outlined text-secondary p-2 hover:bg-surface-container rounded-full transition-colors"
+        >
           share
         </button>
       </div>

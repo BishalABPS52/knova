@@ -11,7 +11,7 @@ interface McqProps {
   options?: string[];
   correctIndex?: number;
   explanation?: string;
-  upvotes?: number;
+  upvotes?: number | string;
   downvotes?: number;
   comments?: number;
   authorInitial?: string;
@@ -21,6 +21,8 @@ interface McqProps {
   onCommentToggle?: () => void;
   tag?: string;
   highlightIndex?: number;
+  onShare?: (id: string | number) => void;
+  id?: string | number;
 }
 
 export default function McqCard(props: McqProps) {
@@ -32,7 +34,7 @@ export default function McqCard(props: McqProps) {
   return null;
 }
 
-function MCQFeed({ author, time, question, options, correctIndex, explanation, upvotes, downvotes, authorInitial, authorBg, authorImg }: McqProps) {
+function MCQFeed({ author, time, question, options, correctIndex, explanation, upvotes, downvotes, authorInitial, authorBg, authorImg, id, onShare }: McqProps) {
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
@@ -97,20 +99,24 @@ function MCQFeed({ author, time, question, options, correctIndex, explanation, u
           })}
         </div>
 
-        {selected !== null && (
+        {selected !== null && correctIndex !== undefined && (
           <div className={`p-4 rounded-xl border ${selected === correctIndex ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
             <p className={`font-bold text-sm mb-1 ${selected === correctIndex ? 'text-green-700' : 'text-red-700'}`}>
               {selected === correctIndex ? 'Correct!' : 'You are wrong.'}
             </p>
             <p className="text-sm text-on-surface-variant">
-              {selected !== correctIndex && <span className="font-bold block mb-1">The correct answer is {options?.[correctIndex]}.</span>}
+              {selected !== correctIndex && (
+                <span className="font-bold block mb-1">
+                  The correct answer is {options?.[correctIndex]}.
+                </span>
+              )}
               {explanation}
             </p>
           </div>
         )}
       </div>
       
-      <FeedActions upvotes={upvotes || 0} downvotes={downvotes || 0} comments={0} />
+      <FeedActions upvotes={upvotes || 0} downvotes={downvotes || 0} comments={0} onShare={() => onShare && id && onShare(id)} />
     </div>
   );
 }
@@ -162,20 +168,23 @@ function MCQReel({ question, options, correctIndex, explanation, tags, author, t
             })}
           </div>
 
-          {selected !== null && (
+          {selected !== null && correctIndex !== undefined && (
             <div className={`mt-6 p-4 rounded-xl border ${selected === correctIndex ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-100'}`}>
               <p className={`text-sm font-bold mb-1 ${selected === correctIndex ? 'text-emerald-700' : 'text-red-700'}`}>
                 {selected === correctIndex ? 'Correct!' : 'You are wrong.'}
               </p>
               <p className="text-on-surface-variant text-sm">
-                {selected !== correctIndex && <span className="font-bold block mb-1">The right answer is {options?.[correctIndex]}.</span>}
+                {selected !== correctIndex && (
+                  <span className="font-bold block mb-1">
+                    The right answer is {options?.[correctIndex]}.
+                  </span>
+                )}
                 {explanation}
               </p>
             </div>
           )}
         </div>
 
-        {/* Author Info Overlay */}
         <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-2 z-30 pointer-events-none bg-gradient-to-t from-white via-white to-transparent pt-6 pb-2 px-2 -mx-2 -mb-2 rounded-b-[16px]">
           <div className="flex flex-wrap gap-1.5">
             {tags?.map((tag) => (

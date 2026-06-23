@@ -1,4 +1,27 @@
-export const feedItems = [
+export type FeedItemType = 'flashcard' | 'text' | 'mcq';
+
+export interface FeedItem {
+  id: number;
+  type: FeedItemType;
+  author: string;
+  authorInitial?: string;
+  authorBg?: string;
+  answerBg?: string;
+  time: string;
+  category: string;
+  question?: string;
+  answer?: string;
+  title?: string;
+  content?: string;
+  options?: string[];
+  correctIndex?: number;
+  explanation?: string;
+  upvotes: number;
+  downvotes: number;
+  comments: number;
+}
+
+export const feedItems: FeedItem[] = [
   {
     id: 1,
     type: 'flashcard',

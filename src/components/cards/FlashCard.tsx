@@ -9,7 +9,7 @@ interface CardProps {
   time?: string;
   question?: string;
   answer?: string;
-  upvotes?: number;
+  upvotes?: number | string;
   downvotes?: number;
   comments?: number;
   authorInitial?: string;
@@ -20,6 +20,8 @@ interface CardProps {
   tag?: string;
   onCommentToggle?: () => void;
   bg?: string;
+  onShare?: (id: string | number) => void;
+  id?: string | number;
 }
 
 export default function FlashCard(props: CardProps) {
@@ -32,7 +34,7 @@ export default function FlashCard(props: CardProps) {
 }
 
 function FlashCardFeed({
-  author, time, question, answer, upvotes, downvotes, comments, authorInitial, authorBg, answerBg
+  author, time, question, answer, upvotes, downvotes, comments, authorInitial, authorBg, answerBg, id, onShare
 }: CardProps) {
   const [flipped, setFlipped] = useState(false);
 
@@ -66,7 +68,7 @@ function FlashCardFeed({
         </div>
       </div>
 
-      <FeedActions upvotes={upvotes || 0} downvotes={downvotes || 0} comments={comments || 0} />
+      <FeedActions upvotes={upvotes || 0} downvotes={downvotes || 0} comments={comments || 0} onShare={() => onShare && id && onShare(id)} />
     </div>
   );
 }

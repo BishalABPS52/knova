@@ -9,21 +9,12 @@ import TextCard from '@/components/cards/TextContentCard';
 import McqCard from '@/components/cards/McqCard';
 import { FeedSkeleton } from '@/components/ui/Skeleton';
 import ShareModal from '@/components/ui/ShareModal';
-import { feedItems } from '@/data/feedData';
-
-// Define types based on usage
-type ShareContentId = string | number | null;
-
-interface FeedItem {
-  id: string | number;
-  type: 'flashcard' | 'text' | 'mcq';
-  [key: string]: any;
-}
+import { feedItems, FeedItem } from '@/data/feedData';
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [shareModalOpen, setShareModalOpen] = useState<boolean>(false);
-  const [shareContentId, setShareContentId] = useState<ShareContentId>(null);
+  const [shareContentId, setShareContentId] = useState<string | number | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {

@@ -8,7 +8,7 @@ interface TextProps {
   time?: string;
   title?: string;
   content?: string;
-  upvotes?: number;
+  upvotes?: number | string;
   downvotes?: number;
   comments?: number;
   authorInitial?: string;
@@ -17,6 +17,8 @@ interface TextProps {
   onCommentToggle?: () => void;
   tag?: string;
   color?: string;
+  onShare?: (id: string | number) => void;
+  id?: string | number;
 }
 
 export default function TextCard(props: TextProps) {
@@ -28,7 +30,7 @@ export default function TextCard(props: TextProps) {
   return null;
 }
 
-function TextFeed({ author, time, title, content, upvotes, downvotes, comments, authorInitial, authorBg }: TextProps) {
+function TextFeed({ author, time, title, content, upvotes, downvotes, comments, authorInitial, authorBg, id, onShare }: TextProps) {
   return (
     <div className="glass-card rounded-2xl overflow-hidden hover-lift transition-all duration-300">
       <div className="p-8 pb-4 bg-white">
@@ -50,7 +52,7 @@ function TextFeed({ author, time, title, content, upvotes, downvotes, comments, 
           Read more...
         </button>
       </div>
-      <FeedActions upvotes={upvotes || 0} downvotes={downvotes || 0} comments={comments || 0} />
+      <FeedActions upvotes={upvotes || 0} downvotes={downvotes || 0} comments={comments || 0} onShare={() => onShare && id && onShare(id)} />
     </div>
   );
 }
@@ -64,7 +66,6 @@ function TextReel({ title, content, tags, author, time, upvotes, comments, onCom
           <p className="text-on-surface-variant text-[16px] leading-relaxed">{content}</p>
         </div>
 
-        {/* Author Info Overlay */}
         <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-2 z-30 pointer-events-none">
           <div className="flex flex-wrap gap-1.5">
             {tags?.map((tag) => (

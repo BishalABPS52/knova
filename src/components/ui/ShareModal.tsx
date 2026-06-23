@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
-  contentId: string | number;
+  contentId: string | number | null; // Changed to allow null
 }
 
 export default function ShareModal({ isOpen, onClose, contentId }: ShareModalProps) {
@@ -34,9 +34,11 @@ export default function ShareModal({ isOpen, onClose, contentId }: ShareModalPro
     };
   }, [isOpen]);
 
-  const shareUrl = `https://knova.edu/content/${contentId}`;
+  // Safe URL generation even if contentId is null
+  const shareUrl = contentId ? `https://knova.edu/content/${contentId}` : '';
 
   const handleCopy = () => {
+    if (!contentId) return;
     navigator.clipboard.writeText(shareUrl).then(() => {
       setCopied(true);
       setTimeout(() => {

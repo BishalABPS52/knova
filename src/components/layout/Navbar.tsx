@@ -24,15 +24,15 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="w-full top-0 z-50 bg-white border-b border-[#d9d9d9] shadow-sm flex justify-between items-center px-6 lg:px-margin-desktop py-4 fixed h-[68px]">
-      <div className="flex items-center gap-6 flex-1">
+    <header className="w-full top-0 z-50 bg-surface dark:bg-surface-dim shadow-sm flex justify-between items-center py-4 fixed px-2 lg:px-[64px] h-[68px]">
+      <div className="flex items-center flex-1 gap-10">
         <div className="flex items-center gap-2">
           <Image
             src="/KnovaWordmark.png"
-            alt="Knova Logo"
-            width={56}
-            height={56}
-            className="object-contain"
+            alt="Knova"
+            width={64}
+            height={64}
+            className="h-16 object-contain transition-all"
             priority
           />
         </div>
@@ -46,7 +46,7 @@ export default function Navbar() {
                 href={link.href}
                 className={`flex items-center gap-2 py-2 px-4 rounded-xl group transition-colors ${
                   isActive
-                    ? 'font-bold bg-primary-container/10 text-primary-container'
+                    ? 'font-bold bg-primary/10 text-primary'
                     : 'text-on-surface-variant hover:bg-surface-container-high'
                 }`}
               >
@@ -74,7 +74,7 @@ export default function Navbar() {
             <img
               alt="User profile"
               className="w-full h-full object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEu-3t0uD8i4XHinactyZVIgU5H7GfzqCbS8sWTAWqp4bu2FT6BQazk7xznnRfgM79DLGKmUOMfhSZ7ZltOxkaZa4BoxVzMoWBZN7lWq7-H6-zOpZ9cKOQ5DLXJwgCf1DA_64LXRFB-k5-ObAh7PVKgli4I3MLEGQJypaipzHqdLm8T22ZAA8J9LaS4pj7subHocFLNZZuTFi7B_raIxHTm8roMmUnzUmkzQZ0Qdb3ISzIyr9Lherefvbt-zrfl6GK2WBp1rfXz5g "
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEu-3t0uD8i4XHinactyZVIgU5H7GfzqCbS8sWTAWqp4bu2FT6BQazk7xznnRfgM79DLGKmUOMfhSZ7ZltOxkaZa4BoxVzMoWBZN7lWq7-H6-zOpZ9cKOQ5DLXJwgCf1DA_64LXRFB-k5-ObAh7PVKgli4I3MLEGQJypaipzHqdLm8T22ZAA8J9LaS4pj7subHocFLNZZuTFi7B_raIxHTm8roMmUnzUmkzQZ0Qdb3ISzIyr9Lherefvbt-zrfl6GK2WBp1rfXz5g"
             />
           </div>
         </div>
