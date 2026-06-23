@@ -1,9 +1,32 @@
-"use client";
-import React, { useState } from 'react';
+'use client';
+
+import React, { useState, FormEvent, ChangeEvent } from 'react';
+// Note: Ensure you have lucide-react installed: pnpm add lucide-react
 import { Headset, Users } from 'lucide-react';
 
-export default function ContactScreen({ setCurrentScreen }) {
-  const [isSent, setIsSent] = useState(false);
+interface ContactScreenProps {
+  setCurrentScreen?: (screen: string) => void;
+}
+
+interface Developer {
+  name: string;
+  initial: string;
+}
+
+export default function ContactScreen({ setCurrentScreen }: ContactScreenProps) {
+  const [isSent, setIsSent] = useState<boolean>(false);
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSent(true);
+    setTimeout(() => setIsSent(false), 2500);
+  };
+
+  const developers: Developer[] = [
+    { name: 'Amay Jha', initial: 'AJ' },
+    { name: 'Birendra Rawat', initial: 'BR' },
+    { name: 'Bishal Shrestha', initial: 'BS' }
+  ];
 
   return (
     <div className="max-w-[1000px] mx-auto p-6 md:p-10 pt-4">
@@ -16,14 +39,7 @@ export default function ContactScreen({ setCurrentScreen }) {
       <div className="grid lg:grid-cols-5 gap-8">
         <div className="lg:col-span-3 bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-[#efeded] animate-in fade-in slide-in-from-bottom-6 duration-500">
           <h2 className="text-2xl font-semibold mb-8 text-[#1b1c1c]">Send us a message</h2>
-          <form 
-            className="space-y-6" 
-            onSubmit={(e) => { 
-              e.preventDefault(); 
-              setIsSent(true); 
-              setTimeout(()=>setIsSent(false), 2500)
-            }}
-          >
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                  <label className="block text-xs font-semibold text-[#594137] mb-2 uppercase tracking-wide">Name</label>
@@ -96,11 +112,7 @@ export default function ContactScreen({ setCurrentScreen }) {
               <h3 className="font-bold text-xl text-[#1b1c1c]">The developer core</h3>
             </div>
             <div className="space-y-6">
-              {[
-                { name: 'Amay Jha', initial: 'AJ' },
-                { name: 'Birendra Rawat', initial: 'BR' },
-                { name: 'Bishal Shrestha', initial: 'BS' }
-              ].map((dev, i) => (
+              {developers.map((dev, i) => (
                 <div key={i} className="flex items-center justify-between group">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-[#efeded] rounded-full flex items-center justify-center font-bold text-sm text-[#594137] group-hover:bg-[#fef3ea] group-hover:text-[#f36710] transition-colors">
@@ -115,5 +127,5 @@ export default function ContactScreen({ setCurrentScreen }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

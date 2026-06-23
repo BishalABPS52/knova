@@ -2,7 +2,19 @@
 
 import { useState } from 'react';
 
-export function FeedActions({ upvotes, downvotes, comments }) {
+interface FeedActionsProps {
+  upvotes: number;
+  downvotes: number;
+  comments: number;
+}
+
+interface ReelActionsProps {
+  upvotes: number;
+  comments: number;
+  onCommentToggle?: () => void;
+}
+
+export function FeedActions({ upvotes, downvotes, comments }: FeedActionsProps) {
   return (
     <div className="p-4 border-t border-surface-variant flex justify-between items-center bg-white">
       <div className="flex items-center gap-6">
@@ -27,7 +39,7 @@ export function FeedActions({ upvotes, downvotes, comments }) {
   );
 }
 
-export function ReelActions({ upvotes, comments, onCommentToggle }) {
+export function ReelActions({ upvotes, comments, onCommentToggle }: ReelActionsProps) {
   const [voted, setVoted] = useState(false);
 
   return (

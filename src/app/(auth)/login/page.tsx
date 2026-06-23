@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, RefCallback } from 'react';
 import Link from 'next/link';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const animRefs = useRef([]);
+  // Define type for array of HTMLDivElement or null
+  const animRefs = useRef<(HTMLDivElement | HTMLFormElement | HTMLButtonElement | HTMLElement | null)[]>([]);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -22,19 +23,22 @@ export default function LoginPage() {
   useEffect(() => {
     animRefs.current.forEach((el, i) => {
       if (!el) return;
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(10px)';
-      el.style.transition = 'all 0.4s ease-out';
+      // Cast to HTMLElement to access style safely if strict types differ
+      const htmlEl = el as HTMLElement;
+      htmlEl.style.opacity = '0';
+      htmlEl.style.transform = 'translateY(10px)';
+      htmlEl.style.transition = 'all 0.4s ease-out';
       setTimeout(() => {
-        el.style.opacity = '1';
-        el.style.transform = 'translateY(0)';
+        htmlEl.style.opacity = '1';
+        htmlEl.style.transform = 'translateY(0)';
       }, 100 + i * 60);
     });
   }, []);
 
-  const ref = (i) => (el) => { animRefs.current[i] = el; };
+  const ref = (i: number): RefCallback<HTMLDivElement | HTMLFormElement | HTMLButtonElement | HTMLElement> => 
+    (el) => { animRefs.current[i] = el; };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle login logic
   };
@@ -47,7 +51,7 @@ export default function LoginPage() {
           {/* Brand Header */}
           <header ref={ref(0)} className="flex flex-col items-center mb-10">
             <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWiSc93XM13_6nr4A9T9WbJYlLy2aVPdqx96zvMKRVRMO-0rNq7q-_FoRTzim2jaGDbHATA1-xbKMXE7wPn3ioCheB4M_9QJQRz3g4D1XjhVjS-ElBEOb9iwiHGMqCdoje4AFkjwFIBCwPLZLJdFQtN1E8Rurd2fkUhARQiu3xLZ4tXcRFEqVqNDRpbe5aS7k1tqsLIi2oKB0agSW6253G7cmNjHfxghYCL5S5UQ5wMgVsUKac1U3XAVkAV3rF3lP9eqhwQXMjUrk"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWiSc93XM13_6nr4A9T9WbJYlLy2aVPdqx96zvMKRVRMO-0rNq7q-_FoRTzim2jaGDbHATA1-xbKMXE7wPn3ioCheB4M_9QJQRz3g4D1XjhVjS-ElBEOb9iwiHGMqCdoje4AFkjwFIBCwPLZLJdFQtN1E8Rurd2fkUhARQiu3xLZ4tXcRFEqVqNDRpbe5aS7k1tqsLIi2oKB0agSW6253G7cmNjHfxghYCL5S5UQ5wMgVsUKac1U3XAVkAV3rF3lP9eqhwQXMjUrk "
               alt="Knova Sparkle Logo"
               className="auth-logo mb-3"
             />
@@ -125,7 +129,7 @@ export default function LoginPage() {
 
           <div className="auth-footer-copy">
             <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWiSc93XM13_6nr4A9T9WbJYlLy2aVPdqx96zvMKRVRMO-0rNq7q-_FoRTzim2jaGDbHATA1-xbKMXE7wPn3ioCheB4M_9QJQRz3g4D1XjhVjS-ElBEOb9iwiHGMqCdoje4AFkjwFIBCwPLZLJdFQtN1E8Rurd2fkUhARQiu3xLZ4tXcRFEqVqNDRpbe5aS7k1tqsLIi2oKB0agSW6253G7cmNjHfxghYCL5S5UQ5wMgVsUKac1U3XAVkAV3rF3lP9eqhwQXMjUrk"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWiSc93XM13_6nr4A9T9WbJYlLy2aVPdqx96zvMKRVRMO-0rNq7q-_FoRTzim2jaGDbHATA1-xbKMXE7wPn3ioCheB4M_9QJQRz3g4D1XjhVjS-ElBEOb9iwiHGMqCdoje4AFkjwFIBCwPLZLJdFQtN1E8Rurd2fkUhARQiu3xLZ4tXcRFEqVqNDRpbe5aS7k1tqsLIi2oKB0agSW6253G7cmNjHfxghYCL5S5UQ5wMgVsUKac1U3XAVkAV3rF3lP9eqhwQXMjUrk "
               alt="Knova small icon"
               className="auth-logo-small"
             />
@@ -148,7 +152,7 @@ export default function LoginPage() {
           <img 
             alt="Knova Logo" 
             className="w-8 h-8 object-contain" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3o0xkQHHA3nRWqaiDY65-LbmdhjpzFBWVBVtE0ipG96r1ZUww0nOmA0DtLVnUsZwxChia8uESSmAgKTPqf31qEcL4OezfxlN0YzxMv5FyHCPYWBSul0bxzL1YY8dsUDiEobuEjMcipdHzc1RbFjRChTLdqayDnLa3NCkq67mWbOrB8wHZc_XXCUXnHvdh65Vjb65NQ9xs-JaAtTC56JHt2RDPYo9fD-cv5XqR-MPdPuc8gWaQE8FBOQl49nXfVcwuhsT9_wPr9bQ"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3o0xkQHHA3nRWqaiDY65-LbmdhjpzFBWVBVtE0ipG96r1ZUww0nOmA0DtLVnUsZwxChia8uESSmAgKTPqf31qEcL4OezfxlN0YzxMv5FyHCPYWBSul0bxzL1YY8dsUDiEobuEjMcipdHzc1RbFjRChTLdqayDnLa3NCkq67mWbOrB8wHZc_XXCUXnHvdh65Vjb65NQ9xs-JaAtTC56JHt2RDPYo9fD-cv5XqR-MPdPuc8gWaQE8FBOQl49nXfVcwuhsT9_wPr9bQ "
           />
           <h1 className="text-headline-md font-extrabold flex">
             <span className="text-[#f36710]">K</span>
@@ -200,7 +204,7 @@ export default function LoginPage() {
                 <img 
                   className="w-full h-full object-cover rounded-lg" 
                   alt="Atom illustration"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQOdWe6DH8nv_ecUl--9gLGcig5hByhN1lhGBBrpH2mA3HpBJmGCjeJOG0mGV1mTTOx3tdcB1iq7moDaNs1wvfeMeVemUFm6Dog_oy__TxbFqvoMLBuqzHLNcuTlrTitwWZK9a2qjNdmpitVdTx9a86tFLwo4CgRc9DBHHcMXh8ulgTNA1Hm2mrf-7cPf6bXxsdzpUKP_m8NeK85lMMDSPDd-9Kr0p7iGqm91SutasLIB-OoAfsHFexyPpyBJ8aDY9Uc3Z5-IK24c"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQOdWe6DH8nv_ecUl--9gLGcig5hByhN1lhGBBrpH2mA3HpBJmGCjeJOG0mGV1mTTOx3tdcB1iq7moDaNs1wvfeMeVemUFm6Dog_oy__TxbFqvoMLBuqzHLNcuTlrTitwWZK9a2qjNdmpitVdTx9a86tFLwo4CgRc9DBHHcMXh8ulgTNA1Hm2mrf-7cPf6bXxsdzpUKP_m8NeK85lMMDSPDd-9Kr0p7iGqm91SutasLIB-OoAfsHFexyPpyBJ8aDY9Uc3Z5-IK24c "
                 />
               </div>
               <p className="text-body-md font-bold text-center">Photosynthesis Process</p>
@@ -327,7 +331,7 @@ export default function LoginPage() {
             <img 
               alt="Footer Logo" 
               className="w-5 h-5 grayscale" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3o0xkQHHA3nRWqaiDY65-LbmdhjpzFBWVBVtE0ipG96r1ZUww0nOmA0DtLVnUsZwxChia8uESSmAgKTPqf31qEcL4OezfxlN0YzxMv5FyHCPYWBSul0bxzL1YY8dsUDiEobuEjMcipdHzc1RbFjRChTLdqayDnLa3NCkq67mWbOrB8wHZc_XXCUXnHvdh65Vjb65NQ9xs-JaAtTC56JHt2RDPYo9fD-cv5XqR-MPdPuc8gWaQE8FBOQl49nXfVcwuhsT9_wPr9bQ"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3o0xkQHHA3nRWqaiDY65-LbmdhjpzFBWVBVtE0ipG96r1ZUww0nOmA0DtLVnUsZwxChia8uESSmAgKTPqf31qEcL4OezfxlN0YzxMv5FyHCPYWBSul0bxzL1YY8dsUDiEobuEjMcipdHzc1RbFjRChTLdqayDnLa3NCkq67mWbOrB8wHZc_XXCUXnHvdh65Vjb65NQ9xs-JaAtTC56JHt2RDPYo9fD-cv5XqR-MPdPuc8gWaQE8FBOQl49nXfVcwuhsT9_wPr9bQ "
             />
           </div>
         </div>

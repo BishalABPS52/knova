@@ -1,6 +1,38 @@
 'use client';
 
-export function CardHeader({ author, avatar, timeAgo, category, isMobile = false }) {
+interface Comment {
+  author: string;
+  text: string;
+  avatar?: string;
+}
+
+interface CardHeaderProps {
+  author: string;
+  avatar: string;
+  timeAgo: string;
+  category: string;
+  isMobile?: boolean;
+}
+
+interface EngagementBarProps {
+  likes: number;
+  dislikes: number;
+  commentsCount: number;
+  onToggleComments: () => void;
+  isCommentsExpanded: boolean;
+  onShare: () => void;
+  id: string | number;
+  isMobile?: boolean;
+}
+
+interface CommentsSectionProps {
+  comments: Comment[];
+  isExpanded: boolean;
+  onToggleComments: () => void;
+  isMobile?: boolean;
+}
+
+export function CardHeader({ author, avatar, timeAgo, category, isMobile = false }: CardHeaderProps) {
   if (isMobile) {
     return (
       <div className="flex items-center gap-3 mb-4">
@@ -8,7 +40,7 @@ export function CardHeader({ author, avatar, timeAgo, category, isMobile = false
           {typeof avatar === 'string' && avatar.length <= 2 ? (
             <span className="material-symbols-outlined text-primary">{avatar}</span>
           ) : (
-            <img className="w-full h-full object-cover" src={avatar} alt="Author" />
+            <img className="w-full h-full object-cover" src={avatar as string} alt="Author" />
           )}
         </div>
         <div>
@@ -46,9 +78,9 @@ export function EngagementBar({
   onShare, 
   id, 
   isMobile = false 
-}) {
+}: EngagementBarProps) {
   if (isMobile) {
-    const formatCount = (num) => {
+    const formatCount = (num: number) => {
       if (num >= 1000) return `${(num/1000).toFixed(1)}k`;
       return num;
     };
@@ -125,7 +157,7 @@ export function EngagementBar({
   );
 }
 
-export function CommentsSection({ comments, isExpanded, onToggleComments, isMobile = false }) {
+export function CommentsSection({ comments, isExpanded, onToggleComments, isMobile = false }: CommentsSectionProps) {
   if (isMobile) {
     return (
       <div className={`comment-section ${isExpanded ? 'expanded' : ''}`}>

@@ -3,9 +3,21 @@ import React, { useState } from 'react';
 import { Grid, BarChart2, ArrowUp, X } from 'lucide-react';
 import Image from 'next/image';
 
-export default function ProfileScreen({ setCurrentScreen }) {
-  const [activeTab, setActiveTab] = useState('posts');
-  const [isEditing, setIsEditing] = useState(false);
+interface StatItem {
+  name: string;
+  score: number;
+}
+
+export default function ProfileScreen({ setCurrentScreen }: { setCurrentScreen?: (screen: string) => void }) {
+  const [activeTab, setActiveTab] = useState<'posts' | 'stats'>('posts');
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const statsData: StatItem[] = [
+    { name: 'Cognitive Psychology', score: 94 },
+    { name: 'Algorithm Design', score: 88 },
+    { name: 'Molecular Biology', score: 72 },
+    { name: 'Global Economics', score: 64 }
+  ];
 
   return (
     <div className="max-w-[880px] mx-auto p-4 space-y-6">
@@ -96,7 +108,7 @@ export default function ProfileScreen({ setCurrentScreen }) {
 
       {activeTab === 'stats' && (
         <div className="pb-8 space-y-4">
-          {[{name: 'Cognitive Psychology', score: 94}, {name: 'Algorithm Design', score: 88}, {name: 'Molecular Biology', score: 72}, {name: 'Global Economics', score: 64}].map(item => (
+          {statsData.map((item) => (
              <div key={item.name} className="bg-white rounded-2xl p-5 shadow-sm space-y-3">
               <div className="flex justify-between items-end">
                 <span className="font-bold text-[#1b1c1c]">{item.name}</span>

@@ -2,18 +2,29 @@
 import React, { useState } from 'react';
 import { Search, Rocket, ChevronDown, BarChart2, TrendingUp, Settings } from 'lucide-react';
 
-export default function HelpScreen({ setCurrentScreen }) {
+interface Category {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+}
+
+interface FAQ {
+  q: string;
+  a: string;
+}
+
+export default function HelpScreen({ setCurrentScreen }: { setCurrentScreen?: (screen: string) => void }) {
   const [openCategory, setOpenCategory] = useState<string | null>('getting-started');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  const categories = [
+  const categories: Category[] = [
     { id: 'getting-started', label: 'Getting Started', icon: Rocket },
     { id: 'profile-stats', label: 'Profile & Stats', icon: BarChart2 },
     { id: 'learning-ladders', label: 'Learning Ladders', icon: TrendingUp },
     { id: 'quizzes-settings', label: 'Quizzes & Settings', icon: Settings },
   ];
 
-  const faqs = [
+  const faqs: FAQ[] = [
     { q: "How do I create my first Learning Space?", a: "Creating your first Space is simple! Navigate to the 'Space' tab in the top bar and click the 'New Space' button. You'll be prompted to name your space and select your primary learning objective. From there, Knova will automatically suggest initial resources and a starter path for you." },
     { q: "What platforms does Knova support?", a: "Knova is currently available as a progressive web app (PWA), meaning it works seamlessly on any modern web browser across Desktop, Tablet, and Mobile. We also offer dedicated sync features for Chrome and Firefox extensions." },
     { q: "Is there a trial period for Premium features?", a: "Yes, all new users get a 14-day trial of Knova Pro. This includes AI-generated quizzes, advanced analytics, and unlimited Learning Ladders. No credit card is required for the initial trial period." },
@@ -67,7 +78,7 @@ export default function HelpScreen({ setCurrentScreen }) {
               <div 
                 className={`overflow-hidden transition-all duration-300 ${openFaq === i ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
               >
-                <div className="px-5 lg:px-6 pb-5 lg:pb-6 text-sm md:text-<base text-[#594137] leading-relaxed border-t border-[#efeded] pt-4">
+                <div className="px-5 lg:px-6 pb-5 lg:pb-6 text-sm md:text-base text-[#594137] leading-relaxed border-t border-[#efeded] pt-4">
                   {faq.a}
                 </div>
               </div>

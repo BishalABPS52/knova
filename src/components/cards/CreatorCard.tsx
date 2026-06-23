@@ -24,7 +24,7 @@ export default function CreatorCard() {
             <textarea
               className="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-body-lg focus:ring-2 focus:ring-primary/20 placeholder:text-on-surface-variant/50 text-on-surface resize-none"
               placeholder="Write your content here...."
-              rows="2"
+              rows={2}
             ></textarea>
           </div>
           <button className="bg-primary text-white w-full h-12 rounded-xl font-label-lg text-lg flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-primary/20">

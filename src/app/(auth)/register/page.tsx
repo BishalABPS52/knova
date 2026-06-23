@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, RefCallback, FormEvent } from 'react';
 import Link from 'next/link';
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const animRefs = useRef([]);
+  // Define type for array of HTML elements or null
+  const animRefs = useRef<(HTMLDivElement | HTMLElement | null)[]>([]);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -23,19 +24,21 @@ export default function RegisterPage() {
   useEffect(() => {
     animRefs.current.forEach((el, i) => {
       if (!el) return;
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(10px)';
-      el.style.transition = 'all 0.4s ease-out';
+      const htmlEl = el as HTMLElement;
+      htmlEl.style.opacity = '0';
+      htmlEl.style.transform = 'translateY(10px)';
+      htmlEl.style.transition = 'all 0.4s ease-out';
       setTimeout(() => {
-        el.style.opacity = '1';
-        el.style.transform = 'translateY(0)';
+        htmlEl.style.opacity = '1';
+        htmlEl.style.transform = 'translateY(0)';
       }, 100 + i * 60);
     });
   }, []);
 
-  const ref = (i) => (el) => { animRefs.current[i] = el; };
+  const ref = (i: number): RefCallback<HTMLDivElement | HTMLElement> => 
+    (el) => { animRefs.current[i] = el; };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     // Handle registration logic
   };

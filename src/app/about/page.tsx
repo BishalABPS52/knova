@@ -1,9 +1,16 @@
-"use client";
+'use client';
 
 import React from 'react';
+// Note: Ensure you have lucide-react installed: pnpm add lucide-react
 import { BookOpen, TrendingUp, GraduationCap } from 'lucide-react';
 
-export default function AboutScreen({ setCurrentScreen }) {
+// Define props type if this component is used elsewhere with props, 
+// otherwise remove setCurrentScreen if it's not used in this specific file structure.
+interface AboutScreenProps {
+  setCurrentScreen?: (screen: string) => void;
+}
+
+export default function AboutScreen({ setCurrentScreen }: AboutScreenProps) {
   return (
     <div className="max-w-[860px] mx-auto p-6 md:p-10 space-y-12 md:space-y-16">
       

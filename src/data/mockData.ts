@@ -1,4 +1,82 @@
-export const feedPosts = [
+export interface FeedPost {
+  id: number;
+  type: string;
+  author: string;
+  time: string;
+  question?: string;
+  answer?: string;
+  upvotes: number;
+  downvotes?: number;
+  comments?: number;
+  authorInitial?: string;
+  authorBg?: string;
+  answerBg?: string;
+  authorImg?: string;
+  title?: string;
+  content?: string;
+  options?: string[];
+  correctIndex?: number;
+  explanation?: string;
+}
+
+export interface SpacePost {
+  id: number;
+  type: string;
+  question?: string;
+  answer?: string;
+  subtitle?: string;
+  theme?: string;
+  tag?: string;
+  tags?: string[];
+  author: string;
+  time: string;
+  upvotes: string | number;
+  comments: number;
+  options?: string[];
+  correctIndex?: number;
+  explanation?: string;
+  title?: string;
+  content?: string;
+}
+
+export interface ProfileTag {
+  name: string;
+  class: string;
+}
+
+export interface SkillStat {
+  title: string;
+  score: number;
+  color: string;
+}
+
+export interface ProfileInfo {
+  name: string;
+  handle: string;
+  followers: number;
+  following: number;
+  bio: string;
+  tags: ProfileTag[];
+  stats: {
+    postsCreated: number;
+    topicsCovered: number;
+    mcqAccuracy: string;
+  };
+  skillStats: SkillStat[];
+}
+
+export interface ProfilePost {
+  id: number;
+  type: string;
+  question?: string;
+  tag?: string;
+  title?: string;
+  content?: string;
+  options?: string[];
+  highlightIndex?: number;
+}
+
+export const feedPosts: FeedPost[] = [
   {
     id: 1,
     type: "flashcard",
@@ -31,7 +109,7 @@ export const feedPosts = [
     type: "mcq",
     author: "Knova AI",
     time: "2 hours ago",
-    authorImg: "https://lh3.googleusercontent.com/aida-public/AB6AXuAY2L7I3kXQcaFzdFumU7HdxJDYUSScDgZm1FQfcdcpLHaNOKK459pdbS__hoimFR0_V-xyxbiz1xoZiMJSW6XCSV9d-DGe5PklATpNh6CFraJLtmGHNpM08yDTmrvtJQI-tX45VnndyEaGrERDNuLTFxwqSZi7AYRngKWYrBRi-gHM9c5NZBzfrH73_iRCcdH30Eg6MsSZkYoMue8SV2GLomch0Z4qJjq478vBz5ZDIOIk5cEWeCtxAHORJVNjXfeNhCHqTWj2GKM",
+    authorImg: "https://lh3.googleusercontent.com/aida-public/AB6AXuAY2L7I3kXQcaFzdFumU7HdxJDYUSScDgZm1FQfcdcpLHaNOKK459pdbS__hoimFR0_V-xyxbiz1xoZiMJSW6XCSV9d-DGe5PklATpNh6CFraJLtmGHNpM08yDTmrvtJQI-tX45VnndyEaGrERDNuLTFxwqSZi7AYRngKWYrBRi-gHM9c5NZBzfrH73_iRCcdH30Eg6MsSZkYoMue8SV2GLomch0Z4qJjq478vBz5ZDIOIk5cEWeCtxAHORJVNjXfeNhCHqTWj2GKM ",
     question: "Which of these is a primary color?",
     options: ["Green", "Purple", "Red", "Orange"],
     correctIndex: 2,
@@ -82,7 +160,7 @@ export const feedPosts = [
   }
 ];
 
-export const spacePosts = [
+export const spacePosts: SpacePost[] = [
   {
     id: 1,
     type: "flashcard",
@@ -122,12 +200,28 @@ export const spacePosts = [
   }
 ];
 
-export const exploreFilters = [
+export const exploreFilters: string[] = [
   'All', 'For You', 'DBMS', 'Computer Networks', 'Machine Learning', 
   'UI/UX Design', 'Data Structures', 'Discrete Mathematics'
 ];
 
-export const explorePosts = [
+export interface ExplorePost {
+  id: number;
+  type: string;
+  question?: string;
+  author?: string;
+  upvotes: number;
+  tag?: string;
+  options?: string[];
+  correctIndex?: number;
+  title?: string;
+  content?: string;
+  color?: string;
+  bg?: string;
+  highlightIndex?: number;
+}
+
+export const explorePosts: ExplorePost[] = [
   { id: 1, type: "flashcard", question: "What is the difference between a process and a thread?", author: "pro_learner", upvotes: 12 },
   { id: 2, type: "mcq", tag: "DBMS", question: "Which normal form handles transitive dependency?", options: ["1NF", "2NF", "3NF", "BCNF"], author: "db_guru", upvotes: 12, correctIndex: 2 },
   { id: 3, type: "text", tag: "Networks", title: "Understanding TCP 3-Way Handshake", content: "The transmission control protocol uses a three-way handshake to establish a connection over an IP based network. The three steps are SYN, SYN-ACK, and ACK. SYN: The client sends a segment with a sequence number...", author: "net_ninja", upvotes: 12, color: "border-l-secondary" },
@@ -142,7 +236,7 @@ export const explorePosts = [
   { id: 12, type: "text", tag: "UI/UX", title: "Hick's Law", content: "Hick's Law states that the time it takes for a person to make a decision as a result of the possible choices: increasing the number of choices will increase the decision time logarithmically.", author: "design_daily", upvotes: 12, color: "border-l-on-surface-variant" }
 ];
 
-export const profileInfo = {
+export const profileInfo: ProfileInfo = {
   name: "Alex Rivera",
   handle: "@arivera_edu",
   followers: 163,
@@ -167,7 +261,7 @@ export const profileInfo = {
   ]
 };
 
-export const profilePosts = [
+export const profilePosts: ProfilePost[] = [
   { id: 1, type: "flashcard", question: "What is the difference between a process and a thread?" },
   { id: 2, type: "mcq", tag: "DBMS", question: "Which normal form handles transitive dependency?", options: ["1NF", "2NF", "3NF", "BCNF"] },
   { id: 3, type: "text", tag: "Networks", title: "TCP 3-Way Handshake", content: "The transmission control protocol uses a three-way handshake to establish a connection over an IP based network..." },

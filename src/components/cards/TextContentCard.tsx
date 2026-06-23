@@ -1,8 +1,25 @@
 'use client';
 
-import { FeedActions, ReelActions } from '../cards/Shared';
+import { FeedActions, ReelActions } from './Shared';
 
-export default function TextCard(props) {
+interface TextProps {
+  variant?: 'feed' | 'reel' | 'explore' | 'profile';
+  author?: string;
+  time?: string;
+  title?: string;
+  content?: string;
+  upvotes?: number;
+  downvotes?: number;
+  comments?: number;
+  authorInitial?: string;
+  authorBg?: string;
+  tags?: string[];
+  onCommentToggle?: () => void;
+  tag?: string;
+  color?: string;
+}
+
+export default function TextCard(props: TextProps) {
   const { variant = 'feed' } = props;
   if (variant === 'feed') return <TextFeed {...props} />;
   if (variant === 'reel') return <TextReel {...props} />;
@@ -11,7 +28,7 @@ export default function TextCard(props) {
   return null;
 }
 
-function TextFeed({ author, time, title, content, upvotes, downvotes, comments, authorInitial, authorBg }) {
+function TextFeed({ author, time, title, content, upvotes, downvotes, comments, authorInitial, authorBg }: TextProps) {
   return (
     <div className="glass-card rounded-2xl overflow-hidden hover-lift transition-all duration-300">
       <div className="p-8 pb-4 bg-white">
@@ -33,12 +50,12 @@ function TextFeed({ author, time, title, content, upvotes, downvotes, comments, 
           Read more...
         </button>
       </div>
-      <FeedActions upvotes={upvotes} downvotes={downvotes} comments={comments} />
+      <FeedActions upvotes={upvotes || 0} downvotes={downvotes || 0} comments={comments || 0} />
     </div>
   );
 }
 
-function TextReel({ title, content, tags, author, time, upvotes, comments, onCommentToggle }) {
+function TextReel({ title, content, tags, author, time, upvotes, comments, onCommentToggle }: TextProps) {
   return (
     <section className="h-screen w-full snap-start flex items-center justify-center relative">
       <div className="w-[440px] h-[90vh] bg-white rounded-[16px] shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex flex-col relative z-20 text-[#1a1a1a]">
@@ -50,7 +67,7 @@ function TextReel({ title, content, tags, author, time, upvotes, comments, onCom
         {/* Author Info Overlay */}
         <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-2 z-30 pointer-events-none">
           <div className="flex flex-wrap gap-1.5">
-            {tags.map((tag) => (
+            {tags?.map((tag) => (
               <span key={tag} className="px-[10px] py-[4px] bg-[#e0f6fe] text-[#0080b0] rounded-full text-[12px] font-semibold pointer-events-auto shadow-sm">
                 {tag}
               </span>
@@ -59,7 +76,7 @@ function TextReel({ title, content, tags, author, time, upvotes, comments, onCom
           <div className="w-full h-px bg-[#1a1a1a]/10 mb-1" />
           <div className="flex items-center gap-3 pointer-events-auto">
             <div className="w-[36px] h-[36px] rounded-full bg-[#e0f6fe] flex items-center justify-center text-[#0080b0] font-bold text-sm shadow-sm border border-white/50">
-              {author.slice(0, 2).toUpperCase()}
+              {author?.slice(0, 2).toUpperCase()}
             </div>
             <div className="drop-shadow-sm">
               <p className="text-[14px] font-bold text-[#1a1a1a] leading-none mb-1">{author}</p>
@@ -69,12 +86,12 @@ function TextReel({ title, content, tags, author, time, upvotes, comments, onCom
         </div>
       </div>
 
-      <ReelActions upvotes={upvotes} comments={comments} onCommentToggle={onCommentToggle} />
+      <ReelActions upvotes={upvotes || 0} comments={comments || 0} onCommentToggle={onCommentToggle} />
     </section>
   );
 }
 
-function TextExplore({ tag, title, content, author, upvotes, color = "border-l-secondary" }) {
+function TextExplore({ tag, title, content, author, upvotes, color = "border-l-secondary" }: TextProps) {
   return (
     <div className={`h-[340px] bg-white rounded-xl flex flex-col p-0 hover-lift cursor-pointer border border-surface-container-high overflow-hidden border-l-[4px] ${color} relative`}>
       <div className="absolute inset-0 bg-[#00afef]/5 pointer-events-none" />
@@ -102,7 +119,7 @@ function TextExplore({ tag, title, content, author, upvotes, color = "border-l-s
   );
 }
 
-function TextProfile({ tag, title, content }) {
+function TextProfile({ tag, title, content }: TextProps) {
   return (
     <div className="aspect-square bg-white rounded-[20px] flex flex-col p-5 border border-surface-container-high border-l-[4px] border-l-[#00afef] hover-shadow-lg transition-all hover:-translate-y-1">
       <span className="text-[10px] font-bold text-[#00afef] mb-2 uppercase tracking-wide">{tag}</span>

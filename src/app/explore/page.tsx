@@ -1,13 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import  FlashCard  from '@/components/cards/FlashCard';
-import  McqCard  from '@/components/cards/McqCard';
-import  TextCard  from '@/components/cards/TextContentCard';
+import FlashCard from '@/components/cards/FlashCard';
+import McqCard from '@/components/cards/McqCard';
+import TextCard from '@/components/cards/TextContentCard';
 import { exploreFilters, explorePosts } from '@/data/mockData';
 
+// Type inference from mockData usually works, but explicit types help if data structure changes
+type PostType = 'FlashCard' | 'mcq' | 'text';
+
 export default function Explore() {
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeFilter, setActiveFilter] = useState<string>('All');
 
   return (
     <main className="pt-[80px] min-h-screen px-4 pb-20">
@@ -33,7 +36,7 @@ export default function Explore() {
       {/* Filters */}
       <section className="mb-10 flex justify-center w-full overflow-hidden">
         <div className="flex items-center gap-3 overflow-x-auto pb-4 custom-scrollbar whitespace-nowrap px-4 max-w-full">
-          {exploreFilters.map((f) => (
+          {exploreFilters.map((f: string) => (
             <button 
               key={f}
               onClick={() => setActiveFilter(f)}

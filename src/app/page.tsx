@@ -11,11 +11,20 @@ import { FeedSkeleton } from '@/components/ui/Skeleton';
 import ShareModal from '@/components/ui/ShareModal';
 import { feedItems } from '@/data/feedData';
 
+// Define types based on usage
+type ShareContentId = string | number | null;
+
+interface FeedItem {
+  id: string | number;
+  type: 'flashcard' | 'text' | 'mcq';
+  [key: string]: any;
+}
+
 export default function HomePage() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [shareModalOpen, setShareModalOpen] = useState(false);
-  const [shareContentId, setShareContentId] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [shareModalOpen, setShareModalOpen] = useState<boolean>(false);
+  const [shareContentId, setShareContentId] = useState<ShareContentId>(null);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -35,7 +44,7 @@ export default function HomePage() {
     };
   }, []);
 
-  const handleShare = (id) => {
+  const handleShare = (id: string | number) => {
     setShareContentId(id);
     setShareModalOpen(true);
   };
@@ -54,7 +63,7 @@ export default function HomePage() {
           <FeedSkeleton />
         ) : (
           <div className={`${isMobile ? 'flex flex-col gap-6' : 'max-w-4xl mx-auto space-y-8'}`}>
-            {feedItems.map((item) => {
+            {feedItems.map((item: FeedItem) => {
               if (item.type === 'flashcard') {
                 return <FlashCard key={item.id} {...item} onShare={handleShare} />;
               } else if (item.type === 'text') {

@@ -3,7 +3,26 @@
 import { useState } from 'react';
 import { FeedActions, ReelActions } from './Shared';
 
-export default function FlashCard(props) {
+interface CardProps {
+  variant?: 'feed' | 'reel' | 'explore' | 'profile';
+  author?: string;
+  time?: string;
+  question?: string;
+  answer?: string;
+  upvotes?: number;
+  downvotes?: number;
+  comments?: number;
+  authorInitial?: string;
+  authorBg?: string;
+  answerBg?: string;
+  subtitle?: string;
+  theme?: string;
+  tag?: string;
+  onCommentToggle?: () => void;
+  bg?: string;
+}
+
+export default function FlashCard(props: CardProps) {
   const { variant = 'feed' } = props;
   if (variant === 'feed') return <FlashCardFeed {...props} />;
   if (variant === 'reel') return <FlashCardReel {...props} />;
@@ -14,7 +33,7 @@ export default function FlashCard(props) {
 
 function FlashCardFeed({
   author, time, question, answer, upvotes, downvotes, comments, authorInitial, authorBg, answerBg
-}) {
+}: CardProps) {
   const [flipped, setFlipped] = useState(false);
 
   return (
@@ -47,12 +66,12 @@ function FlashCardFeed({
         </div>
       </div>
 
-      <FeedActions upvotes={upvotes} downvotes={downvotes} comments={comments} />
+      <FeedActions upvotes={upvotes || 0} downvotes={downvotes || 0} comments={comments || 0} />
     </div>
   );
 }
 
-function FlashCardReel({ question, answer, subtitle, theme, tag, author, time, upvotes, comments, onCommentToggle }) {
+function FlashCardReel({ question, answer, subtitle, theme, tag, author, time, upvotes, comments, onCommentToggle }: CardProps) {
   const [flipped, setFlipped] = useState(false);
   const isOrange = theme === 'orange';
 
@@ -88,7 +107,7 @@ function FlashCardReel({ question, answer, subtitle, theme, tag, author, time, u
           <div className="w-full h-px bg-[#1a1a1a]/10 mb-1" />
           <div className="flex items-center gap-3 pointer-events-auto">
             <div className="w-[36px] h-[36px] rounded-full bg-[#e0f6fe] flex items-center justify-center text-[#0080b0] font-bold text-sm shadow-sm border border-white/50">
-              {author.slice(0, 2).toUpperCase()}
+              {author?.slice(0, 2).toUpperCase()}
             </div>
             <div className="drop-shadow-sm">
               <p className="text-[14px] font-bold text-[#1a1a1a] leading-none mb-1">{author}</p>
@@ -98,12 +117,12 @@ function FlashCardReel({ question, answer, subtitle, theme, tag, author, time, u
         </div>
       </div>
 
-      <ReelActions upvotes={upvotes} comments={comments} onCommentToggle={onCommentToggle} />
+      <ReelActions upvotes={upvotes || 0} comments={comments || 0} onCommentToggle={onCommentToggle} />
     </section>
   );
 }
 
-function FlashCardExplore({ question, author, upvotes, bg = "bg-[#fef3ea]" }) {
+function FlashCardExplore({ question, author, upvotes, bg = "bg-[#fef3ea]" }: CardProps) {
   return (
     <div className={`h-[340px] rounded-xl relative flex flex-col p-6 hover-lift cursor-pointer border border-primary/10 ${bg}`}>
       <div className="flex-1 flex flex-col items-center justify-center text-center">
@@ -127,7 +146,7 @@ function FlashCardExplore({ question, author, upvotes, bg = "bg-[#fef3ea]" }) {
   );
 }
 
-function FlashCardProfile({ question }) {
+function FlashCardProfile({ question }: CardProps) {
   return (
     <div className="aspect-square bg-[#fef3ea] rounded-[20px] relative flex flex-col p-5 border border-primary/10 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1">
       <div className="flex-1 flex flex-col items-center justify-center text-center">

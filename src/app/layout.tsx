@@ -1,8 +1,9 @@
 import "./globals.css";
 import Navbar from '@/components/layout/Navbar';
 import BottomBar from '@/components/layout/BottomBar';
+import type { Metadata, Viewport } from 'next';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Knova – Learning Platform for you all.",
   description: "A telemetry-driven educational platform applying social media engagement mechanics to personalize learning content.",
   icons: {
@@ -10,12 +11,16 @@ export const metadata = {
   },
 };
 
-export const viewport = {
+export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
 };
 
-export default function RootLayout({ children }) {
+interface RootLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>

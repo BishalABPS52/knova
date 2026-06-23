@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import  FlashCard  from '@/components/cards/FlashCard';
-import  McqCard  from '@/components/cards/McqCard';
-import  TextCard  from '@/components/cards/TextContentCard';
+import FlashCard from '@/components/cards/FlashCard';
+import McqCard from '@/components/cards/McqCard';
+import TextCard from '@/components/cards/TextContentCard';
 import { spacePosts } from '@/data/mockData';
 
 export default function SpaceReel() {
   const router = useRouter();
-  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState<boolean>(false);
 
   return (
     <div className="bg-[#0a0f1e] min-h-screen overflow-hidden relative text-white antialiased transition-all"
@@ -36,7 +36,7 @@ export default function SpaceReel() {
             <img 
               alt="Profile" 
               className="w-full h-full object-cover" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoL6Tz-loSXPzAFM0ngTHJa_vd-cHY-twsdup-7NcFw33hdYuWamtSvCMzW-ZipgBpOHkTbwTYWN-yrfVSV86i5W8oiFWPpqp3Qj1VTIHGuU7gKeOdM3eJSMGXylGH1vowIdWiylOz0moZvWcFCMbvacxj4ZHeOdBckiFwZEGtqDIvBfGMVFqhDA42WA56ouAUC8J5z189MFkfIQWfouE7kv_lSUpn95a8XC9ddAgfENLq1vE_EzQ8crCz5kmw0ofUeOg6HG1gaFc"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoL6Tz-loSXPzAFM0ngTHJa_vd-cHY-twsdup-7NcFw33hdYuWamtSvCMzW-ZipgBpOHkTbwTYWN-yrfVSV86i5W8oiFWPpqp3Qj1VTIHGuU7gKeOdM3eJSMGXylGH1vowIdWiylOz0moZvWcFCMbvacxj4ZHeOdBckiFwZEGtqDIvBfGMVFqhDA42WA56ouAUC8J5z189MFkfIQWfouE7kv_lSUpn95a8XC9ddAgfENLq1vE_EzQ8crCz5kmw0ofUeOg6HG1gaFc "
             />
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function SpaceReel() {
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
           <div className="flex gap-3">
-            <img alt="" className="w-8 h-8 rounded-full bg-surface-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_B7PdErlpS-Hr37FNUXhr1I7IUcIYfslZYxB4U-DOLsd2-M8vRTyscEChs_gOqJsGMIgNAAibTrNfXM31pNn0BU4dgcUytb05KtTG23E8Z6nFN06YO72uPMRESPT1OtIt6sCQ19vhYzAMbiOo8w_jGUHTse6Gch_3VZI3eoBv6hJ5DCYBWPhd1ze9nawmSAy665JLOT_R31AkGGR5wP8rPhZC7icl0nhVRXv1srGcOgrg8PwilWxua7MuQ2FkzwYByC-4iuhcsxk" />
+            <img alt="" className="w-8 h-8 rounded-full bg-surface-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_B7PdErlpS-Hr37FNUXhr1I7IUcIYfslZYxB4U-DOLsd2-M8vRTyscEChs_gOqJsGMIgNAAibTrNfXM31pNn0BU4dgcUytb05KtTG23E8Z6nFN06YO72uPMRESPT1OtIt6sCQ19vhYzAMbiOo8w_jGUHTse6Gch_3VZI3eoBv6hJ5DCYBWPhd1ze9nawmSAy665JLOT_R31AkGGR5wP8rPhZC7icl0nhVRXv1srGcOgrg8PwilWxua7MuQ2FkzwYByC-4iuhcsxk " />
             <div className="flex-1">
               <div className="bg-gray-50 p-3 rounded-2xl rounded-tl-none">
                 <p className="font-bold text-xs text-on-surface">Alex_Study</p>

@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from 'react';
 
-export default function ShareModal({ isOpen, onClose, contentId }) {
+interface ShareModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  contentId: string | number;
+}
+
+export default function ShareModal({ isOpen, onClose, contentId }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
