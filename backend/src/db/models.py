@@ -61,8 +61,12 @@ class User(Base):
     
     interest_embedding: Mapped[list[float] | None] = mapped_column(Vector(384), nullable=True)
     estimated_expertise: Mapped[float] = mapped_column(Float, default=0.5)
-    
-    
+
+    oauth_accounts: Mapped[list["OAuth"]] = relationship(back_populates="user")
+    creator_profile: Mapped["CreatorProfile | None"] = relationship(back_populates="user")
+    interest_topics: Mapped[list["UserTopicInterest"]] = relationship(back_populates="user")
+
+
 class OAuth(Base):
     __tablename__ = "oauth"
     

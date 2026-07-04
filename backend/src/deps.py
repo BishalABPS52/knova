@@ -1,16 +1,13 @@
 from fastapi import Cookie, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.session import SessionLocal
+from src.db.session import AsyncSessionLocal
 from core.security import decode_token
 
 
-def get_db():
-    try:
-        db = SessionLocal()
+async def get_db():
+    async with AsyncSessionLocal() as db:
         yield db
-    finally:
-        db.close()
         
 def get_cache():
     try:
