@@ -44,6 +44,8 @@ def health_check():
         
     
 from src.auth.router import router as auth_router
+from src.reference.router import router as ref_router
 
 base_router.include_router(auth_router, prefix="/auth")
+base_router.include_router(ref_router, prefix="/reference")
 app.include_router(base_router)
