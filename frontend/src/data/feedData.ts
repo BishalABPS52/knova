@@ -1,0 +1,174 @@
+export type FeedItemType = 'flashcard' | 'text' | 'mcq';
+
+export interface FeedItem {
+  id: number;
+  type: FeedItemType;
+  author: string;
+  authorInitial?: string;
+  authorBg?: string;
+  answerBg?: string;
+  time: string;
+  category: string;
+  question?: string;
+  answer?: string;
+  title?: string;
+  content?: string;
+  options?: string[];
+  correctIndex?: number;
+  explanation?: string;
+  upvotes: number;
+  downvotes: number;
+  comments: number;
+}
+
+export const feedItems: FeedItem[] = [
+  {
+    id: 1,
+    type: 'flashcard',
+    author: 'User123',
+    authorInitial: 'U',
+    authorBg: 'bg-blue-500 text-white',
+    answerBg: 'bg-[#00afef]',
+    time: '2 hours ago',
+    category: 'Geography',
+    question: 'What is the capital of France?',
+    answer: 'Paris',
+    upvotes: 42,
+    downvotes: 3,
+    comments: 2,
+  },
+  {
+    id: 2,
+    type: 'text',
+    author: 'JohnDoe',
+    authorInitial: 'JD',
+    authorBg: 'bg-green-500 text-white',
+    time: '2 hours ago',
+    category: 'Technology',
+    title: 'Artificial Intelligence in Education',
+    content: 'The integration of AI in modern classrooms is redefining the pedagogical landscape. By leveraging personalized learning algorithms, educators can now tailor curriculum delivery to individual student needs at scale...',
+    upvotes: 124,
+    downvotes: 12,
+    comments: 1,
+  },
+  {
+    id: 3,
+    type: 'mcq',
+    author: 'Knova AI',
+    authorInitial: 'K',
+    authorBg: 'bg-purple-500 text-white',
+    time: '2 hours ago',
+    category: 'Art',
+    question: 'Which of these is a primary color?',
+    options: ['Green', 'Purple', 'Red', 'Orange'],
+    correctIndex: 2,
+    explanation: 'Red, Blue, and Yellow are the three primary colors in traditional color theory.',
+    upvotes: 89,
+    downvotes: 5,
+    comments: 1,
+  },
+  {
+    id: 4,
+    type: 'text',
+    author: 'MachineLearner',
+    authorInitial: 'ML',
+    authorBg: 'bg-orange-500 text-white',
+    time: '1 hour ago',
+    category: 'AI',
+    title: 'The Future of Large Language Models',
+    content: 'LLMs are evolving beyond simple text generation into reasoning engines that can solve complex multi-step problems...',
+    upvotes: 256,
+    downvotes: 8,
+    comments: 0,
+  },
+  {
+    id: 5,
+    type: 'flashcard',
+    author: 'PhysicsFan',
+    authorInitial: 'P',
+    authorBg: 'bg-red-500 text-white',
+    answerBg: 'bg-[#f36710]',
+    time: '1 hour ago',
+    category: 'Physics',
+    question: 'What is the speed of light in a vacuum?',
+    answer: '299,792,458 m/s',
+    upvotes: 112,
+    downvotes: 2,
+    comments: 0,
+  },
+  {
+    id: 6,
+    type: 'mcq',
+    author: 'SwiftDev',
+    authorInitial: 'S',
+    authorBg: 'bg-sky-500 text-white',
+    time: '1 hour ago',
+    category: 'Programming',
+    question: 'Which programming language is primarily used for iOS development?',
+    options: ['Java', 'Swift', 'Python', 'C++'],
+    correctIndex: 1,
+    explanation: 'Swift is Apple\'s official language for iOS, macOS, and other Apple platform development.',
+    upvotes: 76,
+    downvotes: 4,
+    comments: 0,
+  },
+  {
+    id: 7,
+    type: 'text',
+    author: 'ArtCritic',
+    authorInitial: 'A',
+    authorBg: 'bg-pink-500 text-white',
+    time: '45 mins ago',
+    category: 'Art',
+    title: 'The Ethics of AI Art',
+    content: 'As generative models become more capable, the debate over copyright and artistic integrity intensifies...',
+    upvotes: 189,
+    downvotes: 31,
+    comments: 0,
+  },
+  {
+    id: 8,
+    type: 'flashcard',
+    author: 'LiteratureLover',
+    authorInitial: 'L',
+    authorBg: 'bg-teal-500 text-white',
+    answerBg: 'bg-[#00afef]',
+    time: '1 hour ago',
+    category: 'Literature',
+    question: "Who wrote 'To Kill a Mockingbird'?",
+    answer: 'Harper Lee',
+    upvotes: 94,
+    downvotes: 1,
+    comments: 0,
+  },
+  {
+    id: 9,
+    type: 'mcq',
+    author: 'Traveler',
+    authorInitial: 'T',
+    authorBg: 'bg-yellow-500 text-white',
+    time: '30 mins ago',
+    category: 'Geography',
+    question: 'What is the capital of Japan?',
+    options: ['Kyoto', 'Osaka', 'Tokyo', 'Nagoya'],
+    correctIndex: 2,
+    explanation: 'Tokyo has been the capital of Japan since 1869 when Emperor Meiji moved there.',
+    upvotes: 145,
+    downvotes: 3,
+    comments: 0,
+  },
+  {
+    id: 10,
+    type: 'text',
+    author: 'EduTech',
+    authorInitial: 'E',
+    authorBg: 'bg-indigo-500 text-white',
+    time: '15 mins ago',
+    category: 'Education',
+    title: 'Personalized Learning Paths',
+    content: 'How AI is helping students learn at their own pace by identifying knowledge gaps in real-time...',
+    upvotes: 210,
+    downvotes: 5,
+    comments: 0,
+  },
+];
