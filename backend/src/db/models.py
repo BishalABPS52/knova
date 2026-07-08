@@ -35,6 +35,24 @@ class OAuthProvider(str, enum.Enum):
     FACEBOOK = "facebook"
 
 
+class ContentType(str, enum.Enum):
+    """Kind of educational unit a Post carries. Encoded as a ranker feature
+    (mirrors knova_type_encoder.pkl); payload rows live in the mcqs/flashcards tables."""
+    TEXT = "text"
+    MCQ = "mcq"
+    FLASHCARD = "flashcard"
+
+
+class InteractionSurface(str, enum.Enum):
+    """Where a post was shown when the interaction happened -> lets the ranker
+    de-bias position/surface effects from raw engagement telemetry."""
+    FEED = "feed"          # main recommended feed (tiktok-style)
+    PROFILE = "profile"
+    SEARCH = "search"
+    TOPIC = "topic"
+    SAVED = "saved"
+
+
 # Tables
 # ------------------------------------------------------
 class Base(DeclarativeBase):
@@ -154,8 +172,12 @@ class Post(Base):
     id: Mapped[uuid.UUID] = uuid_pk()
     creator_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("creatorprofiles.id", ondelete="CASCADE"), index=True)
  
+    content_type: Mapped[ContentType] = mapped_column(
+        Enum(ContentType), default=ContentType.TEXT, index=True
+    )  # text | mcq | flashcard
+
     title: Mapped[str | None] = mapped_column(String(200), nullable=False)
-    body: Mapped[str] = mapped_column(Text, nullable=False)   
+    body: Mapped[str] = mapped_column(Text, nullable=False)
     word_count: Mapped[int] = mapped_column(Integer, default=0)
     est_read_seconds: Mapped[int] = mapped_column(Integer, default=0)
  
@@ -182,9 +204,113 @@ class Post(Base):
     creator: Mapped["CreatorProfile"] = relationship(back_populates="posts")
     votes: Mapped[list["Vote"]] = relationship(back_populates="post", cascade="all, delete-orphan")
     comments: Mapped[list["Comment"]] = relationship(back_populates="post", cascade="all, delete-orphan")
- 
+    interactions: Mapped[list["Interaction"]] = relationship(back_populates="post", cascade="all, delete-orphan")
+    tags: Mapped[list["Tag"]] = relationship(secondary="post_tags", back_populates="posts")
+
+    # content-type specific payloads (exactly one is populated per post)
+    mcq: Mapped["Mcq | None"] = relationship(back_populates="post", uselist=False, cascade="all, delete-orphan")
+    flashcard: Mapped["Flashcard | None"] = relationship(back_populates="post", uselist=False, cascade="all, delete-orphan")
+
     __table_args__ = (
         Index("ix_posts_topic_published", "topic_id", "published_at"),
+    )
+
+
+# Content-type payloads
+# ------------------------------------------------------------
+# A Post row holds the shared feed fields (title, body, counters, embedding);
+# these tables hold the structured payload for non-text content types.
+
+class Mcq(Base):
+    """Structured multiple-choice payload for a Post with content_type=MCQ.
+    Pairs with knova_mcq_model.pkl."""
+    __tablename__ = "mcqs"
+
+    id: Mapped[uuid.UUID] = uuid_pk()
+    post_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"), unique=True, index=True)
+
+    question: Mapped[str] = mapped_column(Text, nullable=False)
+    options: Mapped[list[str]] = mapped_column(JSONB, nullable=False)   # ["opt a", "opt b", ...]
+    correct_index: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    post: Mapped["Post"] = relationship(back_populates="mcq")
+
+
+class Flashcard(Base):
+    """Front/back payload for a Post with content_type=FLASHCARD."""
+    __tablename__ = "flashcards"
+
+    id: Mapped[uuid.UUID] = uuid_pk()
+    post_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"), unique=True, index=True)
+
+    front: Mapped[str] = mapped_column(Text, nullable=False)
+    back: Mapped[str] = mapped_column(Text, nullable=False)
+    flip_threshold_sec: Mapped[float | None] = mapped_column(Float, nullable=True)  # dwell before flip counts as "studied"
+
+    post: Mapped["Post"] = relationship(back_populates="flashcard")
+
+
+# Tags
+# ------------------------------------------------------------
+# Free-form labels on top of the Topic taxonomy; used as retrieval /
+# ranker features and for tag-based feeds.
+
+class Tag(Base):
+    __tablename__ = "tags"
+
+    id: Mapped[uuid.UUID] = uuid_pk()
+    name: Mapped[str] = mapped_column(String(80), unique=True, index=True, nullable=False)
+    primary_topic_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("topics.id", ondelete="SET NULL"), nullable=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    posts: Mapped[list["Post"]] = relationship(secondary="post_tags", back_populates="tags")
+
+
+class PostTag(Base):
+    """Many-to-many association between posts and tags."""
+    __tablename__ = "post_tags"
+    __table_args__ = (UniqueConstraint("post_id", "tag_id", name="uq_post_tag"),)
+
+    id: Mapped[uuid.UUID] = uuid_pk()
+    post_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"), index=True)
+    tag_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tags.id", ondelete="CASCADE"), index=True)
+
+
+# Telemetry
+# ------------------------------------------------------------
+# Raw per-user x per-post engagement events. This is the ground-truth signal
+# the whole "telemetry-driven" engine is built on: the content ranker's
+# features and the ALS user-item matrix are both derived from these rows.
+# The denormalized counters on Post are aggregates of this table.
+
+class Interaction(Base):
+    __tablename__ = "interactions"
+
+    id: Mapped[uuid.UUID] = uuid_pk()
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    post_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"), index=True)
+
+    # where/how the post was served -> lets the ranker de-bias position effects
+    surface: Mapped[InteractionSurface] = mapped_column(Enum(InteractionSurface), default=InteractionSurface.FEED, index=True)
+    feed_position: Mapped[int | None] = mapped_column(Integer, nullable=True)  # rank slot the user saw it at
+
+    # engagement telemetry
+    dwell_time_sec: Mapped[float] = mapped_column(Float, default=0.0)          # time the post was on screen
+    scroll_depth: Mapped[float | None] = mapped_column(Float, nullable=True)   # 0..1 for long text posts
+    completion_ratio: Mapped[float] = mapped_column(Float, default=0.0)        # dwell / est_read_seconds, clamped 0..1
+    is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # implicit-feedback strength precomputed for CF/ALS (e.g. weighted engagement)
+    engagement_weight: Mapped[float] = mapped_column(Float, default=0.0)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    post: Mapped["Post"] = relationship(back_populates="interactions")
+
+    __table_args__ = (
+        Index("ix_interactions_user_created", "user_id", "created_at"),
+        Index("ix_interactions_post_created", "post_id", "created_at"),
     )
  
  
