@@ -62,5 +62,5 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
         secure=True,
         samesite="none",
         max_age=settings.REFRESH_TOKEN_EXPIRE_MINUTES * 60,
-        path="/auth/refresh",
+        path="/api/v1/auth/refresh",
     )

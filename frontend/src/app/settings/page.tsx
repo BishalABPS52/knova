@@ -2,8 +2,10 @@
 
 import { ChevronRight, BadgeInfo, User, Lock, Tag, HelpCircle, Info, Mail, LogOut, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 
 export default function SettingsPage() {
+  const { logout } = useAuth();
   return (
     <main className="max-w-[500px] mx-auto pt-6 px-4 pb-20">
       <header className="flex items-center gap-3 mb-8">
@@ -89,10 +91,13 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        <Link href="/register" className="w-full bg-[#fef2f2] border border-[#ef4444]/20 rounded-2xl shadow-sm p-4 flex items-center justify-center gap-3 hover:bg-[#fee2e2] text-[#ef4444] transition-colors mt-8">
+        <button
+          onClick={logout}
+          className="w-full bg-[#fef2f2] border border-[#ef4444]/20 rounded-2xl shadow-sm p-4 flex items-center justify-center gap-3 hover:bg-[#fee2e2] text-[#ef4444] transition-colors mt-8 cursor-pointer"
+        >
           <LogOut size={20} />
           <span className="font-bold text-sm">Log Out</span>
-        </Link>
+        </button>
       </div>
     </main>
   );

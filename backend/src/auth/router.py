@@ -28,3 +28,10 @@ async def refresh(
     if not refresh_token:
         raise HTTPException(status_code=401, detail="Missing refresh token")
     return await refresh_user_session(response, db, refresh_token)
+
+
+@router.post("/logout")
+async def logout(response: Response):
+    response.delete_cookie(key="access_token", path="/")
+    response.delete_cookie(key="refresh_token", path="/api/v1/auth/refresh")
+    return {"detail": "Logged out successfully"}

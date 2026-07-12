@@ -1,5 +1,6 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import get_settings
 from core.logging import setup_logging
@@ -13,6 +14,20 @@ app = FastAPI(
     redoc_url="/api/v1/redoc"
 )
 setup_logging()
+
+# Configure CORS
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 base_router = APIRouter(prefix="/api/v1")
 
@@ -45,7 +60,9 @@ def health_check():
     
 from src.auth.router import router as auth_router
 from src.reference.router import router as ref_router
+from src.users.router import router as users_router
 
 base_router.include_router(auth_router, prefix="/auth")
 base_router.include_router(ref_router, prefix="/reference")
+base_router.include_router(users_router, prefix="/users")
 app.include_router(base_router)

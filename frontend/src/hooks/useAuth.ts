@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import * as authApi from "@/lib/auth";
+import { useAuth as useAuthContext } from "@/context/AuthContext";
 import {
     LoginRequest,
     RegisterRequest,
 } from "@/types/authentication";
 
 export function useAuth() {
+    const context = useAuthContext();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -15,8 +16,7 @@ export function useAuth() {
         try {
             setLoading(true);
             setError("");
-
-            return await authApi.login(data);
+            await context.login(data);
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -33,8 +33,7 @@ export function useAuth() {
         try {
             setLoading(true);
             setError("");
-
-            return await authApi.register(data);
+            await context.register(data);
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -48,9 +47,11 @@ export function useAuth() {
     }
 
     return {
+        user: context.user,
         login,
         register,
-        loading,
+        logout: context.logout,
+        loading: loading || context.loading,
         error,
     };
 }
