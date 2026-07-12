@@ -61,7 +61,7 @@ export default function RegisterPage() {
     try {
       await registerUser({
         email: data.email,
-        full_name: data.name,
+        username: data.name,
         password: data.password,
       });
       router.push("/");

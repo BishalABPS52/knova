@@ -2,6 +2,7 @@ import "./globals.css";
 import Navbar from '@/components/layout/Navbar';
 import BottomBar from '@/components/layout/BottomBar';
 import type { Metadata, Viewport } from 'next';
+import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
   title: "Knova – Learning Platform for you all.",
@@ -38,13 +39,15 @@ export default function RootLayout({ children }: RootLayoutProps) {
         />
       </head>
       <body>
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <div className="flex-1 w-full max-w-4xl mx-auto pb-24 md:pb-10 pt-20">
-            {children}
+        <AuthProvider>
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <div className="flex-1 w-full max-w-4xl mx-auto pb-24 md:pb-10 pt-20">
+              {children}
+            </div>
+            <BottomBar />
           </div>
-          <BottomBar />
-        </div>
+        </AuthProvider>
       </body>
     </html>
   );

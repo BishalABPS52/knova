@@ -71,6 +71,7 @@ class User(Base):
     password_hash: Mapped[str | None]= mapped_column(String(255), nullable=True)
     username: Mapped[str] = mapped_column(String(50), index=True, nullable=False, default="Username")
     avatar_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    bio: Mapped[str | None] = mapped_column(String(500), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

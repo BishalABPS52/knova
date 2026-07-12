@@ -1,9 +1,10 @@
-"use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Grid, BarChart2, ArrowUp, X } from 'lucide-react';
 import Image from 'next/image';
-import { useParams } from "next/navigation";
-import { useProfile } from "@/hooks/useProfile"
+import { useParams, useRouter } from "next/navigation";
+import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/context/AuthContext";
+import { updateProfile } from "@/lib/profile";
 
 interface StatItem {
   name: string;
@@ -12,19 +13,65 @@ interface StatItem {
 
 export default function ProfileScreen({ setCurrentScreen }: { setCurrentScreen?: (screen: string) => void }) {
   const { username } = useParams();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'posts' | 'stats'>('posts');
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
-  const { profile, loading, error, } = useProfile(username as string);
+  const { user, refreshUser } = useAuth();
+  const { profile, setProfile, loading, error } = useProfile(username as string);
+
+  const [editUsername, setEditUsername] = useState("");
+  const [editBio, setEditBio] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+
+  useEffect(() => {
+    if (profile && isEditing) {
+      setEditUsername(profile.username);
+      setEditBio(profile.bio || "");
+    }
+  }, [profile, isEditing]);
+
   if (loading) {
-    return <div>Loading...</div>
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
   if (error) {
-    return <div>{error}</div>
+    return <div className="text-red-500 text-center py-10 font-semibold">{error}</div>;
   }
   if (!profile) {
-    return <div>User not found</div>
+    return <div className="text-stone-500 text-center py-10 font-semibold">User not found</div>;
   }
+
+  const isOwnProfile = user?.username.toLowerCase() === (username as string).toLowerCase();
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      setSaveError("");
+      const updated = await updateProfile({
+        username: editUsername,
+        bio: editBio,
+      });
+      setProfile(updated);
+      setIsEditing(false);
+      if (updated.username.toLowerCase() !== (username as string).toLowerCase()) {
+        router.push(`/profile/${updated.username}`);
+      }
+      await refreshUser();
+    } catch (err) {
+      if (err instanceof Error) {
+        setSaveError(err.message);
+      } else {
+        setSaveError("Failed to save changes");
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const statsData: StatItem[] = [
     { name: 'Cognitive Psychology', score: 94 },
@@ -61,9 +108,11 @@ export default function ProfileScreen({ setCurrentScreen }: { setCurrentScreen?:
                 </div>
               </div>
             </div>
-            <button onClick={() => setIsEditing(true)} className="px-5 py-2.5 border border-[#d9d9d9] text-sm font-semibold rounded-xl hover:bg-[#f5f5f5] transition active:scale-95">
-              Edit Profile
-            </button>
+            {isOwnProfile && (
+              <button onClick={() => setIsEditing(true)} className="px-5 py-2.5 border border-[#d9d9d9] text-sm font-semibold rounded-xl hover:bg-[#f5f5f5] transition active:scale-95">
+                Edit Profile
+              </button>
+            )}
           </div>
           <p className="text-sm text-[#5c5c5c] leading-relaxed mt-5">
             {profile.bio}
@@ -154,22 +203,39 @@ export default function ProfileScreen({ setCurrentScreen }: { setCurrentScreen?:
             </button>
             <h2 className="text-2xl font-bold mb-8">Edit Profile</h2>
             <div className="space-y-5">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-[#5c5c5c] tracking-wider uppercase">Name</label>
-                <input className="w-full border border-[#d9d9d9] rounded-xl px-4 py-3.5 focus:border-[#f36710] focus:ring-1 focus:ring-[#f36710] outline-none transition-all" defaultValue={profile.username} />
-              </div>
+              {saveError && (
+                <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+                  {saveError}
+                </div>
+              )}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-[#5c5c5c] tracking-wider uppercase">Username</label>
                 <div className="relative">
                   <span className="absolute left-4 top-3.5 text-[#5c5c5c]">@</span>
-                  <input className="w-full border border-[#d9d9d9] rounded-xl pl-8 pr-4 py-3.5 focus:border-[#f36710] focus:ring-1 focus:ring-[#f36710] outline-none transition-all" defaultValue={profile.username} />
+                  <input
+                    className="w-full border border-[#d9d9d9] rounded-xl pl-8 pr-4 py-3.5 focus:border-[#f36710] focus:ring-1 focus:ring-[#f36710] outline-none transition-all"
+                    value={editUsername}
+                    onChange={(e) => setEditUsername(e.target.value)}
+                    disabled={isSaving}
+                  />
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-[#5c5c5c] tracking-wider uppercase">Bio</label>
-                <textarea className="w-full border border-[#d9d9d9] rounded-xl px-4 py-3.5 focus:border-[#f36710] focus:ring-1 focus:ring-[#f36710] outline-none resize-none h-28 transition-all" defaultValue={profile.bio ?? ""} />
+                <textarea
+                  className="w-full border border-[#d9d9d9] rounded-xl px-4 py-3.5 focus:border-[#f36710] focus:ring-1 focus:ring-[#f36710] outline-none resize-none h-28 transition-all"
+                  value={editBio}
+                  onChange={(e) => setEditBio(e.target.value)}
+                  disabled={isSaving}
+                />
               </div>
-              <button onClick={() => setIsEditing(false)} className="w-full bg-[#f36710] hover:bg-[#d45600] text-white font-bold py-4 rounded-xl mt-6 shadow-md transition-colors active:scale-95">Save Changes</button>
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="w-full bg-[#f36710] hover:bg-[#d45600] text-white font-bold py-4 rounded-xl mt-6 shadow-md transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSaving ? "Saving..." : "Save Changes"}
+              </button>
             </div>
           </div>
         </div>

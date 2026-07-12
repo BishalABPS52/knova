@@ -9,25 +9,23 @@ export function useProfile(username: string) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    useEffect(() => {
-        async function fetchProfile() {
-            try {
-                setLoading(true);
-
-                const data = await getProfile(username);
-
-                setProfile(data);
-            } catch (err) {
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("Unknown error");
-                }
-            } finally {
-                setLoading(false);
+    const fetchProfile = async () => {
+        try {
+            setLoading(true);
+            const data = await getProfile(username);
+            setProfile(data);
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError("Unknown error");
             }
+        } finally {
+            setLoading(false);
         }
+    };
 
+    useEffect(() => {
         if (username) {
             fetchProfile();
         }
@@ -35,7 +33,9 @@ export function useProfile(username: string) {
 
     return {
         profile,
+        setProfile,
         loading,
         error,
+        refetch: fetchProfile,
     };
 }
