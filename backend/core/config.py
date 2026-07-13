@@ -9,6 +9,23 @@ settings = None
 # Points to the backend/ directory (this file lives in backend/core/)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+def get_database_url(async_mode: bool = False) -> str:
+    url = str(get_settings().DATABASE_URL).strip()
+    if not url:
+        return url
+
+    if async_mode:
+        if url.startswith("postgresql://") and "+asyncpg" not in url:
+            return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        if url.startswith("postgresql+psycopg2://"):
+            return url.replace("postgresql+psycopg2://", "postgresql+asyncpg://", 1)
+        if url.startswith("postgresql+psycopg://"):
+            return url.replace("postgresql+psycopg://", "postgresql+asyncpg://", 1)
+
+    return url
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
