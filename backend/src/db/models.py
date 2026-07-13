@@ -67,6 +67,9 @@ class User(Base):
     __tablename__ = "users"
     
     id: Mapped[uuid.UUID] = uuid_pk()
+    # Integer bridge to the ML artifacts (ALS/TF-IDF/feature CSV keys). Seeded users
+    # carry the generator's integer user_id here; organic users leave it NULL.
+    ext_id: Mapped[int | None] = mapped_column(Integer, nullable=True, unique=True, index=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     password_hash: Mapped[str | None]= mapped_column(String(255), nullable=True)
     username: Mapped[str] = mapped_column(String(50), index=True, nullable=False, default="Username")
@@ -79,7 +82,8 @@ class User(Base):
     last_active_at: Mapped[datetime | None] = mapped_column(DateTime)
     
     interest_embedding: Mapped[list[float] | None] = mapped_column(Vector(384), nullable=True)
-    estimated_expertise: Mapped[float] = mapped_column(Float, default=0.5)
+    estimated_expertise: Mapped[float] = mapped_column(Float, default=0.5)   # base_skill_level (0..1)
+    curiosity_score: Mapped[float] = mapped_column(Float, default=0.5)       # exploration appetite (0..1)
 
     oauth_accounts: Mapped[list["OAuth"]] = relationship(back_populates="user")
     creator_profile: Mapped["CreatorProfile | None"] = relationship(back_populates="user")
@@ -171,8 +175,12 @@ class Post(Base):
     __tablename__ = "posts"
  
     id: Mapped[uuid.UUID] = uuid_pk()
+    # Integer bridge to the ML artifacts (content_id in ALS/TF-IDF/feature CSVs).
+    # Seeded posts carry the generator's content_id; organic posts leave it NULL.
+    # Not unique: organic posts are all NULL.
+    ext_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
     creator_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("creatorprofiles.id", ondelete="CASCADE"), index=True)
- 
+
     content_type: Mapped[ContentType] = mapped_column(
         Enum(ContentType), default=ContentType.TEXT, index=True
     )  # text | mcq | flashcard
@@ -304,6 +312,13 @@ class Interaction(Base):
 
     # implicit-feedback strength precomputed for CF/ALS (e.g. weighted engagement)
     engagement_weight: Mapped[float] = mapped_column(Float, default=0.0)
+
+    # per-content-type telemetry signals so every ML feature is reconstructable
+    # from stored rows (nullable: only meaningful for the relevant content type).
+    quiz_answered: Mapped[bool | None] = mapped_column(Boolean, nullable=True)   # mcq: did the user answer
+    quiz_correct: Mapped[bool | None] = mapped_column(Boolean, nullable=True)    # mcq: was the answer correct
+    card_flipped: Mapped[bool | None] = mapped_column(Boolean, nullable=True)    # flashcard: did the user flip
+    flip_time_sec: Mapped[float | None] = mapped_column(Float, nullable=True)    # flashcard: dwell before flip
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

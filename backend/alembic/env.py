@@ -1,5 +1,6 @@
 import asyncio
 from logging.config import fileConfig
+from uuid import uuid4
 
 import pgvector.sqlalchemy
 from sqlalchemy import pool
@@ -86,7 +87,12 @@ async def run_async_migrations() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
-        connect_args={"statement_cache_size": 0},
+        # Supabase's transaction pooler (pgbouncer) doesn't support asyncpg's
+        # cached prepared statements; disable the cache and use unique names.
+        connect_args={
+            "statement_cache_size": 0,
+            "prepared_statement_name_func": lambda: f"__asyncpg_{uuid4()}__",
+        },
     )
 
     async with connectable.connect() as connection:
