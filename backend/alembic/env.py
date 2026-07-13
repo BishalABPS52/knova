@@ -21,11 +21,11 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from core.config import get_settings
+from core.config import get_database_url, get_settings
 from src.db.models import Base
 settings = get_settings()
 
-config.set_main_option("sqlalchemy.url", str(settings.DATABASE_URL))
+config.set_main_option("sqlalchemy.url", get_database_url(async_mode=True))
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -86,6 +86,7 @@ async def run_async_migrations() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args={"statement_cache_size": 0},
     )
 
     async with connectable.connect() as connection:
