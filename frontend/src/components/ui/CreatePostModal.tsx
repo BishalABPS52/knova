@@ -22,7 +22,6 @@ export default function CreatePostModal({ isOpen, onClose, onCreate }: CreatePos
   const [tagInput, setTagInput] = useState('');
 
   const [noteContent, setNoteContent] = useState('');
-  
   const [flashcardFront, setFlashcardFront] = useState('');
   const [flashcardBack, setFlashcardBack] = useState('');
   
