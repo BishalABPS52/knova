@@ -18,8 +18,7 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
 
-  if (pathname === '/learnspace') return null;
-
+  
   const links: NavLink[] = [
     { name: 'Home', href: '/', icon: 'home' },
     { name: 'Space', href: '/learnspace', icon: 'school' },
@@ -27,7 +26,7 @@ export default function Navbar() {
     { name: 'Profile', href: '/profile', icon: 'person' },
     { name: 'Settings', href: '/settings', icon: 'settings' },
   ];
-
+  
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -37,14 +36,16 @@ export default function Navbar() {
         setDropDownOpen(false);
       }
     }
-
+    
     document.addEventListener('mousedown', handleClickOutside);
-
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
+  if (pathname === '/learnspace') return null;
+  
   return (
     <header className="w-full top-0 z-50 bg-surface dark:bg-surface-dim shadow-sm flex justify-between items-center py-4 fixed px-2 lg:px-[64px] h-[68px]">
       <div className="flex items-center flex-1 gap-10">
