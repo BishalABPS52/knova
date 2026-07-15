@@ -1,7 +1,8 @@
+// data/feedData.ts
 export type FeedItemType = 'flashcard' | 'text' | 'mcq';
 
 export interface FeedItem {
-  id: number;
+  id: number | string;
   type: FeedItemType;
   author: string;
   authorInitial?: string;
@@ -19,6 +20,10 @@ export interface FeedItem {
   upvotes: number;
   downvotes: number;
   comments: number;
+  // New fields for interactive features
+  userVote?: number;      // 1 = upvoted, -1 = downvoted, 0 = no vote
+  userSaved?: boolean;    // true if saved by current user
+  isOwner?: boolean;      // true if current user is the author
 }
 
 export const feedItems: FeedItem[] = [
@@ -36,6 +41,9 @@ export const feedItems: FeedItem[] = [
     upvotes: 42,
     downvotes: 3,
     comments: 2,
+    userVote: 0,
+    userSaved: false,
+    isOwner: false,
   },
   {
     id: 2,
@@ -50,6 +58,9 @@ export const feedItems: FeedItem[] = [
     upvotes: 124,
     downvotes: 12,
     comments: 1,
+    userVote: 0,
+    userSaved: false,
+    isOwner: false,
   },
   {
     id: 3,
@@ -66,6 +77,9 @@ export const feedItems: FeedItem[] = [
     upvotes: 89,
     downvotes: 5,
     comments: 1,
+    userVote: 0,
+    userSaved: false,
+    isOwner: false,
   },
   {
     id: 4,
@@ -80,6 +94,9 @@ export const feedItems: FeedItem[] = [
     upvotes: 256,
     downvotes: 8,
     comments: 0,
+    userVote: 0,
+    userSaved: false,
+    isOwner: false,
   },
   {
     id: 5,
@@ -95,6 +112,9 @@ export const feedItems: FeedItem[] = [
     upvotes: 112,
     downvotes: 2,
     comments: 0,
+    userVote: 0,
+    userSaved: false,
+    isOwner: false,
   },
   {
     id: 6,
@@ -111,6 +131,9 @@ export const feedItems: FeedItem[] = [
     upvotes: 76,
     downvotes: 4,
     comments: 0,
+    userVote: 0,
+    userSaved: false,
+    isOwner: false,
   },
   {
     id: 7,
@@ -125,6 +148,9 @@ export const feedItems: FeedItem[] = [
     upvotes: 189,
     downvotes: 31,
     comments: 0,
+    userVote: 0,
+    userSaved: false,
+    isOwner: false,
   },
   {
     id: 8,
@@ -140,6 +166,9 @@ export const feedItems: FeedItem[] = [
     upvotes: 94,
     downvotes: 1,
     comments: 0,
+    userVote: 0,
+    userSaved: false,
+    isOwner: false,
   },
   {
     id: 9,
@@ -156,6 +185,9 @@ export const feedItems: FeedItem[] = [
     upvotes: 145,
     downvotes: 3,
     comments: 0,
+    userVote: 0,
+    userSaved: false,
+    isOwner: false,
   },
   {
     id: 10,
@@ -170,5 +202,8 @@ export const feedItems: FeedItem[] = [
     upvotes: 210,
     downvotes: 5,
     comments: 0,
+    userVote: 0,
+    userSaved: false,
+    isOwner: false,
   },
 ];

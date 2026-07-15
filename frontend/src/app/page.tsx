@@ -1,7 +1,9 @@
+// app/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Loader2 } from 'lucide-react';
+import { useInView } from 'react-intersection-observer';
 import CreatorCard from '@/components/cards/CreatorCard';
 import FlashCard from '@/components/cards/FlashCard';
 import TextCard from '@/components/cards/TextContentCard';
@@ -10,19 +12,121 @@ import { FeedSkeleton } from '@/components/ui/Skeleton';
 import ShareModal from '@/components/ui/ShareModal';
 import CreatePostModal from '@/components/ui/CreatePostModal';
 import { feedItems, FeedItem } from '@/data/feedData';
+import { PostService } from '@/lib/posts';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 export default function HomePage() {
+  const { user } = useAuth();
+  const { ref, inView } = useInView();
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [feed, setFeed] = useState<FeedItem[]>(feedItems);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [hasNext, setHasNext] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [total, setTotal] = useState<number>(0);
   const [shareModalOpen, setShareModalOpen] = useState<boolean>(false);
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
   const [shareContentId, setShareContentId] = useState<string | number | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [useMockData, setUseMockData] = useState<boolean>(false);
+
+  const postService = new PostService();
+
+  const loadFeed = useCallback(async (pageNum: number, append: boolean = false) => {
+    try {
+      if (pageNum === 1) {
+        setIsLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
+
+      // Try to fetch from API
+      const response = await postService.getPosts({
+        page: pageNum,
+        size: 10,
+        sort_by: 'recent',
+      });
+
+      // Transform API response to FeedItem format
+      const items: FeedItem[] = response.items.map((post: any) => {
+        const baseItem: FeedItem = {
+          id: post.id,
+          type: post.content_type,
+          author: post.creator?.user?.username || 'Unknown',
+          authorInitial: post.creator?.user?.username?.slice(0, 2).toUpperCase() || 'U',
+          authorBg: 'bg-orange-500 text-white',
+          time: post.published_at ? new Date(post.published_at).toLocaleDateString() : 'Just now',
+          category: post.tags?.[0] || 'General',
+          upvotes: post.upvote_count || 0,
+          downvotes: post.downvote_count || 0,
+          comments: post.comment_count || 0,
+          userVote: post.user_vote,
+          userSaved: post.user_saved,
+          isOwner: user?.id === post.creator?.user?.id,
+        };
+
+        if (post.content_type === 'flashcard') {
+          return {
+            ...baseItem,
+            answerBg: 'bg-[#f36710]',
+            question: post.flashcard?.front,
+            answer: post.flashcard?.back,
+          };
+        } else if (post.content_type === 'text') {
+          return {
+            ...baseItem,
+            title: post.title || 'Untitled',
+            content: post.body,
+          };
+        } else if (post.content_type === 'mcq') {
+          return {
+            ...baseItem,
+            question: post.mcq?.question,
+            options: post.mcq?.options,
+            correctIndex: post.mcq?.correct_index,
+            explanation: post.mcq?.explanation,
+          };
+        }
+        return baseItem;
+      });
+
+      if (append) {
+        setFeed(prev => [...prev, ...items]);
+      } else {
+        setFeed(items);
+      }
+
+      setHasNext(response.has_next);
+      setTotal(response.total);
+      setPage(pageNum);
+      setUseMockData(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const isExpectedFallback = /not found|404|route not available|unable to reach the server/i.test(message);
+
+      if (!append && pageNum === 1) {
+        setFeed(feedItems);
+        setHasNext(false);
+        setUseMockData(true);
+
+        if (!isExpectedFallback) {
+          console.error('Failed to load feed from API, using mock data:', error);
+        }
+
+        toast.info(isExpectedFallback ? 'Showing sample feed while the backend feed endpoint is unavailable.' : 'Using sample data (API unavailable)');
+      }
+    } finally {
+      setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
+      loadFeed(1, false);
+    }, 500);
 
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -47,7 +151,14 @@ export default function HomePage() {
       window.removeEventListener('resize', checkScreenSize);
       window.removeEventListener('open-create-modal', handleOpen);
     };
-  }, []);
+  }, [loadFeed]);
+
+  // Load more when scrolling
+  useEffect(() => {
+    if (inView && hasNext && !isLoadingMore && !isLoading && !useMockData) {
+      loadFeed(page + 1, true);
+    }
+  }, [inView, hasNext, isLoadingMore, isLoading, page, loadFeed, useMockData]);
 
   const handleShare = (id: string | number) => {
     console.log("share clicked:", id);
@@ -62,27 +173,187 @@ export default function HomePage() {
 
   const handleCreatePost = (post: FeedItem) => {
     setFeed([post, ...feed]);
+    setTotal(prev => prev + 1);
+  };
+
+  const handleVote = async (postId: string, value: number) => {
+    if (useMockData) {
+      // Mock vote for demo
+      setFeed(prev => prev.map(p => {
+        if (p.id === postId) {
+          const newVote = p.userVote === value ? 0 : value;
+          const upvoteDelta = newVote === 1 ? 1 : (p.userVote === 1 ? -1 : 0);
+          const downvoteDelta = newVote === -1 ? 1 : (p.userVote === -1 ? -1 : 0);
+          return {
+            ...p,
+            upvotes: p.upvotes + upvoteDelta,
+            downvotes: p.downvotes + downvoteDelta,
+            userVote: newVote,
+          };
+        }
+        return p;
+      }));
+      return;
+    }
+
+    try {
+      const updatedPost = await postService.vote(postId, value);
+      setFeed(prev => prev.map(p => {
+        if (p.id === postId) {
+          return {
+            ...p,
+            upvotes: updatedPost.upvote_count,
+            downvotes: updatedPost.downvote_count,
+            userVote: updatedPost.user_vote,
+          };
+        }
+        return p;
+      }));
+    } catch (error) {
+      console.error('Failed to vote:', error);
+      toast.error('Failed to vote');
+    }
+  };
+
+  const handleSave = async (postId: string) => {
+    if (useMockData) {
+      // Mock save for demo
+      setFeed(prev => prev.map(p => {
+        if (p.id === postId) {
+          return {
+            ...p,
+            userSaved: !p.userSaved,
+          };
+        }
+        return p;
+      }));
+      return;
+    }
+
+    try {
+      const response = await postService.toggleSave(postId);
+      setFeed(prev => prev.map(p => {
+        if (p.id === postId) {
+          return {
+            ...p,
+            userSaved: response.saved,
+          };
+        }
+        return p;
+      }));
+    } catch (error) {
+      console.error('Failed to save:', error);
+      toast.error('Failed to save post');
+    }
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+
+    if (useMockData) {
+      setFeed(prev => prev.filter(p => p.id !== postId));
+      setTotal(prev => prev - 1);
+      toast.success('Post deleted');
+      return;
+    }
+
+    try {
+      await postService.deletePost(postId);
+      setFeed(prev => prev.filter(p => p.id !== postId));
+      setTotal(prev => prev - 1);
+      toast.success('Post deleted');
+    } catch (error) {
+      console.error('Failed to delete post:', error);
+      toast.error('Failed to delete post');
+    }
+  };
+
+  // Render the feed items
+  const renderFeedItems = () => {
+    return feed.map((item: FeedItem) => {
+      // Common props for all card types
+      const commonProps = {
+        id: item.id,
+        author: item.author,
+        authorInitial: item.authorInitial,
+        authorBg: item.authorBg || 'bg-orange-500 text-white',
+        time: item.time,
+        category: item.category,
+        upvotes: item.upvotes,
+        downvotes: item.downvotes,
+        comments: item.comments,
+        onShare: handleShare,
+        onVote: handleVote,
+        onSave: handleSave,
+        onDelete: handleDeletePost,
+        userVote: item.userVote,
+        userSaved: item.userSaved,
+        isOwner: item.isOwner,
+      };
+
+      if (item.type === 'flashcard') {
+        return (
+          <FlashCard
+            key={item.id}
+            {...commonProps}
+            question={item.question}
+            answer={item.answer}
+            answerBg={item.answerBg || 'bg-[#f36710]'}
+          />
+        );
+      } else if (item.type === 'text') {
+        return (
+          <TextCard
+            key={item.id}
+            {...commonProps}
+            title={item.title || 'Untitled'}
+            content={item.content || ''}
+          />
+        );
+      } else if (item.type === 'mcq') {
+        return (
+          <McqCard
+            key={item.id}
+            {...commonProps}
+            question={item.question}
+            options={item.options}
+            correctIndex={item.correctIndex}
+            explanation={item.explanation}
+          />
+        );
+      }
+      return null;
+    });
   };
 
   return (
     <div className="flex min-h-screen">
-      <main className={`flex-1 ${isMobile ? 'px-4 py-6 pb-[100px]' : 'px-4 md:px-[64px] py-12 pt-32 pb-12'}`}>
+      <main className={`flex-1 ${isMobile ? 'px-4 py-6 pb-25' : 'px-4 md:px-[64px] py-12 pt-32 pb-12'}`}>
         <CreatorCard onCreateClick={() => setCreateModalOpen(true)} />
 
         {isLoading ? (
           <FeedSkeleton />
         ) : (
           <div className={`${isMobile ? 'flex flex-col gap-6' : 'max-w-4xl mx-auto space-y-8'}`}>
-            {feed.map((item: FeedItem) => {
-              if (item.type === 'flashcard') {
-                return <FlashCard key={item.id} {...item} onShare={handleShare} />;
-              } else if (item.type === 'text') {
-                return <TextCard key={item.id} {...item} onShare={handleShare} />;
-              } else if (item.type === 'mcq') {
-                return <McqCard key={item.id} {...item} onShare={handleShare} />;
-              }
-              return null;
-            })}
+            {feed.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">No posts yet. Be the first to create one!</p>
+              </div>
+            ) : (
+              renderFeedItems()
+            )}
+          </div>
+        )}
+
+        {/* Load more trigger */}
+        {hasNext && !isLoading && !useMockData && (
+          <div ref={ref} className={`${isMobile ? '' : 'max-w-4xl mx-auto'} flex justify-center py-8`}>
+            {isLoadingMore && (
+              <div className="flex items-center gap-2 text-gray-500">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Loading more...</span>
+              </div>
+            )}
           </div>
         )}
       </main>
@@ -90,7 +361,7 @@ export default function HomePage() {
       {!isMobile && (
         <button 
           onClick={() => setCreateModalOpen(true)}
-          className="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-primary-container text-white shadow-2xl shadow-primary/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50"
+          className="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-orange-600 text-white shadow-2xl shadow-orange-600/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50"
         >
           <Plus className="w-8 h-8" />
         </button>

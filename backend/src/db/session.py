@@ -6,7 +6,7 @@ from core.config import get_database_url, get_settings
 
 settings = get_settings()
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    get_database_url(async_mode=True),
     pool_pre_ping=True,
     pool_size=10,
     max_overflow=20,
