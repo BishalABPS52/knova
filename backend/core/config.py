@@ -42,7 +42,13 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES:  int = 30
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 24 * 60
 
-    ALLOW_ORIGINS: list[str] = ["*"]
+    # Exact frontend origins allowed by CORS. Cannot be ["*"] because
+    # allow_credentials=True forbids the wildcard. Override in prod via the
+    # ALLOW_ORIGINS env var, e.g. '["https://your-app.vercel.app"]'.
+    ALLOW_ORIGINS: list[str] = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
 
     # ML model artifacts (overridable via ML_MODELS_PATH / ML_DATA_PATH env vars)
     ML_MODELS_PATH: Path = BASE_DIR / "models"
