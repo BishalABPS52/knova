@@ -1,0 +1,98 @@
+topic,tags
+DBMS,SQL|Indexing|ACID properties|Normalization|NoSQL|Primary Key
+Software Engineering,SDLC|Agile/Scrum|Version control|Code reviews|Design patterns
+Programming Fundamentals,Python|JavaScript|OOP|Recursion|Memory management
+Web Development,React|Next.js|REST APIs|CSS layouts|Full-stack projects
+Mobile App Development,Flutter|React Native|App Store guidelines|Push notifications
+Machine Learning,Supervised learning|Regression|Decision trees|LightGBM|LLMs
+Computer Vision,Convolutional layers|Image segmentation|Edge detection|OpenCV
+Cybersecurity,Phishing scams|Password managers|VPNs|Ethical hacking|Encryption
+Cloud Computing,AWS basics|Docker|Kubernetes|Serverless functions|CI/CD
+Data Analysis,Excel formulas|SQL queries|Dashboards|Power BI|Data cleaning
+AI,Artificial Intelligence|ai|Intelligent system
+Discrete Mathematics,Graph theory|Set theory|Combinatorics|Boolean algebra
+Cryptocurrency & Web3,Bitcoin basics|Wallet security|Smart contracts|Blockchain explained
+Java Programming,OOP in Java|JVM internals|Spring Boot|Multithreading|Exception handling|Collections framework|Interfaces & abstract classes|Garbage collection|JDBC
+C Programming,Pointers|Memory management|Structs|Bitwise operations|Header files|Dynamic allocation|Recursion in C|File handling|Preprocessor directives
+MERN Stack,MongoDB schemas|Express routing|React components|Node.js event loop|JWT auth|REST integration|Middleware|State management|API design
+Computer Hardware,CPU architecture|RAM types|Motherboard components|Building a PC
+Electronics & Circuits,Ohm's law|Breadboarding|Microcontrollers|Sensors|Arduino projects
+Embedded Systems,Firmware|Real-time OS|IoT devices|PCB design basics
+Robotics,Actuators|Robotic arms|Path planning|ROS basics|Drone building
+Mechanical Engineering,CAD modeling|Machine design|Manufacturing processes|Gear systems
+Structural Engineering,Concrete mix|Beam deflection|Shear force|Bending moment
+Civil Engineering & Construction,Site surveying|Building codes|Project estimation|Materials
+Electrical Engineering,Circuit analysis|Power systems|Transformers|Signal processing
+Classical Mechanics,Newton's laws|Kinematics|Vector math|Torque|Friction
+Fluid Mechanics,Bernoulli equation|Reynolds number|Viscosity|Pipe flow
+Thermodynamics,Entropy|Laws of thermodynamics|Heat engines|Refrigeration cycles
+Soil Mechanics,Soil compaction|Bearing capacity|Effective stress|Slope stability
+Automobiles & EVs,Engine maintenance|EV battery tech|Fuel efficiency|New model reviews
+Architecture,Floor planning|Building materials|Sustainable design|Site orientation
+Architectural History,Brutalism|Gothic vaulting|Bauhaus philosophy|Pagoda style
+Graphic Design,Typography|Color theory|Figma workflows|Logo design
+UI/UX Design,Wireframing|User research|Design systems|Prototyping
+Interior Design,Space planning|Lighting design|Furniture layout|Color palettes
+Linear Algebra,Matrices|Eigenvalues|Vector spaces|Matrix multiplication
+Calculus,Derivatives|Integration|Limits|Gradient descent
+Probability & Stats,Bayes theorem|Normal distribution|Standard deviation
+Classical Physics,Wave-particle duality|Electromagnetism|Optics|Nuclear physics
+Astronomy & Space,Stellar evolution|Black holes|Space missions|Stargazing tips
+Cell Biology,Mitosis|Organelles|Cell membrane|ATP synthesis
+Genetics,DNA replication|RNA transcription|Mendelian laws|CRISPR
+Human Anatomy,Cardiovascular system|Synaptic transmission|Endocrine glands
+Organic Chemistry,Hydrocarbons|Functional groups|Resonance structures
+Environmental Science,Carbon cycle|Biodiversity tracking|Trophic levels
+Climate & Sustainability,Renewable energy|Air quality|Recycling myths|Green tech
+Geomorphology,Plate tectonics|Rock cycle|River erosion|Glacial landforms
+Hydrology,Rainfall-runoff|Catchment area|Groundwater flow|Hydrograph
+Agronomy,Soil nutrients|Crop rotation|Irrigation efficiency|Urban farming
+Financial Accounting,Balance sheets|Income statements|Cash flow|Double entry
+Corporate Finance,Portfolio diversification|Capital budgeting|Valuation basics
+Personal Finance,Budgeting apps|Emergency fund|Credit score|Debt payoff
+Stock Market Investing,Nepal Stock Exchange|Mutual funds|Dividend stocks
+Macroeconomics,GDP calculation|Inflation metrics|Fiscal policy|Monetary policy
+Microeconomics,Monopoly pricing|Oligopoly|Consumer surplus|Opportunity cost
+Strategic Management,SWOT analysis|Porter's five forces|Market penetration
+HR Management,Talent acquisition|Performance appraisal|Labor relations
+Startups & Entrepreneurship,Pitch decks|MVP building|Bootstrapping|Fundraising
+Freelancing,Client contracts|Pricing your work|Invoicing|Scope creep
+E-commerce & Online Business,Dropshipping|Shopify setup|Ad campaigns
+Career Growth,Salary negotiation|Performance reviews|Networking|Career pivots
+Real Estate & Property,Renting vs buying|Property investment|Home loans
+History of Nepal,Lichchhavi period|Malla dynasty|Unification era|Bhimsen Thapa
+Nepali Culture & Festivals,Newari traditions|Folk stories|Major festivals
+Nepali Literature,Laxmi Prasad Devkota|Muna Madan|Parijat|Shirishko Phool
+Modern English Fiction,George Orwell|Dystopian fiction|Post-colonialism
+World Mythology,Archetypes|Monomyth|Oral traditions|Deity pantheons
+Philosophy,Dualism|Empiricism|Rationalism|Consciousness
+Political Philosophy,Social contract|Separation of powers|Totalitarianism
+Current Affairs & Politics,Election coverage|Policy explainers|Geopolitics
+International Law,Sovereignty|Treaty ratification|Humanitarian law
+Psychology & Human Behavior,Cognitive bias|Classical conditioning|Habit formation
+Linguistics,Syntax trees|Phonemes|Morphology|Language learning tips
+Archeology,Stratigraphy|Radiocarbon dating|Artifact conservation
+Fitness & Strength Training,Progressive overload|Home workouts|Gym routines
+Nutrition & Diet,Macros|Meal prep|Intermittent fasting|Reading food labels
+Mental Health,Anxiety management|Therapy basics|Journaling|Sleep hygiene
+Cooking & Recipes,Nepali cuisine|Quick weeknight meals|Baking basics
+Skincare & Grooming,Routine building|Ingredient guides|Sunscreen myths
+Fashion & Style,Wardrobe basics|Seasonal trends|Thrifting
+Parenting,Screen time limits|Sleep training|Toddler tantrums
+Relationships & Dating,Communication tips|Breakup recovery|Red flags
+Productivity,Time blocking|Deep work|Habit tracking|Study techniques
+Adventure Tourism,Everest Base Camp|Annapurna Circuit|Mountaineering permits
+Cultural Tourism,Lumbini pilgrimage|Buddhist circuits|Pashupatinath heritage
+Budget Travel,Flight deals|Backpacking routes|Travel itineraries
+Sports Science,Biomechanics|Aerobic threshold|Kinematics|Ball trajectory
+Football (Soccer),Tactics breakdown|Transfer news|Fantasy leagues
+Cricket Analytics,Batting technique|IPL analysis|Fantasy cricket|Match strategy
+Gaming & Esports,Speedrunning|Console vs PC|Indie games|Esports tournaments
+Cinema Studies,Cinematography|Screenplay structure|Color grading
+Music Theory & Production,Harmonic progression|Beat making|DAW tutorials
+Photography,Camera settings|Composition rules|Editing basics
+IOE Entrance Exam,Physics numericals|Chemistry reactions|Engineering mathematics|IOE syllabus|Previous year questions|Objective-type practice|Merit list cutoffs|Entrance mock tests
+CEE Exam,Biology MCQs|Physics for CEE|Chemistry for CEE|CEE syllabus|MBBS admission|BDS admission|Previous year CEE papers|Merit list
+NEET Exam,NEET Biology|NEET Physics|NEET Chemistry|NCERT based questions|NEET syllabus|Mock test series|Previous year NEET papers|Rank prediction
+IELTS Preparation,Listening practice|Reading comprehension|Writing task 1 & 2|Speaking fluency|Band score criteria|Academic vs General IELTS|Vocabulary building|Mock IELTS tests
+PTE Preparation,PTE speaking tasks|PTE writing essays|PTE reading fill-in-blanks|PTE listening summarize|Score prediction|PTE syllabus|Template strategies|Mock PTE tests
