@@ -41,7 +41,7 @@ export const api = async <T>(path: string, options?: RequestInit): Promise<T> =>
   } catch (error) {
     if (error instanceof Error && error.message) {
       if (error.message.includes("Failed to fetch") || error.message.includes("fetch")) {
-        throw new Error("Unable to reach the server. Make sure the backend is running on localhost:8000.");
+        throw new Error("Unable to reach the server. Please check your connection and try again.");
       }
       throw error;
     }
