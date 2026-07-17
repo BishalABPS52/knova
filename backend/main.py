@@ -57,9 +57,11 @@ from src.auth.router import router as auth_router
 from src.onboarding.route import router as onboarding_router
 from src.reference.router import router as ref_router
 from src.users.router import router as users_router
+from src.posts.router import router as posts_router
 
 base_router.include_router(auth_router, prefix="/auth")
 base_router.include_router(onboarding_router)
 base_router.include_router(ref_router, prefix="/reference")
 base_router.include_router(users_router, prefix="/users")
+base_router.include_router(posts_router, prefix="/posts")
 app.include_router(base_router)
