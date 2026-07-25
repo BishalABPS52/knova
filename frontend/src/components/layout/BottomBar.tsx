@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  Home,
-  GraduationCap,
-  Plus,
-  Compass,
-  User,
-  Settings,
-} from "lucide-react";
+import { Home, GraduationCap, Plus, Compass, User, LucideIcon } from "lucide-react";
+
+const LINKS: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "/", label: "Home", icon: Home },
+  { href: "/learnspace", label: "Space", icon: GraduationCap },
+  // Create sits between these two
+  { href: "/explore", label: "Explore", icon: Compass },
+  { href: "/profile", label: "Profile", icon: User },
+];
 
 export default function BottomBar({
   onCreateClick,
@@ -19,60 +20,87 @@ export default function BottomBar({
   const pathname = usePathname();
   const router = useRouter();
 
-  const navClass = (href: string) =>
-    `flex flex-col items-center justify-center transition-colors ${
-      pathname === href
-        ? "text-orange-500 font-semibold"
-        : "text-black hover:text-orange-500"
-    }`;
+  // Learn Space is a full-bleed reel with its own controls (matches Navbar).
+  if (pathname === '/learnspace') return null;
+
+  // Prefix match so nested routes still light up their tab — /profile/alex is
+  // still "Profile". "/" has to be exact or it would match everything.
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  const [home, space, explore, profile] = LINKS;
 
   return (
-    <nav className="md:hidden fixed bottom-0 w-full z-50 rounded-t-2xl bg-white shadow-[0_-4px_12px_rgba(0,0,0,0.05)] flex justify-around items-center h-20 px-2 pb-2">
-      
-      <Link href="/" className={navClass("/")}>
-        <Home className="w-6 h-6 mb-1" />
-        <span className="text-[10px]">Home</span>
-      </Link>
+    <nav
+      aria-label="Primary"
+      className="md:hidden fixed inset-x-4 z-50 bottom-[calc(1rem+env(safe-area-inset-bottom))]"
+    >
+      <div className="grid grid-cols-5 items-center h-16 rounded-[26px] bg-white/90 backdrop-blur-xl border border-black/[0.06] shadow-[0_10px_30px_-6px_rgba(0,0,0,0.22)]">
+        <NavItem {...home} active={isActive(home.href)} />
+        <NavItem {...space} active={isActive(space.href)} />
 
-      <Link href="/learnspace" className={navClass("/learnspace")}>
-        <GraduationCap className="w-6 h-6 mb-1" />
-        <span className="text-[10px]">Space</span>
-      </Link>
+        <button
+          onClick={() => {
+            if (onCreateClick) {
+              onCreateClick();
+            } else if (pathname === "/") {
+              window.dispatchEvent(new CustomEvent("open-create-modal"));
+            } else {
+              router.push("/?create=true");
+            }
+          }}
+          aria-label="Create a post"
+          className="flex flex-col items-center justify-center gap-1 h-full"
+        >
+          {/* Lifted out of the bar; the white ring cuts it away from the pill. */}
+          <span className="-mt-8 w-12 h-12 rounded-2xl bg-gradient-to-br from-[#f97a2b] to-[#f36710] ring-4 ring-white shadow-lg shadow-orange-500/35 flex items-center justify-center active:scale-95 transition-transform">
+            <Plus className="w-6 h-6 text-white" strokeWidth={2.5} />
+          </span>
+          <span className="text-[10px] font-semibold leading-none text-[#f36710]">
+            Create
+          </span>
+        </button>
 
-      <button
-        onClick={() => {
-          if (onCreateClick) {
-            onCreateClick();
-          } else if (pathname === "/") {
-            window.dispatchEvent(new CustomEvent("open-create-modal"));
-          } else {
-            router.push("/?create=true");
-          }
-        }}
-        className="flex flex-col items-center justify-center relative -top-4"
-      >
-        <div className="w-14 h-14 rounded-full bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30 hover:scale-105 active:scale-95 transition-transform">
-          <Plus className="w-8 h-8 text-white" />
-        </div>
-        <span className="text-[10px] mt-1 text-orange-500 font-medium">
-          Create
-        </span>
-      </button>
-
-      <Link href="/explore" className={navClass("/explore")}>
-        <Compass className="w-6 h-6 mb-1" />
-        <span className="text-[10px]">Explore</span>
-      </Link>
-
-      <Link href="/profile" className={navClass("/profile")}>
-        <User className="w-6 h-6 mb-1" />
-        <span className="text-[10px]">Profile</span>
-      </Link>
-
-      <Link href="/settings" className={navClass("/settings")}>
-        <Settings className="w-6 h-6 mb-1" />
-        <span className="text-[10px]">Settings</span>
-      </Link>
+        <NavItem {...explore} active={isActive(explore.href)} />
+        <NavItem {...profile} active={isActive(profile.href)} />
+      </div>
     </nav>
+  );
+}
+
+function NavItem({
+  href,
+  label,
+  icon: Icon,
+  active,
+}: {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className="group flex flex-col items-center justify-center gap-1 h-full"
+    >
+      <span
+        className={`flex items-center justify-center h-7 w-12 rounded-full transition-colors ${
+          active
+            ? "bg-[#fef3ea] text-[#f36710]"
+            : "text-stone-400 group-hover:text-[#f36710]"
+        }`}
+      >
+        <Icon className="w-5 h-5" strokeWidth={active ? 2.5 : 2} />
+      </span>
+      <span
+        className={`text-[10px] leading-none transition-colors ${
+          active ? "font-bold text-[#f36710]" : "font-medium text-stone-400"
+        }`}
+      >
+        {label}
+      </span>
+    </Link>
   );
 }

@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { LoginSchema } from "@/schemas/login";
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
+import { ButtonSpinner } from "@/components/ui/Spinner";
 
 type LoginFormData = z.infer<typeof LoginSchema>;
 
@@ -386,7 +387,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full h-[50px] rounded-lg text-white font-semibold text-[16px] bg-[#f36710] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? "Logging in..." : "Log In"}
+              {loading ? <ButtonSpinner size={20}>Logging in</ButtonSpinner> : "Log In"}
             </button>
 
             <div ref={ref(4)} className="text-center -mt-1.5">
@@ -626,7 +627,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full h-11 bg-[#f36710] text-white font-bold rounded-lg hover:bg-[#d4580e] transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? "Logging in..." : "Log in"}
+              {loading ? <ButtonSpinner>Logging in</ButtonSpinner> : "Log in"}
             </button>
 
             {/* Forgot password: BUTTON that opens the desktop modal (not a Link) */}

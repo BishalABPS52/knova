@@ -168,6 +168,7 @@ export default function PostDetail({ postId }: { postId: string }) {
           <FlashCard
             id={post.id}
             author={post.creator?.user?.username || 'Unknown'}
+            creatorId={post.creator?.id}
             authorInitial={post.creator?.user?.username?.slice(0, 2).toUpperCase() || 'U'}
             authorBg="bg-orange-500 text-white"
             time={post.published_at ? new Date(post.published_at).toLocaleDateString() : 'Just now'}
@@ -191,6 +192,7 @@ export default function PostDetail({ postId }: { postId: string }) {
           <TextCard
             id={post.id}
             author={post.creator?.user?.username || 'Unknown'}
+            creatorId={post.creator?.id}
             authorInitial={post.creator?.user?.username?.slice(0, 2).toUpperCase() || 'U'}
             authorBg="bg-orange-500 text-white"
             time={post.published_at ? new Date(post.published_at).toLocaleDateString() : 'Just now'}
@@ -213,6 +215,7 @@ export default function PostDetail({ postId }: { postId: string }) {
           <McqCard
             id={post.id}
             author={post.creator?.user?.username || 'Unknown'}
+            creatorId={post.creator?.id}
             authorInitial={post.creator?.user?.username?.slice(0, 2).toUpperCase() || 'U'}
             authorBg="bg-orange-500 text-white"
             time={post.published_at ? new Date(post.published_at).toLocaleDateString() : 'Just now'}

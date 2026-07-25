@@ -2,10 +2,14 @@
 'use client';
 import { useState } from 'react';
 import { FeedActions, ReelActions, CommentsSection } from './Shared';
+import FollowButton from '@/components/ui/FollowButton';
+import PostMenu from '@/components/ui/PostMenu';
 
 interface TextProps {
   variant?: 'feed' | 'reel' | 'explore' | 'profile';
   author?: string;
+  /** Creator profile id, used by the follow button. */
+  creatorId?: string;
   time?: string;
   category?: string;
   title?: string;
@@ -42,6 +46,7 @@ export default function TextCard(props: TextProps) {
 function TextFeed({
   id,
   author,
+  creatorId,
   time,
   title,
   content,
@@ -126,21 +131,22 @@ function TextFeed({
               {authorInitial || author?.slice(0, 2).toUpperCase()}
             </div>
             <div>
-              <p className="font-semibold text-sm text-on-surface">{author || 'Unknown'}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold text-sm text-on-surface">{author || 'Unknown'}</p>
+                <FollowButton creatorId={creatorId} author={author} hidden={isOwner} />
+              </div>
               <p className="text-xs text-outline">{time || 'Just now'}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {isOwner && onDelete && (
-              <button
-                onClick={handleDelete}
-                className="text-red-500 hover:text-red-700 transition-colors"
-              >
-                <span className="material-symbols-outlined text-sm">delete</span>
-              </button>
-            )}
-            <button className="material-symbols-outlined text-outline">more_horiz</button>
-          </div>
+          <PostMenu
+            postId={id}
+            author={author}
+            isOwner={isOwner}
+            onDelete={onDelete ? handleDelete : undefined}
+            onShare={onShare && id ? () => onShare(id) : undefined}
+            onSave={onSave && id ? handleSave : undefined}
+            saved={localUserSaved}
+          />
         </div>
         <h3 className="text-[24px] font-bold text-on-surface mb-4 leading-tight">{title || 'Untitled'}</h3>
         <p className="text-[18px] text-on-surface-variant leading-relaxed mb-6 whitespace-pre-wrap">
@@ -175,9 +181,9 @@ function TextFeed({
 
 function TextReel({ title, content, tags, author, time, upvotes, comments, onCommentToggle }: TextProps) {
   return (
-    <section className="h-screen w-full snap-start flex items-center justify-center relative">
-      <div className="w-[440px] h-[90vh] bg-white rounded-[16px] shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex flex-col relative z-20 text-[#1a1a1a]">
-        <div className="flex-1 p-8 flex flex-col justify-center items-center text-center">
+    <section className="h-[100svh] w-full snap-start flex items-center justify-center relative">
+      <div className="w-full h-full bg-white flex flex-col relative z-20 text-[#1a1a1a] md:w-[440px] md:h-[88vh] md:rounded-2xl md:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+        <div className="flex-1 px-6 pt-24 pb-36 md:px-8 md:pt-10 md:pb-28 flex flex-col justify-center items-center text-center overflow-y-auto custom-scrollbar">
           <h2 className="font-bold text-[24px] leading-tight mb-6">{title || 'Untitled'}</h2>
           <p className="text-on-surface-variant text-[16px] leading-relaxed">{content || 'No content'}</p>
         </div>
@@ -201,9 +207,9 @@ function TextReel({ title, content, tags, author, time, upvotes, comments, onCom
             </div>
           </div>
         </div>
-      </div>
 
-      <ReelActions upvotes={upvotes || 0} comments={comments || 0} onCommentToggle={onCommentToggle} />
+        <ReelActions upvotes={upvotes || 0} comments={comments || 0} onCommentToggle={onCommentToggle} />
+      </div>
     </section>
   );
 }

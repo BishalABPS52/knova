@@ -10,7 +10,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
     <div className="flex flex-col min-h-screen">
       <Navbar />
 
-      <div className="flex-1 w-full max-w-4xl mx-auto pb-24 md:pb-10 pt-20">
+      {/* Bottom padding clears the floating mobile nav (and the iOS safe area). */}
+      <div className="flex-1 w-full max-w-4xl mx-auto pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-10 pt-20">
         {children}
       </div>
 

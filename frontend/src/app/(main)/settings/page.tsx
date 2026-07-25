@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import {
   IdCard,
-  User,
   Lock,
   Tag,
   HelpCircle,
@@ -18,13 +17,10 @@ import {
   Search,
   Loader2,
 } from "lucide-react";
-import Image from "next/image";
 import { getTopics, Topic } from "@/lib/reference";
 import { getMyInterests, updateMyInterests } from "@/lib/interests";
-import { getProfile, updateProfile } from "@/lib/profile";
-import { useAuth } from "@/context/AuthContext";
 
-type ModalType = "personal" | "profile" | "password" | "topics" | null;
+type ModalType = "personal" | "password" | "topics" | null;
 
 export default function SettingsPage() {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
@@ -59,12 +55,6 @@ export default function SettingsPage() {
               icon={<IdCard size={20} className="text-[#594137]" />}
               label="Personal Information"
               onClick={() => setActiveModal("personal")}
-            />
-            <Divider />
-            <SettingsButton
-              icon={<User size={20} className="text-[#594137]" />}
-              label="Edit Profile"
-              onClick={() => setActiveModal("profile")}
             />
             <Divider />
             <SettingsButton
@@ -117,9 +107,6 @@ export default function SettingsPage() {
         <ModalWrapper onClose={closeModal}>
           {activeModal === "personal" && (
             <PersonalInfoModal onClose={closeModal} />
-          )}
-          {activeModal === "profile" && (
-            <EditProfileModal onClose={closeModal} />
           )}
           {activeModal === "password" && (
             <ChangePasswordModal onClose={closeModal} />
@@ -231,147 +218,6 @@ function InfoField({ label, value }: { label: string; value: string }) {
         {value}
       </div>
     </div>
-  );
-}
-
-function EditProfileModal({ onClose }: { onClose: () => void }) {
-  const { user, refreshUser } = useAuth();
-  const [username, setUsername] = useState("");
-  const [bio, setBio] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Load the user's current profile so the fields reflect real, saved values.
-  useEffect(() => {
-    if (!user?.username) return;
-    let active = true;
-    getProfile(user.username)
-      .then((p) => {
-        if (!active) return;
-        setUsername(p.username ?? "");
-        setBio(p.bio ?? "");
-        setAvatarUrl(p.avatar_url ?? null);
-      })
-      .catch((e) => {
-        if (active)
-          setError(e instanceof Error ? e.message : "Failed to load profile");
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [user?.username]);
-
-  const handleSave = async () => {
-    if (!username.trim()) {
-      setError("Username cannot be empty");
-      return;
-    }
-    setSaving(true);
-    setError(null);
-    try {
-      await updateProfile({ username: username.trim(), bio });
-      await refreshUser();
-      onClose();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to save profile");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <>
-      <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
-        <h3 className="text-lg font-bold text-gray-900 tracking-tight">
-          Edit Profile
-        </h3>
-        <button
-          onClick={onClose}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <X size={20} className="text-gray-500" />
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-        </div>
-      ) : (
-        <div className="p-6 overflow-y-auto space-y-8">
-          <div className="flex flex-col items-center gap-3">
-            <div className="relative">
-              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-sm bg-gray-100 relative">
-                <Image
-                  src={avatarUrl || "/logos/default-avatar.png"}
-                  alt="Profile"
-                  fill
-                  className="object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Username
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-[#f36710] focus:ring-1 focus:ring-[#f36710] outline-none text-gray-900 transition-colors bg-gray-50/50 text-sm font-medium"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Bio
-              </label>
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Tell others what you're learning..."
-                className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#f36710] focus:ring-1 focus:ring-[#f36710] outline-none text-gray-900 transition-colors h-28 resize-none bg-gray-50/50 text-sm"
-              />
-            </div>
-          </div>
-
-          <p className="text-xs text-gray-400">
-            Manage your learning interests under{" "}
-            <span className="font-semibold text-gray-500">
-              Preferred Topics
-            </span>
-            .
-          </p>
-
-          {error && <p className="text-sm text-red-500">{error}</p>}
-        </div>
-      )}
-
-      <div className="p-6 border-t border-gray-100 bg-white flex gap-3 sticky bottom-0">
-        <button
-          onClick={onClose}
-          className="flex-1 h-12 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={saving || loading}
-          className="flex-1 h-12 bg-[#f36710] text-white text-sm font-bold rounded-xl shadow-md shadow-orange-500/20 hover:bg-[#d45600] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-          Save Changes
-        </button>
-      </div>
-    </>
   );
 }
 

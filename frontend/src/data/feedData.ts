@@ -5,6 +5,7 @@ export interface FeedItem {
   id: number | string;
   type: FeedItemType;
   author: string;
+  creatorId?: string;     // creator profile id, for the follow button
   authorInitial?: string;
   authorBg?: string;
   answerBg?: string;

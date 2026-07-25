@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Grid, BarChart2, ArrowUp, X } from "lucide-react";
+import { Grid, BarChart2, ArrowUp, X, Settings } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import Spinner, { ButtonSpinner } from "@/components/ui/Spinner";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/context/AuthContext";
 import { updateProfile } from "@/lib/profile";
@@ -43,7 +45,7 @@ export default function ProfileScreen({
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+        <Spinner size={32} className="text-orange-500" label="Loading profile" />
       </div>
     );
   }
@@ -136,12 +138,24 @@ export default function ProfileScreen({
               </div>
             </div>
             {isOwnProfile && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="px-5 py-2.5 border border-[#d9d9d9] text-sm font-semibold rounded-xl hover:bg-[#f5f5f5] transition active:scale-95"
-              >
-                Edit Profile
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="px-5 py-2.5 border border-[#d9d9d9] text-sm font-semibold rounded-xl hover:bg-[#f5f5f5] transition active:scale-95"
+                >
+                  Edit Profile
+                </button>
+                {/* Only entry point to settings now that it's out of the nav bars. */}
+                <Link
+                  href="/settings"
+                  aria-label="Settings"
+                  title="Settings"
+                  className="flex items-center gap-2 px-4 py-2.5 border border-[#d9d9d9] text-sm font-semibold rounded-xl hover:bg-[#f5f5f5] transition active:scale-95"
+                >
+                  <Settings className="w-4 h-4" />
+                  <span className="md:hidden lg:inline">Settings</span>
+                </Link>
+              </div>
             )}
           </div>
           <p className="text-sm text-[#5c5c5c] leading-relaxed mt-5">
@@ -273,8 +287,20 @@ export default function ProfileScreen({
             >
               <X className="w-5 h-5 text-[#594137]" />
             </button>
-            <h2 className="text-2xl font-bold mb-8">Edit Profile</h2>
+            <h2 className="text-2xl font-bold mb-6">Edit Profile</h2>
             <div className="space-y-5">
+              <div className="flex justify-center">
+                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-sm bg-[#f5f5f5]">
+                  <Image
+                    src={profile.avatar_url || "/logos/default-avatar.png"}
+                    alt={profile.username}
+                    width={96}
+                    height={96}
+                    className="object-cover w-full h-full"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              </div>
               {saveError && (
                 <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
                   {saveError}
@@ -307,13 +333,29 @@ export default function ProfileScreen({
                   disabled={isSaving}
                 />
               </div>
-              <button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="w-full bg-[#f36710] hover:bg-[#d45600] text-white font-bold py-4 rounded-xl mt-6 shadow-md transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSaving ? "Saving..." : "Save Changes"}
-              </button>
+              <p className="text-xs text-[#8d7165]">
+                Learning interests live under{" "}
+                <Link href="/settings" className="font-semibold underline underline-offset-2">
+                  Settings → Preferred Topics
+                </Link>
+                .
+              </p>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setIsEditing(false)}
+                  disabled={isSaving}
+                  className="flex-1 py-4 rounded-xl font-bold text-[#5c5c5c] hover:bg-[#f5f5f5] transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="flex-1 bg-[#f36710] hover:bg-[#d45600] text-white font-bold py-4 rounded-xl shadow-md transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSaving ? <ButtonSpinner>Saving</ButtonSpinner> : "Save Changes"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

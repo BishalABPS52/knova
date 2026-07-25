@@ -197,6 +197,43 @@ export const spacePosts: SpacePost[] = [
     time: "8h ago",
     upvotes: "1.5k",
     comments: 92
+  },
+  {
+    id: 4,
+    type: "flashcard",
+    question: "What does Big-O notation actually measure?",
+    answer: "Growth rate",
+    subtitle: "How runtime scales as input size grows — not raw speed",
+    theme: "blue",
+    tag: "Algorithms",
+    author: "ByteSized_CS",
+    time: "10h ago",
+    upvotes: "3.4k",
+    comments: 210
+  },
+  {
+    id: 5,
+    type: "mcq",
+    question: "A solution has a pH of 4. How many times more acidic is it than a solution with a pH of 6?",
+    options: ["2 times", "10 times", "100 times", "1000 times"],
+    correctIndex: 2,
+    explanation: "The pH scale is logarithmic, so each whole unit is a 10x change in hydrogen ion concentration. Two units means 10 x 10 = 100 times more acidic.",
+    tags: ["Chemistry", "pH"],
+    author: "MoleMentor",
+    time: "13h ago",
+    upvotes: "982",
+    comments: 57
+  },
+  {
+    id: 6,
+    type: "text",
+    title: "Why Compound Interest Feels Like Magic",
+    content: "Interest earned starts earning its own interest, so balances grow exponentially rather than linearly. At 8% a year, money roughly doubles every nine years — which is why starting a decade earlier often beats saving twice as much later.",
+    tags: ["Finance", "Maths"],
+    author: "Econ_Everyday",
+    time: "1d ago",
+    upvotes: "2.1k",
+    comments: 128
   }
 ];
 

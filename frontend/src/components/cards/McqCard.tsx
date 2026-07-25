@@ -3,11 +3,15 @@
 
 import { useState } from 'react';
 import { FeedActions, ReelActions, CommentsSection } from './Shared';
-import { CheckCircle2, XCircle, MoreHorizontal } from 'lucide-react';
+import { CheckCircle2, XCircle } from 'lucide-react';
+import FollowButton from '@/components/ui/FollowButton';
+import PostMenu from '@/components/ui/PostMenu';
 
 interface McqProps {
   variant?: 'feed' | 'reel' | 'explore' | 'profile';
   author?: string;
+  /** Creator profile id, used by the follow button. */
+  creatorId?: string;
   time?: string;
   category?: string;
   question?: string;
@@ -47,6 +51,7 @@ export default function McqCard(props: McqProps) {
 function MCQFeed({
   id,
   author,
+  creatorId,
   time,
   question,
   options,
@@ -136,21 +141,22 @@ function MCQFeed({
             </div>
           )}
           <div>
-            <p className="font-semibold text-sm text-on-surface">{author || 'Unknown'}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-semibold text-sm text-on-surface">{author || 'Unknown'}</p>
+              <FollowButton creatorId={creatorId} author={author} hidden={isOwner} />
+            </div>
             <p className="text-xs text-outline">{time || 'Just now'}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {isOwner && onDelete && (
-            <button
-              onClick={handleDelete}
-              className="text-red-500 hover:text-red-700 transition-colors"
-            >
-              <span className="material-symbols-outlined text-sm">delete</span>
-            </button>
-          )}
-          <button className="material-symbols-outlined text-outline">more_horiz</button>
-        </div>
+        <PostMenu
+          postId={id}
+          author={author}
+          isOwner={isOwner}
+          onDelete={onDelete ? handleDelete : undefined}
+          onShare={onShare && id ? () => onShare(id) : undefined}
+          onSave={onSave && id ? handleSave : undefined}
+          saved={localUserSaved}
+        />
       </div>
 
       <div className="p-8 bg-white">
@@ -233,12 +239,12 @@ function MCQReel({ question, options, correctIndex, explanation, tags, author, t
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
-    <section className="h-screen w-full snap-start flex items-center justify-center relative">
-      <div className="w-110 h-[90vh] bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex flex-col relative z-20 text-[#1a1a1a]">
-        <div className="flex-1 p-6 flex flex-col justify-start pt-12 overflow-y-auto custom-scrollbar">
-          <h2 className="font-bold text-[22px] leading-tight mb-8">{question || 'Question'}</h2>
+    <section className="h-[100svh] w-full snap-start flex items-center justify-center relative">
+      <div className="w-full h-full bg-white flex flex-col relative z-20 text-[#1a1a1a] md:w-[440px] md:h-[88vh] md:rounded-2xl md:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+        <div className="flex-1 px-5 md:px-6 pt-24 md:pt-10 pb-36 md:pb-32 flex flex-col justify-start overflow-y-auto custom-scrollbar">
+          <h2 className="font-bold text-[22px] leading-tight mb-7">{question || 'Question'}</h2>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {options?.map((opt, i) => {
               const isSelected = selected === i;
               const isCorrect = correctIndex === i;
@@ -312,9 +318,9 @@ function MCQReel({ question, options, correctIndex, explanation, tags, author, t
             </div>
           </div>
         </div>
-      </div>
 
-      <ReelActions upvotes={upvotes || 0} comments={comments || 0} onCommentToggle={onCommentToggle} />
+        <ReelActions upvotes={upvotes || 0} comments={comments || 0} onCommentToggle={onCommentToggle} />
+      </div>
     </section>
   );
 }

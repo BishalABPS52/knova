@@ -258,37 +258,95 @@ export function CommentsSection({ show, postId, onCommentCountChange }: Comments
 }
 
 export function ReelActions({ upvotes, comments, onCommentToggle }: ReelActionsProps) {
-  const [voted, setVoted] = useState(false);
+  const [vote, setVote] = useState<0 | 1 | -1>(0);
+  const [saved, setSaved] = useState(false);
+  // Bumped on every fresh upvote; the value doubles as the React key so rapid
+  // taps restart the burst instead of waiting for the previous one to finish.
+  const [burst, setBurst] = useState(0);
+
+  // Counts can arrive pre-formatted ("1.2k"), so only nudge real numbers.
+  const upvoteLabel =
+    typeof upvotes === 'number' ? upvotes + (vote === 1 ? 1 : 0) : upvotes;
+
+  // A single timer owns teardown: relying on animationend is fragile when the
+  // icon and its ring finish at different times.
+  useEffect(() => {
+    if (!burst) return;
+    const timer = setTimeout(() => setBurst(0), 900);
+    return () => clearTimeout(timer);
+  }, [burst]);
+
+  const handleUpvote = () => {
+    const next = vote === 1 ? 0 : 1;
+    setVote(next);
+    if (next === 1) setBurst((n) => n + 1);   // celebrate the upvote, not the undo
+  };
+
+  // Cards are light, so the rail is white-on-dark to stay legible over any of
+  // them. No backdrop-blur: its backdrop repaints a frame behind the scroll,
+  // which made the rail look like it was drifting away from the card.
+  const button =
+    'w-11 h-11 rounded-full flex items-center justify-center ' +
+    'bg-black/60 text-white ring-1 ring-white/15 ' +
+    'shadow-[0_2px_10px_rgba(0,0,0,0.25)] active:scale-90 transition-colors hover:bg-black/75';
+
+  const count =
+    'text-white text-[11px] font-semibold [text-shadow:0_1px_3px_rgba(0,0,0,0.7)] tabular-nums';
 
   return (
-    <div className="absolute left-[calc(50%+230px)] top-1/2 -translate-y-1/2 flex flex-col gap-4 z-30">
+    <>
+      {/* Upvote celebration: fills the card (which is the screen on mobile),
+          floats up and fades. Never intercepts taps. */}
+      {burst > 0 && (
+        <span key={burst} aria-hidden className="vote-burst">
+          <ArrowUp size={112} strokeWidth={2.5} />
+        </span>
+      )}
+
+      {/* Rendered inside the card element, so it is positioned against the card
+          itself and cannot drift relative to it while the reel scrolls. */}
+      <div className="absolute z-40 right-3 bottom-28 md:bottom-24 flex flex-col items-center gap-4">
       <div className="flex flex-col items-center gap-1">
         <button
-          onClick={() => setVoted(!voted)}
-          className={`w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all text-[#1a1a1a] ${voted ? 'text-[#f36710]' : ''}`}
+          aria-label="Upvote"
+          aria-pressed={vote === 1}
+          onClick={handleUpvote}
+          className={`${button} ${vote === 1 ? 'text-[#ff8a3d]' : ''}`}
         >
-          <ArrowUp size={24} />
+          <ArrowUp size={22} />
         </button>
-        <span className="text-white text-[12px] font-medium drop-shadow-md">{upvotes}</span>
+        <span className={count}>{upvoteLabel}</span>
       </div>
 
-      <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all text-[#1a1a1a] hover:bg-gray-50">
-        <ArrowDown size={24} />
+      <button
+        aria-label="Downvote"
+        aria-pressed={vote === -1}
+        onClick={() => setVote(vote === -1 ? 0 : -1)}
+        className={`${button} ${vote === -1 ? 'text-[#5fd0ff]' : ''}`}
+      >
+        <ArrowDown size={22} />
       </button>
 
-      <div className="flex flex-col items-center gap-1 mt-2">
-        <button
-          onClick={onCommentToggle}
-          className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all text-[#1a1a1a] hover:bg-gray-50"
-        >
-          <MessageSquare size={22} />
+      <div className="flex flex-col items-center gap-1">
+        <button aria-label="Comments" onClick={onCommentToggle} className={button}>
+          <MessageSquare size={20} />
         </button>
-        <span className="text-white text-[12px] font-medium drop-shadow-md">{comments}</span>
+        <span className={count}>{comments}</span>
       </div>
 
-      <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all text-[#1a1a1a] hover:bg-gray-50 mt-2">
-        <Share2 size={22} />
+      <button
+        aria-label={saved ? 'Remove from saved' : 'Save'}
+        aria-pressed={saved}
+        onClick={() => setSaved(!saved)}
+        className={`${button} ${saved ? 'text-[#ff8a3d]' : ''}`}
+      >
+        <Bookmark size={20} fill={saved ? 'currentColor' : 'none'} />
       </button>
-    </div>
+
+      <button aria-label="Share" className={button}>
+        <Share2 size={20} />
+      </button>
+      </div>
+    </>
   );
 }
