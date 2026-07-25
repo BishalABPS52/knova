@@ -3,10 +3,14 @@
 
 import { useState } from 'react';
 import { FeedActions, ReelActions, CommentsSection } from './Shared';
+import FollowButton from '@/components/ui/FollowButton';
+import PostMenu from '@/components/ui/PostMenu';
 
 interface CardProps {
   variant?: 'feed' | 'reel' | 'explore' | 'profile';
   author?: string;
+  /** Creator profile id, used by the follow button. */
+  creatorId?: string;
   time?: string;
   category?: string;
   question?: string;
@@ -45,6 +49,7 @@ export default function FlashCard(props: CardProps) {
 function FlashCardFeed({
   id,
   author,
+  creatorId,
   time,
   question,
   answer,
@@ -126,21 +131,22 @@ function FlashCardFeed({
             {authorInitial || author?.slice(0, 2).toUpperCase()}
           </div>
           <div>
-            <p className="font-semibold text-sm text-on-surface">{author || 'Unknown'}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-semibold text-sm text-on-surface">{author || 'Unknown'}</p>
+              <FollowButton creatorId={creatorId} author={author} hidden={isOwner} />
+            </div>
             <p className="text-xs text-outline">{time || 'Just now'}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {isOwner && onDelete && (
-            <button
-              onClick={handleDelete}
-              className="text-red-500 hover:text-red-700 transition-colors"
-            >
-              <span className="material-symbols-outlined text-sm">delete</span>
-            </button>
-          )}
-          <button className="material-symbols-outlined text-outline">more_horiz</button>
-        </div>
+        <PostMenu
+          postId={id}
+          author={author}
+          isOwner={isOwner}
+          onDelete={onDelete ? handleDelete : undefined}
+          onShare={onShare && id ? () => onShare(id) : undefined}
+          onSave={onSave && id ? handleSave : undefined}
+          saved={localUserSaved}
+        />
       </div>
 
       <div className="relative w-full h-[300px] perspective-1000 group cursor-pointer overflow-hidden" onClick={() => setFlipped(!flipped)}>
@@ -182,8 +188,8 @@ function FlashCardReel({ question, answer, subtitle, theme, tag, author, time, u
   const isOrange = theme === 'orange';
 
   return (
-    <section className="h-screen w-full snap-start flex items-center justify-center relative">
-      <div className="w-[440px] h-[90vh] bg-white rounded-[16px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex flex-col relative z-20">
+    <section className="h-[100svh] w-full snap-start flex items-center justify-center relative">
+      <div className="w-full h-full overflow-hidden bg-white flex flex-col relative z-20 md:w-[440px] md:h-[88vh] md:rounded-2xl md:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className={`h-1/2 flex items-center justify-center p-6 text-center ${isOrange ? 'bg-[#fef3ea]' : 'bg-[#e5f7fd]'}`}>
             <h2 className="text-[#1a1a1a] font-semibold text-[24px] leading-tight">{question || 'Question'}</h2>
@@ -206,7 +212,7 @@ function FlashCardReel({ question, answer, subtitle, theme, tag, author, time, u
 
         <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-2 z-30 pointer-events-none">
           <div className="flex flex-wrap gap-1.5">
-            <span className={`px-[10px] py-[4px] ${isOrange ? 'bg-[#fef3ea]/60 text-[#f36710]' : 'bg-[#e0f6fe]/60 text-[#0080b0]'} rounded-full text-[12px] font-semibold backdrop-blur-sm pointer-events-auto shadow-sm`}>
+            <span className={`px-[10px] py-[4px] ${isOrange ? 'bg-[#fef3ea] text-[#f36710]' : 'bg-[#e0f6fe] text-[#0080b0]'} rounded-full text-[12px] font-semibold pointer-events-auto shadow-sm`}>
               {tag || 'General'}
             </span>
           </div>
@@ -221,9 +227,9 @@ function FlashCardReel({ question, answer, subtitle, theme, tag, author, time, u
             </div>
           </div>
         </div>
-      </div>
 
-      <ReelActions upvotes={upvotes || 0} comments={comments || 0} onCommentToggle={onCommentToggle} />
+        <ReelActions upvotes={upvotes || 0} comments={comments || 0} onCommentToggle={onCommentToggle} />
+      </div>
     </section>
   );
 }
