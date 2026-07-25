@@ -21,7 +21,38 @@ const getErrorMessage = async (response: Response) => {
   return text || `Request failed with status ${response.status}`;
 };
 
-const getApiUrl = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_PORT = process.env.NEXT_PUBLIC_API_PORT || "8000";
+
+// Requests can't hang forever: the session bootstrap (GET /users/me) gates the
+// whole app, so an unreachable API has to fail rather than stall.
+const REQUEST_TIMEOUT_MS = 15_000;
+
+const getApiUrl = () => {
+  const configured = process.env.NEXT_PUBLIC_API_URL;
+  if (configured) return configured.replace(/\/+$/, "");
+
+  // When the page is opened from another device (a phone on the same network),
+  // "localhost" is that device — not the machine running the API. Reuse the host
+  // the page itself was served from so LAN testing works without extra config.
+  if (typeof window !== "undefined") {
+    return `${window.location.protocol}//${window.location.hostname}:${API_PORT}`;
+  }
+
+  return `http://localhost:${API_PORT}`;
+};
+
+// AbortSignal.timeout is unavailable on older mobile Safari; skip the timeout
+// there rather than throwing while building the request.
+const timeoutSignal = () =>
+  typeof AbortSignal !== "undefined" && "timeout" in AbortSignal
+    ? AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+    : undefined;
+
+const isNetworkError = (error: Error) =>
+  error.name === "TimeoutError" ||
+  error.name === "AbortError" ||
+  error.message.includes("Failed to fetch") ||
+  error.message.includes("fetch");
 
 // Auth endpoints must never trigger the refresh-and-retry flow (a 401 from them is
 // a genuine auth failure, and refreshing on /auth/refresh would recurse).
@@ -42,6 +73,7 @@ const refreshSession = (): Promise<boolean> => {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
+      signal: timeoutSignal(),
     })
       .then((res) => res.ok)
       .catch(() => false)
@@ -58,6 +90,7 @@ export const api = async <T>(path: string, options?: RequestInit): Promise<T> =>
   const doFetch = () =>
     fetch(`${apiUrl}${path}`, {
       credentials: "include",
+      signal: timeoutSignal(),
       ...options,
       headers: {
         "Content-Type": "application/json",
@@ -83,11 +116,13 @@ export const api = async <T>(path: string, options?: RequestInit): Promise<T> =>
 
     return response.json();
   } catch (error) {
-    if (error instanceof Error && error.message) {
-      if (error.message.includes("Failed to fetch") || error.message.includes("fetch")) {
-        throw new Error("Unable to reach the server. Please check your connection and try again.");
+    if (error instanceof Error) {
+      if (isNetworkError(error)) {
+        throw new Error(
+          `Unable to reach the server at ${apiUrl}. Check your connection and that the API is running.`,
+        );
       }
-      throw error;
+      if (error.message) throw error;
     }
 
     throw new Error("Unexpected request error");
