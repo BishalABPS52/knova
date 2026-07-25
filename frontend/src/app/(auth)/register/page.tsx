@@ -8,6 +8,7 @@ import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
 import { SignUpSchema } from "@/schemas/signUp";
 import Link from 'next/link';
+import { ButtonSpinner } from "@/components/ui/Spinner";
 
 type SignUpFormData = z.infer<typeof SignUpSchema>;
 
@@ -173,7 +174,7 @@ export default function RegisterPage() {
                 disabled={loading}
                 className="btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {loading ? "Creating account..." : "Create Account"}
+                {loading ? <ButtonSpinner size={20}>Creating account</ButtonSpinner> : "Create Account"}
               </button>
             </div>
 
@@ -336,7 +337,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full h-11 bg-[#f36710] text-white font-bold rounded-lg hover:bg-[#d4580e] transition-colors shadow-sm mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? "Creating account..." : "Create Account"}
+              {loading ? <ButtonSpinner>Creating account</ButtonSpinner> : "Create Account"}
             </button>
           </form>
 

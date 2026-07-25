@@ -5,6 +5,7 @@ import { Search, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { getTopics, Topic } from "@/lib/reference";
+import { ButtonSpinner } from "@/components/ui/Spinner";
 
 const REQUIRED_SELECTIONS = 5;
 
@@ -194,7 +195,13 @@ export default function OnboardingPage() {
                 }
               `}
             >
-              {loading ? "Saving..." : canContinue ? "Continue to Feed" : "Continue"}
+              {loading ? (
+                <ButtonSpinner>Saving</ButtonSpinner>
+              ) : canContinue ? (
+                "Continue to Feed"
+              ) : (
+                "Continue"
+              )}
             </button>
           </div>
         </div>
