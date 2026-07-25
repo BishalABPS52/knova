@@ -24,7 +24,7 @@ export default function Navbar() {
     { name: 'Space', href: '/learnspace', icon: 'school' },
     { name: 'Explore', href: '/explore', icon: 'explore' },
     { name: 'Profile', href: '/profile', icon: 'person' },
-    { name: 'Settings', href: '/settings', icon: 'settings' },
+    // Settings intentionally lives only on the profile page, not in the nav.
   ];
   
   useEffect(() => {
@@ -88,9 +88,24 @@ export default function Navbar() {
 
       <div className="flex items-center gap-4 lg:gap-6">
         <div className="flex items-center gap-4">
-          <button className="material-symbols-outlined text-on-surface-variant hover:text-on-surface transition-colors">
-            notifications
-          </button>
+          <Link
+            href="/notifications"
+            aria-label="Notifications"
+            className={`relative flex items-center justify-center transition-colors ${
+              pathname === '/notifications'
+                ? 'text-orange-500'
+                : 'text-on-surface-variant hover:text-on-surface'
+            }`}
+          >
+            <span
+              className="material-symbols-outlined"
+              style={{ fontVariationSettings: pathname === '/notifications' ? "'FILL' 1" : "'FILL' 0" }}
+            >
+              notifications
+            </span>
+            {/* unread dot — swap for a real count once the endpoint exists */}
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-orange-500 ring-2 ring-surface" />
+          </Link>
           
           {user ? (
             <div
