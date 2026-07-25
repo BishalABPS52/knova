@@ -1,6 +1,23 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
+import { Manrope, Plus_Jakarta_Sans } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
+
+// Self-hosted by next/font (no render-blocking stylesheet, no layout shift).
+// Manrope carries body/UI text; Plus Jakarta Sans is the display face for
+// headings and the brand voice.
+const sans = Manrope({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-sans-manrope",
+});
+
+const display = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-display-jakarta",
+});
 
 export const metadata: Metadata = {
   title: "Knova – Learning Platform for you all.",
@@ -22,14 +39,13 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${sans.variable} ${display.variable}`}
+    >
       <head>
-        {/* Load Material Symbols */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-          rel="stylesheet"
-        />
-        {/* Load other fonts */}
+        {/* Material Symbols is an icon font, so it still comes from Google */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -37,7 +53,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"
         />
       </head>
