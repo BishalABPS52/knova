@@ -51,7 +51,14 @@ export function useAuth() {
         login,
         register,
         logout: context.logout,
-        loading: loading || context.loading,
+        // Submit state for THIS form only. It must not fold in context.loading:
+        // that flag means "still checking whether a session exists" and stays
+        // true until GET /users/me settles, so OR-ing them left the login and
+        // register buttons disabled and spinning from page load whenever the API
+        // was slow or unreachable (e.g. opening the app from a phone).
+        loading,
+        // Session bootstrap, for callers that need to wait on the user lookup.
+        initializing: context.loading,
         error,
     };
 }
