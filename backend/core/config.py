@@ -54,6 +54,31 @@ class Settings(BaseSettings):
     ML_MODELS_PATH: Path = BASE_DIR / "models"
     ML_DATA_PATH: Path = BASE_DIR / "data"
 
+    # External LLM providers for content generation. Google is primary,
+    # OpenRouter is the fallback; a provider with an empty key is skipped.
+    GOOGLE_API_KEY: str = ""
+    GOOGLE_GENAI_MODEL: str = "gemini-2.5-flash"
+    GOOGLE_GENAI_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta"
+
+    OPENROUTER_API_KEY: str = ""
+    OPENROUTER_MODEL: str = "openai/gpt-4o-mini"
+    OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
+    # OpenRouter attributes usage to these (sent as HTTP-Referer / X-Title).
+    OPENROUTER_APP_URL: str = "https://knova.app"
+    OPENROUTER_APP_TITLE: str = "Knova"
+
+    LLM_TIMEOUT_SECONDS: float = 60.0
+    LLM_MAX_ATTEMPTS: int = 2      # per provider, before falling through
+    LLM_TEMPERATURE: float = 0.7
+
+    # MCQ quiz generation (background job fired when a topic is created)
+    QUIZ_AUTOGEN_ENABLED: bool = True
+    QUIZ_MCQ_PER_TOPIC: int = 5
+    QUIZ_MCQ_MAX_PER_REQUEST: int = 20
+    # System account generated questions are attributed to (created on first run).
+    QUIZ_BOT_EMAIL: str = "quizbot@knova.internal"
+    QUIZ_BOT_USERNAME: str = "Knova Quiz Bot"
+
 
 @lru_cache
 def get_settings():

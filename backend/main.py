@@ -71,10 +71,12 @@ from src.reference.router import router as ref_router
 from src.users.router import router as users_router
 from src.posts.router import router as posts_router
 from src.recommendation.router import router as feed_router
+from src.quiz.router import router as quiz_router
 
 base_router.include_router(auth_router, prefix="/auth")
 base_router.include_router(onboarding_router)
 base_router.include_router(ref_router, prefix="/reference")
+base_router.include_router(quiz_router, prefix="/quiz")
 base_router.include_router(users_router, prefix="/users")
 # Feed router must be registered before the posts router so /posts/feed matches
 # before the /posts/{post_id} catch-all.
