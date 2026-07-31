@@ -58,10 +58,16 @@ async def save_user_interests(
         ).scalars().all()
     )
 
+    # Keyed by resolved topic id, not name: `names` is de-duped case-sensitively
+    # while resolution is case-insensitive, so ["physics", "Physics"] would
+    # otherwise insert the same (user_id, topic_id) twice and trip uq_user_topic.
+    seen_topic_ids = set(existing_topic_ids)
+
     for name in names:
         topic = topic_by_lower[name.lower()]
-        if topic.id in existing_topic_ids:
+        if topic.id in seen_topic_ids:
             continue
+        seen_topic_ids.add(topic.id)
         db.add(
             UserTopicInterest(
                 user_id=user.id,
