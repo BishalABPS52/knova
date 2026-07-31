@@ -3,7 +3,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import get_settings
-from src.deps import get_db
+from src.deps import get_db, is_authenticated
 from src.reference import service as ref_service
 from src.quiz import tasks as quiz_tasks
 from .schemas import (
@@ -25,9 +25,13 @@ async def add_topic(
     body: TopicCreateRequest,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
+    token_payload: dict = Depends(is_authenticated),
 ):
     """Create a topic. MCQ generation for it runs after the response is sent, so
-    the caller isn't blocked on the LLM round-trip (see src/quiz/tasks.py)."""
+    the caller isn't blocked on the LLM round-trip (see src/quiz/tasks.py).
+
+    Authenticated: creating a topic spends provider credits. The topic list
+    (GET) stays public for the onboarding picker."""
     settings = get_settings()
     topic = await ref_service.create_topic(body.name, body.parent_id, db)
 
@@ -50,6 +54,7 @@ async def add_topics_batch(
     body: TopicBatchCreateRequest,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
+    token_payload: dict = Depends(is_authenticated),
 ):
     """Bulk topic creation. Duplicates/invalid parents are reported in `skipped`;
     every newly created topic gets its quiz generated in one background task that

@@ -4,7 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, s
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import get_settings
-from src.deps import get_db
+from src.deps import get_db, is_authenticated
 
 from . import service, tasks
 from .llm import LLMError
@@ -23,8 +23,11 @@ async def generate_topic_quiz(
     background_tasks: BackgroundTasks,
     count: int | None = Query(None, ge=1, le=20, description="defaults to QUIZ_MCQ_PER_TOPIC"),
     force: bool = Query(False, description="generate even if the topic already has MCQs"),
+    token_payload: dict = Depends(is_authenticated),
 ):
-    """Re-run generation for an existing topic (the same job topic creation fires)."""
+    """Re-run generation for an existing topic (the same job topic creation fires).
+
+    Authenticated: every call spends provider credits."""
     settings = get_settings()
     background_tasks.add_task(
         tasks.generate_quiz_for_topic, topic_id, count=count, force=force
@@ -46,6 +49,7 @@ async def generate_topic_quiz_now(
     count: int | None = Query(None, ge=1, le=20),
     force: bool = Query(False),
     db: AsyncSession = Depends(get_db),
+    token_payload: dict = Depends(is_authenticated),
 ):
     """Synchronous generation — blocks on the LLM call. Intended for debugging the
     provider setup, where the failure reason should reach the caller."""
