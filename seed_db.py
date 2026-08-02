@@ -435,7 +435,12 @@ async def seed_interactions(session, user_id, post_id, post_type):
         return
 
     df = read_csv("knova_interactions.csv")
-    inter_rows, vote_rows = [], []
+    # interactions is one row per (user, post) — uq_interaction_pair enforces it.
+    # The CSV contains ~119 duplicate pairs, so collapse them here, keeping the
+    # most engaged one. Same rule the interaction_telemetry migration applies to
+    # already-seeded databases.
+    best: dict[tuple, dict] = {}
+    vote_rows = []
     vote_seen = set()
     for r in df.to_dict("records"):
         u = user_id.get(to_int(r["user_id"]))
@@ -447,13 +452,19 @@ async def seed_interactions(session, user_id, post_id, post_type):
         is_mcq = ctype == ContentType.MCQ
         is_card = ctype == ContentType.FLASHCARD
         dwell_ratio = to_float(r["dwell_ratio_actual"], 0.0) or 0.0
+        dwell_sec = to_float(r["actual_dwell_sec"], 0.0) or 0.0
 
-        inter_rows.append({
+        key = (u, p)
+        prior = best.get(key)
+        if prior is not None and prior["dwell_time_sec"] >= dwell_sec:
+            continue
+
+        best[key] = {
             "id": uuid.uuid4(),
             "user_id": u,
             "post_id": p,
             "surface": InteractionSurface.FEED,
-            "dwell_time_sec": to_float(r["actual_dwell_sec"], 0.0),
+            "dwell_time_sec": dwell_sec,
             "completion_ratio": min(1.0, max(0.0, dwell_ratio)),
             "is_completed": dwell_ratio >= 0.9,
             "engagement_weight": to_float(r["engagement_score"], 0.0),
@@ -461,13 +472,23 @@ async def seed_interactions(session, user_id, post_id, post_type):
             "quiz_correct": to_bool(r["quiz_correct"]) if is_mcq else None,
             "card_flipped": to_bool(r["card_flipped"]) if is_card else None,
             "flip_time_sec": to_float(r["flip_time_sec"]) if is_card else None,
-        })
+            # The generator recorded these at "serve" time, so they are genuine
+            # point-in-time snapshots — carry them over rather than letting the
+            # export recompute them from current state.
+            "is_interest_match": to_bool(r["is_interest_match"]),
+            "creator_followed": to_bool(r["creator_followed"]),
+            "difficulty_gap": to_float(r["difficulty_gap"]),
+            # These were observed interactions, not merely served impressions.
+            "view_count": 1,
+            "session_dwell_sec": 0.0,
+        }
 
         value = 1 if to_bool(r["upvote"]) else -1 if to_bool(r["downvote"]) else 0
         if value and (u, p) not in vote_seen:
             vote_seen.add((u, p))
             vote_rows.append({"id": uuid.uuid4(), "user_id": u, "post_id": p, "value": value})
 
+    inter_rows = list(best.values())
     n_i = await bulk_insert(session, Interaction, inter_rows)
     n_v = await bulk_insert(session, Vote, vote_rows)
     print(f"  interactions: +{n_i}   votes: +{n_v}")

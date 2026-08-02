@@ -68,6 +68,49 @@ FEATURE_MEDIANS = {
 # Cold-start fill for als_score (mean, not median — matches the notebook's als_mean).
 ALS_MEAN = 0.04676
 
+# Identifies the artifact set that produced a ranking, stamped onto every
+# interaction row. Bump this whenever backend/models/*.pkl is replaced, so
+# telemetry can be attributed to the model that actually served it.
+MODEL_VERSION = "synthetic-v1"
+
+# --- Telemetry contract (must mirror ml/notebook/synthetic_data.py) ----------
+# Kept here so capture, export and the training pipeline cannot drift apart.
+
+# A post counts as "seen" (and is filtered out of future feeds) only once the
+# user actually looked at it. Below this, a scroll-past stays eligible —
+# otherwise a 0.3s glimpse would burn the post permanently.
+SEEN_DWELL_SEC = 2.0
+
+# dwell_ratio at/above which a post is considered read to completion.
+COMPLETION_RATIO_THRESHOLD = 0.9
+
+# engagement_score = upvote*0.3 + quiz_correct*0.3
+#                  + min(dwell_ratio, 1.5)/1.5*0.2 + is_interest_match*0.2
+# Stored as Interaction.engagement_weight and used as the ALS implicit-feedback
+# strength. Verbatim from synthetic_data.py:606.
+ENGAGEMENT_W_UPVOTE = 0.3
+ENGAGEMENT_W_QUIZ_CORRECT = 0.3
+ENGAGEMENT_W_DWELL = 0.2
+ENGAGEMENT_W_INTEREST = 0.2
+ENGAGEMENT_DWELL_CAP = 1.5
+
+
+def engagement_score(
+    *,
+    upvote: bool = False,
+    quiz_correct: bool = False,
+    dwell_ratio: float = 0.0,
+    is_interest_match: bool = False,
+) -> float:
+    """Training-parity engagement score in 0..1."""
+    capped = min(max(dwell_ratio, 0.0), ENGAGEMENT_DWELL_CAP)
+    return (
+        (ENGAGEMENT_W_UPVOTE if upvote else 0.0)
+        + (ENGAGEMENT_W_QUIZ_CORRECT if quiz_correct else 0.0)
+        + (capped / ENGAGEMENT_DWELL_CAP) * ENGAGEMENT_W_DWELL
+        + (ENGAGEMENT_W_INTEREST if is_interest_match else 0.0)
+    )
+
 # --- Retrieval / assembly hyperparameters (from notebook serving cell 9) ---
 CANDIDATE_POOL_SIZE = 60          # unseen candidates retrieved per request
 INTEREST_SHARE = 0.45             # pool share reserved for interest-topic content

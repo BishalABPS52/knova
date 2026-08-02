@@ -66,19 +66,35 @@ def _cap_diversity(df: pd.DataFrame, n_slots: int) -> pd.DataFrame:
 
 
 def assemble_feed(df: pd.DataFrame, n_ranked: int = C.N_RANKED) -> list[dict]:
-    """Return an ordered list of {post_id, source} for the feed."""
+    """Return an ordered list of {post_id, source, final_score} for the feed.
+
+    `source` and `final_score` are the ranking provenance for this slot; the feed
+    service snapshots them onto the impression row so the served ordering can be
+    evaluated offline later.
+    """
     if df.empty or models.ranker is None or models.scaler is None:
         return []
 
     df = _score(df).reset_index(drop=True)
+    scores = dict(zip(df["post_id"], df["final_score"]))
     picked: list[dict] = []
     used: set = set()
+
+    def _pick(post_id, source: str) -> None:
+        score = scores.get(post_id)
+        picked.append(
+            {
+                "post_id": post_id,
+                "source": source,
+                "final_score": float(score) if score is not None else None,
+            }
+        )
+        used.add(post_id)
 
     # 1. Followed-creator slots (chronological, guaranteed, bypass ranker)
     followed = df[df["followed"]].sort_values("published_at", ascending=False)
     for _, row in followed.head(C.N_FOLLOWED_SLOTS).iterrows():
-        picked.append({"post_id": row["post_id"], "source": "followed_creator"})
-        used.add(row["post_id"])
+        _pick(row["post_id"], "followed_creator")
 
     # 2. Exploit slots — softmax-sampled from the diversity-capped remaining pool
     remaining = df[~df["post_id"].isin(used)]
@@ -91,8 +107,7 @@ def assemble_feed(df: pd.DataFrame, n_ranked: int = C.N_RANKED) -> list[dict]:
         chosen = np.random.choice(exploit_pool.index, size=k, replace=False, p=weights)
         for idx in chosen:
             row = exploit_pool.loc[idx]
-            picked.append({"post_id": row["post_id"], "source": "ranked"})
-            used.add(row["post_id"])
+            _pick(row["post_id"], "ranked")
 
     # 3. Explore slots — Thompson sampling over the still-unused candidates
     explore_pool = df[~df["post_id"].isin(used)]
@@ -106,14 +121,12 @@ def assemble_feed(df: pd.DataFrame, n_ranked: int = C.N_RANKED) -> list[dict]:
         for ext_id in pick_explore(cands, C.N_EXPLORE_SLOTS):
             pid = by_ext.get(ext_id)
             if pid is not None and pid not in used:
-                picked.append({"post_id": pid, "source": "explore_thompson"})
-                used.add(pid)
+                _pick(pid, "explore_thompson")
 
     # 4. Backfill from best remaining by final_score
     if len(picked) < n_ranked:
         backfill = df[~df["post_id"].isin(used)].sort_values("final_score", ascending=False)
         for _, row in backfill.head(n_ranked - len(picked)).iterrows():
-            picked.append({"post_id": row["post_id"], "source": "backfill"})
-            used.add(row["post_id"])
+            _pick(row["post_id"], "backfill")
 
     return picked[:n_ranked]

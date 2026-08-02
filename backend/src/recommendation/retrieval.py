@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ml import constants as C
@@ -51,6 +51,7 @@ class CandidateRow:
     downvotes: int
     published_at: datetime | None
     creator_id: UUID
+    difficulty: float
     tier: str = "random"
     followed: bool = False
 
@@ -94,11 +95,12 @@ def _base_columns():
         Post.downvote_count,
         Post.published_at,
         Post.creator_id,
+        Post.difficulty,
     )
 
 
 def _row(record, tier: str, followed: bool) -> CandidateRow:
-    (pid, ext_id, topic, ctype, authority, up, down, pub, creator_id) = record
+    (pid, ext_id, topic, ctype, authority, up, down, pub, creator_id, difficulty) = record
     return CandidateRow(
         post_id=pid,
         ext_id=int(ext_id) if ext_id is not None else None,
@@ -109,13 +111,25 @@ def _row(record, tier: str, followed: bool) -> CandidateRow:
         downvotes=int(down or 0),
         published_at=pub,
         creator_id=creator_id,
+        difficulty=float(difficulty if difficulty is not None else 0.5),
         tier=tier,
         followed=followed,
     )
 
 
 async def retrieve_candidates(db: AsyncSession, ctx: UserContext) -> list[CandidateRow]:
-    seen_subq = select(Interaction.post_id).where(Interaction.user_id == ctx.user_id)
+    # "Seen" means actually looked at, not merely served. The feed writes an
+    # impression row for everything it returns, so filtering on row existence
+    # alone would burn a post the user scrolled straight past.
+    seen_subq = select(Interaction.post_id).where(
+        Interaction.user_id == ctx.user_id,
+        or_(
+            Interaction.dwell_time_sec >= C.SEEN_DWELL_SEC,
+            Interaction.is_completed.is_(True),
+            Interaction.quiz_answered.is_(True),
+            Interaction.card_flipped.is_(True),
+        ),
+    )
 
     chosen: dict[UUID, CandidateRow] = {}
 
