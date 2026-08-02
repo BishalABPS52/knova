@@ -1,7 +1,7 @@
 // app/page.tsx
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { Plus, Loader2 } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 import CreatorCard from '@/components/cards/CreatorCard';
@@ -12,7 +12,9 @@ import { FeedSkeleton } from '@/components/ui/Skeleton';
 import ShareModal from '@/components/ui/ShareModal';
 import CreatePostModal from '@/components/ui/CreatePostModal';
 import { feedItems, FeedItem } from '@/data/feedData';
+import TrackedCard from '@/components/feed/TrackedCard';
 import { PostService } from '@/lib/posts';
+import { telemetry } from '@/lib/telemetry';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
@@ -265,9 +267,32 @@ export default function HomePage() {
     }
   };
 
+  // Engagement telemetry. Disabled on the mock fallback: those ids aren't real
+  // posts, and one non-UUID would make the server reject the whole batch.
+  const trackingEnabled = !useMockData;
+
+  const handleQuizAnswer = useCallback((postId: string, correct: boolean) => {
+    if (!trackingEnabled) return;
+    telemetry.trackQuiz(postId, correct);
+  }, [trackingEnabled]);
+
+  const handleFlip = useCallback((postId: string) => {
+    if (!trackingEnabled) return;
+    telemetry.trackFlip(postId);
+  }, [trackingEnabled]);
+
+  const handleExpand = useCallback((postId: string) => {
+    if (!trackingEnabled) return;
+    telemetry.trackScroll(postId, 1);
+  }, [trackingEnabled]);
+
+  // Client-side navigation off the feed fires neither pagehide nor
+  // visibilitychange, so the buffered batch has to be pushed on unmount.
+  useEffect(() => () => { void telemetry.flush(); }, []);
+
   // Render the feed items
   const renderFeedItems = () => {
-    return feed.map((item: FeedItem) => {
+    return feed.map((item: FeedItem, index: number) => {
       // Common props for all card types
       const commonProps = {
         id: item.id,
@@ -289,38 +314,54 @@ export default function HomePage() {
         isOwner: item.isOwner,
       };
 
+      let card: ReactNode = null;
+
       if (item.type === 'flashcard') {
-        return (
+        card = (
           <FlashCard
-            key={item.id}
             {...commonProps}
             question={item.question}
             answer={item.answer}
             answerBg={item.answerBg || 'bg-[#f36710]'}
+            onFlip={handleFlip}
           />
         );
       } else if (item.type === 'text') {
-        return (
+        card = (
           <TextCard
-            key={item.id}
             {...commonProps}
             title={item.title || 'Untitled'}
             content={item.content || ''}
+            onExpand={handleExpand}
           />
         );
       } else if (item.type === 'mcq') {
-        return (
+        card = (
           <McqCard
-            key={item.id}
             {...commonProps}
             question={item.question}
             options={item.options}
             correctIndex={item.correctIndex}
             explanation={item.explanation}
+            onQuizAnswer={handleQuizAnswer}
           />
         );
       }
-      return null;
+
+      if (!card) return null;
+
+      // feed_position is the index in the rendered list, which is the slot the
+      // reader actually saw — not the rank the server assigned.
+      return (
+        <TrackedCard
+          key={item.id}
+          postId={String(item.id)}
+          feedPosition={index}
+          enabled={trackingEnabled}
+        >
+          {card}
+        </TrackedCard>
+      );
     });
   };
 

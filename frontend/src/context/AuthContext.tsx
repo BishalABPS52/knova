@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { login as apiLogin, register as apiRegister, logout as apiLogout } from "@/lib/auth";
+import { telemetry } from "@/lib/telemetry";
 import { api } from "@/lib/api";
 import { AuthUser, LoginRequest, RegisterRequest } from "@/types/authentication";
 
@@ -67,6 +68,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const logout = async () => {
+        // Dispatch what we have before the cookie goes away, then clear the
+        // buffer: the tab's session id outlives the login, so cumulative dwell
+        // left behind would be re-sent under whoever signs in next. Not awaited —
+        // the keepalive fetch is already in flight, and logout must not hang on
+        // telemetry.
+        void telemetry.flush();
+        telemetry.reset();
+
         try {
             await apiLogout();
         } catch (err) {
