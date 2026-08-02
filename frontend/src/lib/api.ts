@@ -27,7 +27,7 @@ const API_PORT = process.env.NEXT_PUBLIC_API_PORT || "8000";
 // whole app, so an unreachable API has to fail rather than stall.
 const REQUEST_TIMEOUT_MS = 15_000;
 
-const getApiUrl = () => {
+export const getApiUrl = () => {
   const configured = process.env.NEXT_PUBLIC_API_URL;
   if (configured) return configured.replace(/\/+$/, "");
 

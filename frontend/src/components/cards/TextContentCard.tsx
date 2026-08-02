@@ -28,6 +28,8 @@ interface TextProps {
   onSave?: (id: string) => Promise<void>;
   onComment?: (id: string, body: string) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
+  /** Telemetry: fired when the reader expands a truncated post. */
+  onExpand?: (id: string) => void;
   id?: string | number;
   userVote?: number;
   userSaved?: boolean;
@@ -59,6 +61,7 @@ function TextFeed({
   onVote,
   onSave,
   onDelete,
+  onExpand,
   userVote,
   userSaved,
   isOwner,
@@ -122,6 +125,14 @@ function TextFeed({
   const shouldTruncate = content && content.length > 300;
   const displayContent = shouldTruncate && !expanded ? content.slice(0, 300) + '...' : content;
 
+  // Expanding is the only in-card signal that the whole post was read; collapsing
+  // again says nothing, so it isn't reported.
+  const handleExpandToggle = () => {
+    const expanding = !expanded;
+    setExpanded(expanding);
+    if (expanding && id) onExpand?.(String(id));
+  };
+
   return (
     <div className="glass-card rounded-2xl overflow-hidden hover-lift transition-all duration-300">
       <div className="p-8 pb-4 bg-white">
@@ -154,7 +165,7 @@ function TextFeed({
         </p>
         {shouldTruncate && (
           <button 
-            onClick={() => setExpanded(!expanded)}
+            onClick={handleExpandToggle}
             className="font-bold hover:underline flex items-center gap-1 mb-4 text-primary"
           >
             {expanded ? 'Show less' : 'Read more...'}

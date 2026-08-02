@@ -31,6 +31,8 @@ interface CardProps {
   onSave?: (id: string) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
   onComment?: (id: string, body: string) => Promise<void>;
+  /** Telemetry: fired when the answer is revealed, not when flipping back. */
+  onFlip?: (id: string) => void;
   id?: string | number;
   userVote?: number;
   userSaved?: boolean;
@@ -63,6 +65,7 @@ function FlashCardFeed({
   onVote,
   onSave,
   onDelete,
+  onFlip,
   userVote,
   userSaved,
   isOwner,
@@ -123,6 +126,13 @@ function FlashCardFeed({
     }
   };
 
+  // Only the reveal is a learning signal; flipping back to the question isn't.
+  const handleFlip = () => {
+    const revealing = !flipped;
+    setFlipped(revealing);
+    if (revealing && id) onFlip?.(String(id));
+  };
+
   return (
     <div className="glass-card rounded-2xl overflow-hidden hover-lift transition-all duration-300">
       <div className="p-6 border-b border-orange-100 bg-gradient-to-r from-orange-50 via-white to-orange-50 flex justify-between items-center">
@@ -149,7 +159,7 @@ function FlashCardFeed({
         />
       </div>
 
-      <div className="relative w-full h-[300px] perspective-1000 group cursor-pointer overflow-hidden" onClick={() => setFlipped(!flipped)}>
+      <div className="relative w-full h-[300px] perspective-1000 group cursor-pointer overflow-hidden" onClick={handleFlip}>
         <div className={`FlashCard-inner relative w-full h-full text-center flex flex-col items-center justify-center ${flipped ? 'is-flipped' : ''}`} style={{ transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)', transformStyle: 'preserve-3d' }}>
           <div className="FlashCard-front absolute inset-0 p-12 flex flex-col items-center justify-center bg-gradient-to-br from-white to-surface-container-low" style={{ backfaceVisibility: 'hidden' }}>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">{question || 'Question'}</h2>

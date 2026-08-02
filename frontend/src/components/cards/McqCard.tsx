@@ -33,6 +33,8 @@ interface McqProps {
   onSave?: (id: string) => Promise<void>;
   onComment?: (id: string, body: string) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
+  /** Telemetry: fired once, on the reader's first answer. */
+  onQuizAnswer?: (id: string, correct: boolean) => void;
   id?: string | number;
   userVote?: number;
   userSaved?: boolean;
@@ -67,6 +69,7 @@ function MCQFeed({
   onVote,
   onSave,
   onDelete,
+  onQuizAnswer,
   userVote,
   userSaved,
   isOwner,
@@ -124,6 +127,14 @@ function MCQFeed({
     if (!id || !onDelete) return;
     if (confirm('Are you sure you want to delete this post?')) {
       await onDelete(id as string);
+    }
+  };
+
+  // The options disable themselves once answered, so this reports exactly once.
+  const handleAnswer = (index: number) => {
+    setSelected(index);
+    if (id && correctIndex !== undefined) {
+      onQuizAnswer?.(String(id), index === correctIndex);
     }
   };
 
@@ -188,7 +199,7 @@ function MCQFeed({
               <button
                 key={opt}
                 disabled={selected !== null}
-                onClick={() => setSelected(i)}
+                onClick={() => handleAnswer(i)}
                 className={`flex items-center gap-4 p-4 rounded-xl border transition-all text-left group ${btnClasses}`}
               >
                 <span className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold transition-colors ${markerClasses}`}>
