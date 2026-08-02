@@ -305,6 +305,13 @@ class PostTag(Base):
 # The denormalized counters on Post are aggregates of this table.
 
 class Interaction(Base):
+    """One row per (user, post) pair, upserted as telemetry arrives.
+
+    Not an append-only event log: the ML training contract
+    (ml/data/knova_interactions.csv) is one row per user x content, so events are
+    merged into a single row -- dwell accumulates, boolean signals OR together.
+    `uq_interaction_pair` is what makes that upsert possible.
+    """
     __tablename__ = "interactions"
 
     id: Mapped[uuid.UUID] = uuid_pk()
@@ -316,7 +323,7 @@ class Interaction(Base):
     feed_position: Mapped[int | None] = mapped_column(Integer, nullable=True)  # rank slot the user saw it at
 
     # engagement telemetry
-    dwell_time_sec: Mapped[float] = mapped_column(Float, default=0.0)          # time the post was on screen
+    dwell_time_sec: Mapped[float] = mapped_column(Float, default=0.0)          # lifetime total, across sessions
     scroll_depth: Mapped[float | None] = mapped_column(Float, nullable=True)   # 0..1 for long text posts
     completion_ratio: Mapped[float] = mapped_column(Float, default=0.0)        # dwell / est_read_seconds, clamped 0..1
     is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -331,11 +338,39 @@ class Interaction(Base):
     card_flipped: Mapped[bool | None] = mapped_column(Boolean, nullable=True)    # flashcard: did the user flip
     flip_time_sec: Mapped[float | None] = mapped_column(Float, nullable=True)    # flashcard: dwell before flip
 
+    # --- idempotent dwell accounting ---
+    # The client reports dwell as an absolute cumulative value for the current
+    # session, not a delta, so a retried/replayed batch is a no-op. To keep the
+    # lifetime total correct we remember this session's contribution separately:
+    #   same session  -> dwell = dwell - session_dwell + incoming
+    #   new session   -> dwell = dwell + incoming
+    session_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    session_dwell_sec: Mapped[float] = mapped_column(Float, default=0.0)
+    # Number of client flushes that have reported this pair. Read as a gate, not
+    # a view tally: 0 means the feed served this post but the client never
+    # confirmed it was on screen, and those rows stay out of the training export.
+    view_count: Mapped[int] = mapped_column(Integer, default=0)
+
+    # --- point-in-time snapshots, written server-side when the post is served ---
+    # These depend on mutable state (interests, follow graph, estimated_expertise).
+    # Recomputing them at export time would leak future state into training rows,
+    # so they are frozen here instead.
+    is_interest_match: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    creator_followed: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    difficulty_gap: Mapped[float | None] = mapped_column(Float, nullable=True)  # post.difficulty - user skill
+
+    # --- ranking provenance, for offline evaluation of the served ordering ---
+    rank_source: Mapped[str | None] = mapped_column(String(24), nullable=True)  # followed_creator|ranked|explore_thompson|backfill
+    ranker_score: Mapped[float | None] = mapped_column(Float, nullable=True)    # final_score at serve time
+    model_version: Mapped[str | None] = mapped_column(String(32), nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    last_event_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     post: Mapped["Post"] = relationship(back_populates="interactions")
 
     __table_args__ = (
+        UniqueConstraint("user_id", "post_id", name="uq_interaction_pair"),
         Index("ix_interactions_user_created", "user_id", "created_at"),
         Index("ix_interactions_post_created", "post_id", "created_at"),
     )

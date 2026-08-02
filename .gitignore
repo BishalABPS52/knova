@@ -94,3 +94,14 @@ ml/wandb/
 .DS_Store
 Thumbs.db
 *.pem
+
+# ── AI tooling: Claude Code / MCP / Serena ──────────────────────────
+# Per-developer agent config, local permissions, and language-server caches.
+# None of it is reproducible across machines, so it stays untracked.
+.claude/
+**/.claude/
+CLAUDE.md
+.mcp.json
+**/.mcp.json
+.serena/
+**/.serena/

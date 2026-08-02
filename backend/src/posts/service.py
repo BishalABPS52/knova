@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.db.models import ContentType, Post, SavedPost, Vote
+from src.telemetry import service as telemetry_service
 from .schemas import (
     CreatorBrief,
     FlashcardData,
@@ -252,6 +253,10 @@ async def cast_vote(
             post.downvote_count += 1
             post.upvote_count = max(0, post.upvote_count - 1)
 
+    # A vote is an engagement signal in its own right: make sure it produces a
+    # training row even when the post was never served through the feed.
+    await telemetry_service.sync_engagement(db, user_id, post_id)
+
     await db.commit()
 
     # Mutating the row makes the DB regenerate `updated_at` (onupdate=func.now()),
@@ -291,6 +296,8 @@ async def toggle_save(db: AsyncSession, user_id: UUID, post_id: UUID) -> SaveRes
         await db.delete(existing)
         post.save_count = max(0, post.save_count - 1)
         saved = False
+
+    await telemetry_service.sync_engagement(db, user_id, post_id)
 
     # Read the counter before commit — commit can expire attributes, and a
     # post-commit read would lazy-load (sync IO) in this async context.

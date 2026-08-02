@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ml import constants as C
@@ -14,6 +14,7 @@ router = APIRouter(tags=["feed"])
 
 @router.get("/feed", response_model=PostListResponse)
 async def get_feed(
+    background_tasks: BackgroundTasks,
     size: int = Query(C.N_RANKED, ge=1, le=50),
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(is_authenticated),
@@ -21,8 +22,10 @@ async def get_feed(
     """Personalized recommendation feed: interest + tag-adjacent + followed-creator
     retrieval, ALS collaborative filtering, LightGBM ranking, and Thompson-sampled
     exploration. Each call re-runs retrieval excluding already-seen posts, so paging
-    is just repeated requests."""
+    is just repeated requests.
+
+    Serving also logs an impression per slot in the background."""
     user = await db.get(User, uuid.UUID(token_payload["sub"]))
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    return await service.get_feed(db, user, size)
+    return await service.get_feed(db, user, size, background_tasks)
