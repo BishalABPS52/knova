@@ -16,3 +16,6 @@ def setup_logging():
     logging.getLogger("watchfiles").setLevel(logging.WARNING)
     logging.getLogger("passlib").setLevel(logging.WARNING)
     
+def get_logger(module: str = 'MODULE'):
+    return logging.getLogger(module)
+    

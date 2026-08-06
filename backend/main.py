@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import get_settings
-from core.logging import setup_logging
+from core.logging import setup_logging, get_logger
 from ml.loader import models
 
 setting = get_settings()
@@ -26,6 +26,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 setup_logging()
+logger = get_logger(__name__)
 
 # Configure CORS
 app.add_middleware(
@@ -60,8 +61,19 @@ def home():
 
 @base_router.get("/health")
 def health_check():
+    from .core.cache import get_redis
+    
+    cache_health = None
+    try:
+        cache = get_redis()
+        cache.set("health", "Ok", ex=900)
+        cache_health = cache.get("health")
+    except Exception as e:
+        logger.warning(f"Cache is not working: {e}")
+        
     return {
-        "state": "Running..."
+        "state": "Running...",
+        "cache": "Healthy" if cache_health else "Unhealthy"
     }
         
     
