@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, literal, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ml import constants as C
@@ -100,7 +100,7 @@ def _base_columns():
 
 
 def _row(record, tier: str, followed: bool) -> CandidateRow:
-    (pid, ext_id, topic, ctype, authority, up, down, pub, creator_id, difficulty) = record
+    (pid, ext_id, topic, ctype, authority, up, down, pub, creator_id, difficulty) = record[:10]
     return CandidateRow(
         post_id=pid,
         ext_id=int(ext_id) if ext_id is not None else None,
@@ -131,13 +131,20 @@ async def retrieve_candidates(db: AsyncSession, ctx: UserContext) -> list[Candid
         ),
     )
 
-    chosen: dict[UUID, CandidateRow] = {}
-
-    async def _fetch(*, tier, followed, limit, topic_names=None, creator_ids=None, randomize=True):
+    def tier_stmt(*, tier, followed, limit, prio, topic_names=None, creator_ids=None, randomize=True):
+        """One SELECT for a tier, tagged with literal tier/followed/priority markers
+        so the combined UNION result knows each row's provenance. All tiers are
+        fetched in a single round trip (this DB is WAN-hosted, so round trips
+        dominate)."""
         if limit <= 0:
-            return
+            return None
         stmt = (
-            select(*_base_columns())
+            select(
+                *_base_columns(),
+                literal(tier).label("_tier"),
+                literal(followed).label("_followed"),
+                literal(prio).label("_prio"),
+            )
             .join(CreatorProfile, CreatorProfile.id == Post.creator_id)
             .outerjoin(Topic, Topic.id == Post.topic_id)
             .where(
@@ -146,8 +153,6 @@ async def retrieve_candidates(db: AsyncSession, ctx: UserContext) -> list[Candid
                 Post.id.notin_(seen_subq),
             )
         )
-        if chosen:
-            stmt = stmt.where(Post.id.notin_(list(chosen.keys())))
         if topic_names:
             stmt = stmt.where(Topic.name.in_(list(topic_names)))
         if creator_ids:
@@ -157,38 +162,77 @@ async def retrieve_candidates(db: AsyncSession, ctx: UserContext) -> list[Candid
             stmt = stmt.order_by(func.random())
         else:
             stmt = stmt.order_by(Post.published_at.desc().nullslast())
-        stmt = stmt.limit(limit)
-
-        for rec in (await db.execute(stmt)).all():
-            row = _row(rec, tier, followed)
-            if row.post_id not in chosen:
-                chosen[row.post_id] = row
+        return stmt.limit(limit)
 
     # 1. Followed-creator reserve (chronological)
+    stmts: list = []
     if ctx.followed_creator_ids:
-        await _fetch(
+        stmt = tier_stmt(
             tier="followed",
             followed=True,
+            prio=0,
             limit=C.FOLLOWED_RESERVE,
             creator_ids=ctx.followed_creator_ids,
             randomize=False,
         )
-
-    remaining_budget = C.CANDIDATE_POOL_SIZE - len(chosen)
+        if stmt is not None:
+            stmts.append(stmt)
 
     # 2. Interest tier
-    if ctx.interest_topics and remaining_budget > 0:
-        n_interest = round(remaining_budget * C.INTEREST_SHARE)
-        await _fetch(tier="interest", followed=False, limit=n_interest, topic_names=ctx.interest_topics)
+    if ctx.interest_topics:
+        n_interest = round(C.CANDIDATE_POOL_SIZE * C.INTEREST_SHARE)
+        stmt = tier_stmt(
+            tier="interest",
+            followed=False,
+            prio=1,
+            limit=n_interest,
+            topic_names=ctx.interest_topics,
+        )
+        if stmt is not None:
+            stmts.append(stmt)
 
     # 3. Tag-adjacent tier
     adjacent = C.tag_adjacent_topics(ctx.interest_topics)
-    if adjacent and len(chosen) < C.CANDIDATE_POOL_SIZE:
-        n_tag = round(remaining_budget * C.TAG_ADJACENT_SHARE)
-        await _fetch(tier="tag_adjacent", followed=False, limit=n_tag, topic_names=adjacent)
+    if adjacent:
+        n_tag = round(C.CANDIDATE_POOL_SIZE * C.TAG_ADJACENT_SHARE)
+        stmt = tier_stmt(
+            tier="tag_adjacent",
+            followed=False,
+            prio=2,
+            limit=n_tag,
+            topic_names=adjacent,
+        )
+        if stmt is not None:
+            stmts.append(stmt)
 
     # 4. Random exploration fill
-    if len(chosen) < C.CANDIDATE_POOL_SIZE:
-        await _fetch(tier="random", followed=False, limit=C.CANDIDATE_POOL_SIZE - len(chosen))
+    stmt = tier_stmt(
+        tier="random",
+        followed=False,
+        prio=3,
+        limit=C.CANDIDATE_POOL_SIZE,
+    )
+    if stmt is not None:
+        stmts.append(stmt)
+
+    if not stmts:
+        return []
+
+    query = stmts[0] if len(stmts) == 1 else stmts[0].union_all(*stmts[1:])
+    rows = (await db.execute(query)).all()
+
+    # Tier priority decides who wins a duplicate and who survives the pool cap, so
+    # sort by the explicit `_prio` marker: UNION ALL happens to emit rows in branch
+    # order today, but Postgres doesn't promise it (a parallel Append could
+    # interleave arms). The sort is stable, so each tier keeps its own
+    # random()/chronological ordering from the DB.
+    rows = sorted(rows, key=lambda rec: rec._prio)
+
+    chosen: dict[UUID, CandidateRow] = {}
+    for rec in rows:
+        if len(chosen) >= C.CANDIDATE_POOL_SIZE:
+            break
+        row = _row(rec, rec._tier, bool(rec._followed))
+        chosen.setdefault(row.post_id, row)
 
     return list(chosen.values())
