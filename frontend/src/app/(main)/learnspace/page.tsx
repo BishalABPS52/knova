@@ -115,6 +115,11 @@ export default function SpaceReel() {
   const [cards, setCards] = useState<SpaceItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  // The post the panel is pinned to. Deliberately NOT the active card: opening
+  // the panel (or the mobile keyboard appearing) nudges the reel, the scroll
+  // observer advances activeIndex, and a panel following it would re-point at
+  // the next card and refetch — hiding the comment the reader just submitted.
+  const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [useMockData, setUseMockData] = useState(false);
@@ -131,7 +136,13 @@ export default function SpaceReel() {
   // and a single non-UUID makes the server reject the entire batch.
   const trackingEnabled = !useMockData;
 
-  const activePost = cards[activeIndex];
+  const commentsPost = cards.find((card) => String(card.id) === commentsPostId);
+
+  /** Open the panel on a specific card; the same card's button closes it again. */
+  const toggleComments = useCallback((postId: string) => {
+    setCommentsOpen((open) => (commentsPostId === postId ? !open : true));
+    setCommentsPostId(postId);
+  }, [commentsPostId]);
 
   /** Scroll a card into view by index (clamped). */
   const goTo = useCallback((index: number) => {
@@ -378,7 +389,7 @@ export default function SpaceReel() {
             const type = post.type.toLowerCase();
             const cardProps = {
               variant: 'reel' as const,
-              onCommentToggle: () => setCommentsOpen((open) => !open),
+              onCommentToggle: () => toggleComments(String(post.id)),
               onVote: handleVote,
               onSave: handleSave,
               onQuizAnswer: handleQuizAnswer,
@@ -444,7 +455,7 @@ export default function SpaceReel() {
           <h3 className="font-bold text-lg font-display">
             Comments{' '}
             <span className="text-outline font-normal tabular-nums">
-              {activePost?.comments ?? 0}
+              {commentsPost?.comments ?? 0}
             </span>
           </h3>
           <button
@@ -465,11 +476,11 @@ export default function SpaceReel() {
           ) : (
             <CommentsSection
               show={commentsOpen}
-              postId={activePost ? String(activePost.id) : undefined}
+              postId={commentsPostId ?? undefined}
               onCommentCountChange={(delta) =>
                 setCards((prev) =>
-                  prev.map((card, index) =>
-                    index === activeIndex
+                  prev.map((card) =>
+                    String(card.id) === commentsPostId
                       ? { ...card, comments: Math.max(0, card.comments + delta) }
                       : card,
                   ),
