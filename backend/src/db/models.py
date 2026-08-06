@@ -413,5 +413,7 @@ class Comment(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
  
     post: Mapped["Post"] = relationship(back_populates="comments")
-    
- 
+    # Author, for serializing a comment with its username/avatar. Mapping-only
+    # (the FK column already exists), so this needs no migration.
+    user: Mapped["User"] = relationship()
+
