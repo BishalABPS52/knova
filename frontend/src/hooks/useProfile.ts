@@ -1,20 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getProfile } from "@/lib/profile";
+import { useCallback, useEffect, useState } from "react";
 import { Profile } from "@/types/profile";
 
-export function useProfile(username: string) {
+/**
+ * Fetch a profile through a caller-supplied fetcher (getMyProfile for the
+ * signed-in user, getProfile for a public handle). Handles the lifecycle that a
+ * real app needs: cancels stale responses when the input changes or the
+ * component unmounts, and resets state between fetches.
+ */
+export function useProfile(fetcher: () => Promise<Profile>) {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const fetchProfile = async () => {
+    const fetchProfile = useCallback(async () => {
+        setLoading(true);
+        setError("");
         try {
-            setLoading(true);
-            const data = await getProfile(username);
+            const data = await fetcher();
             setProfile(data);
         } catch (err) {
+            setProfile(null);
             if (err instanceof Error) {
                 setError(err.message);
             } else {
@@ -23,13 +30,35 @@ export function useProfile(username: string) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [fetcher]);
 
     useEffect(() => {
-        if (username) {
-            fetchProfile();
-        }
-    }, [username]);
+        let cancelled = false;
+
+        setLoading(true);
+        setError("");
+
+        fetcher()
+            .then((data) => {
+                if (!cancelled) setProfile(data);
+            })
+            .catch((err) => {
+                if (cancelled) return;
+                setProfile(null);
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError("Unknown error");
+                }
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [fetcher]);
 
     return {
         profile,
