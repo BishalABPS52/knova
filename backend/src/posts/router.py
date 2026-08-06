@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.cache import (
@@ -13,7 +13,15 @@ from core.cache import (
 )
 from src.deps import get_db, get_optional_user, is_authenticated
 from . import service
-from .schemas import PostListResponse, PostResponse, SaveResponse, VoteRequest
+from .schemas import (
+    CommentCreate,
+    CommentListResponse,
+    CommentResponse,
+    PostListResponse,
+    PostResponse,
+    SaveResponse,
+    VoteRequest,
+)
 
 router = APIRouter(tags=["posts"])
 
@@ -127,3 +135,52 @@ async def save(
     await cache_delete_prefix(f"feed:{user_id}:")
     await invalidate_post_related(post_id)
     return result
+
+
+@router.get("/{post_id}/comments", response_model=CommentListResponse)
+async def list_comments(
+    post_id: uuid.UUID,
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+):
+    """Comments are public: reading them doesn't require a session."""
+    return await service.list_comments(db, post_id, page, size)
+
+
+@router.post(
+    "/{post_id}/comments",
+    response_model=CommentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_comment(
+    post_id: uuid.UUID,
+    body: CommentCreate,
+    db: AsyncSession = Depends(get_db),
+    token_payload: dict = Depends(is_authenticated),
+):
+    user_id = uuid.UUID(token_payload["sub"])
+    result = await service.create_comment(
+        db, user_id, post_id, body.body, body.parent_comment_id
+    )
+    # comment_count changed, so the post detail and every list showing it are
+    # stale; commenting is also an engagement signal, so drop this user's feed.
+    await cache_delete_prefix(f"feed:{user_id}:")
+    await invalidate_post_related(post_id)
+    return result
+
+
+# Deleting is keyed by comment id alone, so it lives outside the /posts prefix.
+comments_router = APIRouter(tags=["posts"])
+
+
+@comments_router.delete("/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_comment(
+    comment_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    token_payload: dict = Depends(is_authenticated),
+):
+    user_id = uuid.UUID(token_payload["sub"])
+    post_id = await service.delete_comment(db, user_id, comment_id)
+    await cache_delete_prefix(f"feed:{user_id}:")
+    await invalidate_post_related(post_id)

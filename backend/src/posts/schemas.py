@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class UserBrief(BaseModel):
@@ -78,6 +78,37 @@ class PostListResponse(BaseModel):
     page: int
     size: int
     has_next: bool
+
+
+class CommentResponse(BaseModel):
+    id: UUID
+    post_id: UUID
+    user_id: UUID
+    parent_comment_id: UUID | None = None
+    body: str
+    created_at: datetime
+
+    user: UserBrief | None = None
+    # Populated for top-level comments only; threading is one level deep.
+    replies: list["CommentResponse"] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CommentListResponse(BaseModel):
+    # `total` counts top-level comments, matching what `items` pages over.
+    items: list[CommentResponse]
+    total: int
+    page: int
+    size: int
+    has_next: bool
+
+
+class CommentCreate(BaseModel):
+    body: str = Field(min_length=1, max_length=5000)
+    # Replying to a reply attaches to its top-level parent: threading is flat
+    # beyond one level, which is what the clients render.
+    parent_comment_id: UUID | None = None
 
 
 class VoteRequest(BaseModel):

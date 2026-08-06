@@ -5,9 +5,11 @@ from sqlalchemy import func, literal, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.db.models import ContentType, Post, SavedPost, Vote
+from src.db.models import Comment, ContentType, Post, SavedPost, Vote
 from src.telemetry import service as telemetry_service
 from .schemas import (
+    CommentListResponse,
+    CommentResponse,
     CreatorBrief,
     FlashcardData,
     McqData,
@@ -309,3 +311,163 @@ async def toggle_save(db: AsyncSession, user_id: UUID, post_id: UUID) -> SaveRes
     new_count = post.save_count
     await db.commit()
     return SaveResponse(post_id=post_id, saved=saved, save_count=new_count)
+
+
+# --------------------------------------------------------------------------
+# Comments
+# --------------------------------------------------------------------------
+
+def _serialize_comment(
+    comment: Comment, replies: list[Comment] | None = None
+) -> CommentResponse:
+    return CommentResponse(
+        id=comment.id,
+        post_id=comment.post_id,
+        user_id=comment.user_id,
+        parent_comment_id=comment.parent_comment_id,
+        body=comment.body,
+        created_at=comment.created_at,
+        user=UserBrief.model_validate(comment.user) if comment.user else None,
+        replies=[_serialize_comment(reply) for reply in (replies or [])],
+    )
+
+
+async def list_comments(
+    db: AsyncSession, post_id: UUID, page: int, size: int
+) -> CommentListResponse:
+    """Newest-first page of top-level comments, each with all of its replies.
+
+    Replies are not paged: threading is one level deep and reply counts are small,
+    so a second query for the whole page's children is cheaper than paging them.
+    """
+    exists = (
+        await db.execute(select(Post.id).where(Post.id == post_id))
+    ).scalar_one_or_none()
+    if exists is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+
+    top_level = [
+        Comment.post_id == post_id,
+        Comment.parent_comment_id.is_(None),
+    ]
+    total = (
+        await db.execute(select(func.count()).select_from(Comment).where(*top_level))
+    ).scalar_one()
+
+    roots = (
+        (
+            await db.execute(
+                select(Comment)
+                .options(selectinload(Comment.user))
+                .where(*top_level)
+                .order_by(Comment.created_at.desc())
+                .offset((page - 1) * size)
+                .limit(size)
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+    replies_by_parent: dict[UUID, list[Comment]] = {}
+    if roots:
+        replies = (
+            (
+                await db.execute(
+                    select(Comment)
+                    .options(selectinload(Comment.user))
+                    .where(Comment.parent_comment_id.in_([c.id for c in roots]))
+                    .order_by(Comment.created_at.asc())
+                )
+            )
+            .scalars()
+            .all()
+        )
+        for reply in replies:
+            replies_by_parent.setdefault(reply.parent_comment_id, []).append(reply)
+
+    return CommentListResponse(
+        items=[_serialize_comment(c, replies_by_parent.get(c.id)) for c in roots],
+        total=total,
+        page=page,
+        size=size,
+        has_next=(page * size) < total,
+    )
+
+
+async def create_comment(
+    db: AsyncSession, user_id: UUID, post_id: UUID, body: str, parent_comment_id: UUID | None
+) -> CommentResponse:
+    """Add a comment (or a reply) and keep `Post.comment_count` in sync."""
+    post = (
+        await db.execute(select(Post).where(Post.id == post_id))
+    ).scalar_one_or_none()
+    if post is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+
+    if parent_comment_id is not None:
+        parent = (
+            await db.execute(
+                select(Comment).where(
+                    Comment.id == parent_comment_id, Comment.post_id == post_id
+                )
+            )
+        ).scalar_one_or_none()
+        if parent is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Parent comment not found"
+            )
+        # Flatten deeper threads onto the top-level ancestor: clients render one
+        # level of replies, so a reply-to-a-reply would otherwise be invisible.
+        parent_comment_id = parent.parent_comment_id or parent.id
+
+    comment = Comment(
+        post_id=post_id, user_id=user_id, parent_comment_id=parent_comment_id, body=body
+    )
+    db.add(comment)
+    post.comment_count += 1
+
+    # A comment is an engagement signal in its own right, like a vote or a save.
+    await telemetry_service.sync_engagement(db, user_id, post_id)
+
+    await db.commit()
+
+    # Re-select with the author eager-loaded: the commit expired the instance, and
+    # a lazy load of `user` here would be sync IO in an async context.
+    created = (
+        await db.execute(
+            select(Comment).options(selectinload(Comment.user)).where(Comment.id == comment.id)
+        )
+    ).scalar_one()
+    return _serialize_comment(created)
+
+
+async def delete_comment(db: AsyncSession, user_id: UUID, comment_id: UUID) -> UUID:
+    """Delete a comment the caller authored. Returns its post id so the caller can
+    invalidate the right caches."""
+    comment = (
+        await db.execute(select(Comment).where(Comment.id == comment_id))
+    ).scalar_one_or_none()
+    if comment is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
+    if comment.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Not your comment"
+        )
+
+    # Replies cascade in the DB (ondelete="CASCADE"), so they must come off the
+    # counter too — count them before the row goes away.
+    reply_count = (
+        await db.execute(
+            select(func.count()).select_from(Comment).where(
+                Comment.parent_comment_id == comment_id
+            )
+        )
+    ).scalar_one()
+
+    post_id = comment.post_id
+    post = (await db.execute(select(Post).where(Post.id == post_id))).scalar_one()
+    await db.delete(comment)
+    post.comment_count = max(0, post.comment_count - (1 + reply_count))
+    await db.commit()
+    return post_id
