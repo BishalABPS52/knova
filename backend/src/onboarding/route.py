@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.deps import get_db, is_authenticated
 from src.db.models import User
+from core.cache import cache_delete_prefix
 
 from .schemas import (
     OnboardingRequest,
@@ -36,6 +37,10 @@ async def save_interests(
         user,
         request.interests,
     )
+
+    # New interests change the personalized feed, so drop those caches.
+    await cache_delete_prefix(f"interests:{user_id}")
+    await cache_delete_prefix(f"feed:{user_id}:")
 
     return OnboardingResponse(
         message="Interests saved successfully."
