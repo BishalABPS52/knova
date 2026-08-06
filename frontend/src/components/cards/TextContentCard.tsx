@@ -1,6 +1,6 @@
 // components/cards/TextContentCard.tsx
 'use client';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FeedActions, ReelActions, CommentsSection } from './Shared';
 import FollowButton from '@/components/ui/FollowButton';
 import PostMenu from '@/components/ui/PostMenu';
@@ -28,8 +28,12 @@ interface TextProps {
   onSave?: (id: string) => Promise<void>;
   onComment?: (id: string, body: string) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
-  /** Telemetry: fired when the reader expands a truncated post. */
-  onExpand?: (id: string) => void;
+  /**
+   * Telemetry: how far through the body the reader got, 0..1. The feed variant
+   * reports a single expand (depth omitted, i.e. read in full); the reel variant
+   * reports real scroll progress through its body.
+   */
+  onExpand?: (id: string, depth?: number) => void;
   id?: string | number;
   userVote?: number;
   userSaved?: boolean;
@@ -185,16 +189,34 @@ function TextFeed({
         userSaved={localUserSaved}
         postId={id as string}
       />
-      <CommentsSection show={showComments} />
+      <CommentsSection show={showComments} postId={id} />
     </div>
   );
 }
 
-function TextReel({ title, content, tags, author, time, upvotes, comments, onCommentToggle }: TextProps) {
+function TextReel({ id, title, content, tags, author, time, upvotes, comments, onCommentToggle, userVote, userSaved, onVote, onSave, onExpand }: TextProps) {
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  // Reading progress is the reel's equivalent of the feed's "expand": a body
+  // short enough not to overflow was seen in full, so it counts as depth 1.
+  const reportDepth = useCallback(() => {
+    const body = bodyRef.current;
+    if (!body || !id) return;
+    const scrollable = body.scrollHeight - body.clientHeight;
+    onExpand?.(String(id), scrollable > 0 ? body.scrollTop / scrollable : 1);
+  }, [id, onExpand]);
+
+  // Fires once on mount so a non-overflowing card still reports depth 1.
+  useEffect(reportDepth, [reportDepth]);
+
   return (
     <section className="h-[100svh] w-full snap-start flex items-center justify-center relative">
       <div className="w-full h-full bg-white flex flex-col relative z-20 text-[#1a1a1a] md:w-[440px] md:h-[88vh] md:rounded-2xl md:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
-        <div className="flex-1 px-6 pt-24 pb-36 md:px-8 md:pt-10 md:pb-28 flex flex-col justify-center items-center text-center overflow-y-auto custom-scrollbar">
+        <div
+          ref={bodyRef}
+          onScroll={reportDepth}
+          className="flex-1 px-6 pt-24 pb-36 md:px-8 md:pt-10 md:pb-28 flex flex-col justify-center items-center text-center overflow-y-auto custom-scrollbar"
+        >
           <h2 className="font-bold text-[24px] leading-tight mb-6">{title || 'Untitled'}</h2>
           <p className="text-on-surface-variant text-[16px] leading-relaxed">{content || 'No content'}</p>
         </div>
@@ -219,7 +241,16 @@ function TextReel({ title, content, tags, author, time, upvotes, comments, onCom
           </div>
         </div>
 
-        <ReelActions upvotes={upvotes || 0} comments={comments || 0} onCommentToggle={onCommentToggle} />
+        <ReelActions
+          upvotes={upvotes || 0}
+          comments={comments || 0}
+          onCommentToggle={onCommentToggle}
+          postId={id}
+          userVote={userVote}
+          userSaved={userSaved}
+          onVote={onVote}
+          onSave={onSave}
+        />
       </div>
     </section>
   );

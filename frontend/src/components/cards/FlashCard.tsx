@@ -188,14 +188,22 @@ function FlashCardFeed({
         userSaved={localUserSaved}
         postId={id as string}
       />
-      <CommentsSection show={showComments} />
+      <CommentsSection show={showComments} postId={id} />
     </div>
   );
 }
 
-function FlashCardReel({ question, answer, subtitle, theme, tag, author, time, upvotes, comments, onCommentToggle }: CardProps) {
+function FlashCardReel({ id, question, answer, subtitle, theme, tag, author, time, upvotes, comments, onCommentToggle, userVote, userSaved, onVote, onSave, onFlip }: CardProps) {
   const [flipped, setFlipped] = useState(false);
   const isOrange = theme === 'orange';
+
+  // Only the first reveal is a signal; flipping back and forth isn't new
+  // information. Reported outside the state updater, which StrictMode may
+  // invoke twice in development.
+  const handleFlip = () => {
+    if (!flipped && id) onFlip?.(String(id));
+    setFlipped((wasFlipped) => !wasFlipped);
+  };
 
   return (
     <section className="h-[100svh] w-full snap-start flex items-center justify-center relative">
@@ -204,7 +212,7 @@ function FlashCardReel({ question, answer, subtitle, theme, tag, author, time, u
           <div className={`h-1/2 flex items-center justify-center p-6 text-center ${isOrange ? 'bg-[#fef3ea]' : 'bg-[#e5f7fd]'}`}>
             <h2 className="text-[#1a1a1a] font-semibold text-[24px] leading-tight">{question || 'Question'}</h2>
           </div>
-          <div className="flex-1 perspective-1000 cursor-pointer" onClick={() => setFlipped(!flipped)}>
+          <div className="flex-1 perspective-1000 cursor-pointer" onClick={handleFlip}>
             <div className={`relative w-full h-full transition-transform duration-600 transform-style-3d ${flipped ? 'rotate-y-180' : ''}`} style={{ transition: 'transform 0.6s', transformStyle: 'preserve-3d' }}>
               <div className="absolute inset-0 bg-white p-6 flex flex-col items-center justify-center backface-hidden" style={{ backfaceVisibility: 'hidden' }}>
                 <span className={`material-symbols-outlined text-[36px] mb-2 ${isOrange ? 'text-[#f36710]' : 'text-[#00afef]'}`}>touch_app</span>
@@ -238,7 +246,16 @@ function FlashCardReel({ question, answer, subtitle, theme, tag, author, time, u
           </div>
         </div>
 
-        <ReelActions upvotes={upvotes || 0} comments={comments || 0} onCommentToggle={onCommentToggle} />
+        <ReelActions
+          upvotes={upvotes || 0}
+          comments={comments || 0}
+          onCommentToggle={onCommentToggle}
+          postId={id}
+          userVote={userVote}
+          userSaved={userSaved}
+          onVote={onVote}
+          onSave={onSave}
+        />
       </div>
     </section>
   );

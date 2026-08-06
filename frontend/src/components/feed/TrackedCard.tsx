@@ -11,6 +11,12 @@ interface TrackedCardProps {
   feedPosition?: number;
   surface?: TelemetrySurface;
   enabled?: boolean;
+  /**
+   * Classes for the wrapper. Needed by scroll-snap surfaces like the learnspace
+   * reel, where the wrapper becomes the scroller's child and has to carry the
+   * snap/height rules the card would otherwise own.
+   */
+  className?: string;
   children: ReactNode;
 }
 
@@ -26,8 +32,9 @@ export default function TrackedCard({
   feedPosition,
   surface = 'feed',
   enabled = true,
+  className,
   children,
 }: TrackedCardProps) {
   const ref = useDwellTracker({ postId, feedPosition, surface, enabled });
-  return <div ref={ref}>{children}</div>;
+  return <div ref={ref} className={className}>{children}</div>;
 }
