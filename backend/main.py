@@ -112,7 +112,8 @@ from src.auth.router import router as auth_router
 from src.onboarding.route import router as onboarding_router
 from src.reference.router import router as ref_router
 from src.users.router import router as users_router
-from src.posts.router import comments_router, router as posts_router
+from src.posts.router import comments_router
+from src.posts.router import router as posts_router
 from src.recommendation.router import router as feed_router
 from src.quiz.router import router as quiz_router
 from src.telemetry.router import router as telemetry_router
