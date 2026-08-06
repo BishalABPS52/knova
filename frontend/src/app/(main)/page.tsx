@@ -368,13 +368,13 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-screen">
-      <main className={`flex-1 ${isMobile ? 'px-4 py-6 pb-25' : 'px-4 md:px-[64px] py-12 pt-32 pb-12'}`}>
+      <main className={`flex-1 ${isMobile ? 'px-4 py-4 pb-[100px]' : 'px-4 md:px-[64px] py-12 pt-32 pb-12'}`}>
         <CreatorCard onCreateClick={() => setCreateModalOpen(true)} />
 
         {isLoading ? (
           <FeedSkeleton />
         ) : (
-          <div className={`${isMobile ? 'flex flex-col gap-6' : 'max-w-4xl mx-auto space-y-8'}`}>
+          <div className={`${isMobile ? 'flex flex-col gap-6 mt-6' : 'max-w-4xl mx-auto space-y-8'}`}>
             {feed.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-500">No posts yet. Be the first to create one!</p>

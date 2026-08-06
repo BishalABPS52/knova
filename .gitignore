@@ -71,16 +71,6 @@ __pycache__/
 *.pyo
 *.egg-info/
 
-# ── ML-specific ────────────────────────────────────────────────────
-ml/.ipynb_checkpoints/
-ml/*.pkl
-ml/*.h5
-ml/*.pt
-ml/*.pth
-ml/models/*.bin
-ml/data/raw/
-ml/mlruns/
-ml/wandb/
 
 # ── Editor & IDE ───────────────────────────────────────────────────
 .vscode/*
