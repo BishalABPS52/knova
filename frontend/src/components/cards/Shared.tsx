@@ -27,6 +27,12 @@ interface ReelActionsProps {
   upvotes: number | string;
   comments: number;
   onCommentToggle?: () => void;
+  postId?: string | number;
+  /** Server state, so a vote/save survives a reload instead of resetting to 0. */
+  userVote?: number;
+  userSaved?: boolean;
+  onVote?: (id: string, value: number) => Promise<void>;
+  onSave?: (id: string) => Promise<void>;
 }
 
 export function FeedActions({
@@ -123,12 +129,21 @@ export function CommentsSection({ show, postId, onCommentCountChange }: Comments
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Point the panel at a different post and everything it holds is stale. The
+  // reel keeps ONE panel mounted and swaps postId as the reader scrolls, so
+  // without this reset it would show the first card's comments forever while
+  // submitting replies against whichever card is on screen.
+  useEffect(() => {
+    setComments([]);
+    setHasLoaded(false);
+  }, [postId]);
+
   useEffect(() => {
     if (show && postId && !hasLoaded) {
       loadComments();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [show, postId]);
+  }, [show, postId, hasLoaded]);
 
   const loadComments = async () => {
     if (!postId) return;
@@ -257,9 +272,20 @@ export function CommentsSection({ show, postId, onCommentCountChange }: Comments
   );
 }
 
-export function ReelActions({ upvotes, comments, onCommentToggle }: ReelActionsProps) {
-  const [vote, setVote] = useState<0 | 1 | -1>(0);
-  const [saved, setSaved] = useState(false);
+export function ReelActions({
+  upvotes,
+  comments,
+  onCommentToggle,
+  postId,
+  userVote,
+  userSaved,
+  onVote,
+  onSave,
+}: ReelActionsProps) {
+  // Optimistic local state seeded from the server, so the rail reacts instantly
+  // and still reflects reality on reload. A failed write rolls back.
+  const [vote, setVote] = useState<0 | 1 | -1>((userVote as 0 | 1 | -1) || 0);
+  const [saved, setSaved] = useState(!!userSaved);
   // Bumped on every fresh upvote; the value doubles as the React key so rapid
   // taps restart the burst instead of waiting for the previous one to finish.
   const [burst, setBurst] = useState(0);
@@ -276,10 +302,39 @@ export function ReelActions({ upvotes, comments, onCommentToggle }: ReelActionsP
     return () => clearTimeout(timer);
   }, [burst]);
 
+  // The API toggles: sending the value that's already set clears it, so setting
+  // and clearing both send the same value.
+  const persistVote = async (target: 1 | -1) => {
+    if (!postId || !onVote) return;
+    const previous = vote;
+    try {
+      await onVote(String(postId), target);
+    } catch {
+      setVote(previous);   // the handler surfaces the error; just undo the guess
+    }
+  };
+
   const handleUpvote = () => {
     const next = vote === 1 ? 0 : 1;
     setVote(next);
     if (next === 1) setBurst((n) => n + 1);   // celebrate the upvote, not the undo
+    void persistVote(1);
+  };
+
+  const handleDownvote = () => {
+    setVote(vote === -1 ? 0 : -1);
+    void persistVote(-1);
+  };
+
+  const handleSave = async () => {
+    const next = !saved;
+    setSaved(next);
+    if (!postId || !onSave) return;
+    try {
+      await onSave(String(postId));
+    } catch {
+      setSaved(!next);
+    }
   };
 
   // Cards are light, so the rail is white-on-dark to stay legible over any of
@@ -321,7 +376,7 @@ export function ReelActions({ upvotes, comments, onCommentToggle }: ReelActionsP
       <button
         aria-label="Downvote"
         aria-pressed={vote === -1}
-        onClick={() => setVote(vote === -1 ? 0 : -1)}
+        onClick={handleDownvote}
         className={`${button} ${vote === -1 ? 'text-[#5fd0ff]' : ''}`}
       >
         <ArrowDown size={22} />
@@ -337,7 +392,7 @@ export function ReelActions({ upvotes, comments, onCommentToggle }: ReelActionsP
       <button
         aria-label={saved ? 'Remove from saved' : 'Save'}
         aria-pressed={saved}
-        onClick={() => setSaved(!saved)}
+        onClick={handleSave}
         className={`${button} ${saved ? 'text-[#ff8a3d]' : ''}`}
       >
         <Bookmark size={20} fill={saved ? 'currentColor' : 'none'} />
