@@ -1,4 +1,6 @@
 // lib/api-client.ts
+
+
 const getErrorMessage = async (response: Response) => {
   const contentType = response.headers.get("content-type") || "";
 

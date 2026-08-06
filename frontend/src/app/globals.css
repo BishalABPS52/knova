@@ -610,3 +610,11 @@ h6,
   gap: 6px;
   opacity: 0.8;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
