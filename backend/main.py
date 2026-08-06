@@ -15,7 +15,39 @@ setting = get_settings()
 async def lifespan(app: FastAPI):
     # Warm-load the recommender artifacts so the first /feed request isn't slow.
     models.load()
+    # Warm up the Redis pool at boot; failures just trip the cache's circuit
+    # breaker, so the API still serves from the DB until Redis recovers.
+    from core.cache import init_redis
+
+    await init_redis()
+
+    # Establish DB connections at boot (the DB is WAN-hosted, so the first
+    # connect can cost seconds; warm it so the first request isn't slow).
+    await _warm_db()
     yield
+
+
+_WARM_DB_CONNECTIONS = 4
+
+
+async def _warm_db() -> None:
+    import asyncio
+
+    from sqlalchemy import text
+
+    from src.db.session import AsyncSessionLocal
+
+    async def _ping() -> None:
+        async with AsyncSessionLocal() as db:
+            await db.execute(text("select 1"))
+
+    # Concurrently, so each session checks out a *different* pooled connection —
+    # sequential pings would reuse the first one and warm nothing else.
+    results = await asyncio.gather(
+        *(_ping() for _ in range(_WARM_DB_CONNECTIONS)), return_exceptions=True
+    )
+    for exc in (r for r in results if isinstance(r, BaseException)):
+        logger.warning("db warm-up failed: %s", exc)
 
 
 app = FastAPI(
@@ -60,17 +92,16 @@ def home():
 
 
 @base_router.get("/health")
-def health_check():
-    from .core.cache import get_redis
-    
-    cache_health = None
-    try:
-        cache = get_redis()
-        cache.set("health", "Ok", ex=900)
-        cache_health = cache.get("health")
-    except Exception as e:
-        logger.warning(f"Cache is not working: {e}")
-        
+async def health_check():
+    # Go through the cache helpers rather than the raw client: they already
+    # handle "Redis disabled or cooling down" (returning None) and route any
+    # failure through the circuit breaker, so health probes can't log a
+    # confusing AttributeError or bypass the breaker.
+    from core.cache import cache_get, cache_set
+
+    await cache_set("health", "Ok", 900)
+    cache_health = await cache_get("health")
+
     return {
         "state": "Running...",
         "cache": "Healthy" if cache_health else "Unhealthy"
