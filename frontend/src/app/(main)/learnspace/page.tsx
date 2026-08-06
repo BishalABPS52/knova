@@ -7,20 +7,104 @@ import { ChevronUp, X, Bell } from 'lucide-react';
 import FlashCard from '@/components/cards/FlashCard';
 import McqCard from '@/components/cards/McqCard';
 import TextCard from '@/components/cards/TextContentCard';
+import { CommentsSection } from '@/components/cards/Shared';
 import { spacePosts } from '@/data/mockData';
+import { useAuth } from '@/hooks/useAuth';
+import { PostService } from '@/lib/posts';
+import type { Post } from '@/types/post';
 
-/** One more page of cards. Ids stay unique so React keys don't collide. */
-function nextBatch(batch: number) {
-  return spacePosts.map((post) => ({ ...post, id: post.id + batch * 1000 }));
+/** One card in the reel, shaped the same way the reel card variants expect. */
+interface SpaceItem {
+  id: string | number;
+  type: string;
+  author: string;
+  time: string;
+  upvotes: string | number;
+  comments: number;
+  theme: string;
+  tag?: string;
+  tags?: string[];
+  question?: string;
+  answer?: string;
+  subtitle?: string;
+  title?: string;
+  content?: string;
+  options?: string[];
+  correctIndex?: number;
+  explanation?: string;
+}
+
+const postService = new PostService();
+
+/** Compact, human-friendly timestamp for a post ("2h ago", "3d ago"). */
+function relativeTime(iso?: string): string {
+  if (!iso) return 'Just now';
+  const delta = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(delta / 60_000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+/** Convert a backend Post into the shape the reel variants consume. */
+function mapPostToSpaceItem(post: Post, index: number): SpaceItem {
+  // A short note is just a text card in this surface.
+  const type = post.content_type === 'short_note' ? 'text' : post.content_type;
+
+  const base: SpaceItem = {
+    id: post.id,
+    type,
+    author: post.creator?.user?.username || 'Unknown',
+    time: relativeTime(post.published_at),
+    upvotes: post.upvote_count || 0,
+    comments: post.comment_count || 0,
+    tags: post.tags || [],
+    tag: post.tags?.[0] || 'General',
+    // Alternate themes only for visual rhythm; the answer side is the real content.
+    theme: index % 2 === 0 ? 'orange' : 'blue',
+  };
+
+  if (type === 'flashcard') {
+    return {
+      ...base,
+      question: post.flashcard?.front || 'Question',
+      answer: post.flashcard?.back || 'Answer',
+      subtitle: post.title || undefined,
+    };
+  }
+
+  if (type === 'mcq') {
+    return {
+      ...base,
+      question: post.mcq?.question,
+      options: post.mcq?.options,
+      correctIndex: post.mcq?.correct_index,
+      explanation: post.mcq?.explanation,
+    };
+  }
+
+  return { ...base, title: post.title || 'Untitled', content: post.body };
 }
 
 export default function SpaceReel() {
   const router = useRouter();
+  const { user } = useAuth();
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const [cards, setCards] = useState(spacePosts);
+  const [cards, setCards] = useState<SpaceItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [useMockData, setUseMockData] = useState(false);
+
+  const seenIdsRef = useRef<Set<string>>(new Set());
+  // Guards the endless loader against concurrent/dup requests and stops it once
+  // a fetch returns nothing new (the feed serves the same top ranks repeatedly).
+  const loadingMoreRef = useRef(false);
+  const exhaustedRef = useRef(false);
 
   const activePost = cards[activeIndex];
 
@@ -30,6 +114,62 @@ export default function SpaceReel() {
     if (!scroller) return;
     const target = Math.max(0, Math.min(scroller.children.length - 1, index));
     scroller.children[target]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
+  const loadBatch = useCallback(async () => {
+    if (exhaustedRef.current || loadingMoreRef.current) return;
+    loadingMoreRef.current = true;
+    try {
+      const response = await postService.getFeed({ size: 15 });
+      const fresh = response.items
+        .map(mapPostToSpaceItem)
+        .filter((item) => !seenIdsRef.current.has(String(item.id)));
+      fresh.forEach((item) => seenIdsRef.current.add(String(item.id)));
+
+      if (fresh.length > 0) {
+        setCards((prev) => [...prev, ...fresh]);
+        setUseMockData(false);
+      } else {
+        // No new posts anymore; stop paging instead of spinning forever.
+        exhaustedRef.current = true;
+      }
+    } catch (error) {
+      console.error('Failed to load learn space from API:', error);
+    } finally {
+      loadingMoreRef.current = false;
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Initial load: hit the personalized feed; fall back to mock data (mirrors the
+  // home feed's behavior) when the endpoint can't be reached.
+  useEffect(() => {
+    const bootstrap = async () => {
+      setIsLoading(true);
+      try {
+        const response = await postService.getFeed({ size: 15 });
+        const initial = response.items.map(mapPostToSpaceItem);
+        seenIdsRef.current = new Set(initial.map((item) => String(item.id)));
+        setCards(initial);
+        setUseMockData(false);
+      } catch (error) {
+        console.error('Failed to load learn space, using mock data:', error);
+        setCards(
+          spacePosts.map((post, index) => ({
+            ...post,
+            id: String(post.id),
+            time: post.time,
+            theme: index % 2 === 0 ? 'orange' : 'blue',
+          })),
+        );
+        exhaustedRef.current = true;
+        setUseMockData(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    const timer = setTimeout(bootstrap, 150);
+    return () => clearTimeout(timer);
   }, []);
 
   // Track the card on screen (drives the comments panel and keyboard nav) and
@@ -50,12 +190,8 @@ export default function SpaceReel() {
           if (index > 0) setHasScrolled(true);
 
           // Endless feed: top up while two cards remain below.
-          if (index >= sections.length - 2) {
-            setCards((current) =>
-              current.length === sections.length
-                ? [...current, ...nextBatch(current.length / spacePosts.length)]
-                : current,
-            );
+          if (index >= sections.length - 2 && !useMockData) {
+            void loadBatch();
           }
         });
       },
@@ -64,7 +200,7 @@ export default function SpaceReel() {
 
     sections.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
-  }, [cards.length]);
+  }, [cards.length, loadBatch, useMockData]);
 
   // Keyboard navigation: the reel is a scroll surface, so it needs explicit keys.
   useEffect(() => {
@@ -130,11 +266,17 @@ export default function SpaceReel() {
               <Bell size={20} />
             </Link>
             <div className="w-10 h-10 rounded-full border-2 border-white/40 hover:border-white overflow-hidden bg-white/10 cursor-pointer transition-colors">
-              <img
-                alt="Profile"
-                className="w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoL6Tz-loSXPzAFM0ngTHJa_vd-cHY-twsdup-7NcFw33hdYuWamtSvCMzW-ZipgBpOHkTbwTYWN-yrfVSV86i5W8oiFWPpqp3Qj1VTIHGuU7gKeOdM3eJSMGXylGH1vowIdWiylOz0moZvWcFCMbvacxj4ZHeOdBckiFwZEGtqDIvBfGMVFqhDA42WA56ouAUC8J5z189MFkfIQWfouE7kv_lSUpn95a8XC9ddAgfENLq1vE_EzQ8crCz5kmw0ofUeOg6HG1gaFc "
-              />
+              {user?.avatar_url ? (
+                <img
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                  src={user.avatar_url}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white/90">
+                  {user?.username?.slice(0, 2).toUpperCase() || 'ME'}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -146,19 +288,25 @@ export default function SpaceReel() {
         ref={scrollerRef}
         className="h-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide overscroll-contain relative z-10"
       >
-        {cards.map((post) => {
-          const type = post.type.toLowerCase();
-          const cardProps = {
-            variant: 'reel' as const,
-            onCommentToggle: () => setCommentsOpen((open) => !open),
-            ...post,
-          };
+        {isLoading ? (
+          <div className="h-full flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-[#f36710] animate-spin" />
+          </div>
+        ) : (
+          cards.map((post) => {
+            const type = post.type.toLowerCase();
+            const cardProps = {
+              variant: 'reel' as const,
+              onCommentToggle: () => setCommentsOpen((open) => !open),
+              ...post,
+            };
 
-          if (type === 'flashcard') return <FlashCard key={post.id} {...cardProps} />;
-          if (type === 'mcq') return <McqCard key={post.id} {...cardProps} />;
-          if (type === 'text') return <TextCard key={post.id} {...cardProps} />;
-          return null;
-        })}
+            if (type === 'flashcard') return <FlashCard key={post.id} {...cardProps} />;
+            if (type === 'mcq') return <McqCard key={post.id} {...cardProps} />;
+            if (type === 'text') return <TextCard key={post.id} {...cardProps} />;
+            return null;
+          })
+        )}
       </div>
 
       {/* Swipe hint — retires once the reader moves past the first card */}
@@ -207,55 +355,13 @@ export default function SpaceReel() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {MOCK_COMMENTS.map((comment) => (
-            <div key={comment.name} className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#fef3ea] text-[#f36710] flex items-center justify-center text-xs font-bold shrink-0">
-                {comment.name.slice(0, 2).toUpperCase()}
-              </div>
-              <div className="flex-1">
-                <div className="bg-gray-50 p-3 rounded-2xl rounded-tl-none">
-                  <p className="font-bold text-xs text-on-surface">{comment.name}</p>
-                  <p className="text-sm text-on-surface-variant">{comment.body}</p>
-                </div>
-                <div className="flex items-center gap-4 mt-1 ml-2">
-                  <span className="text-[11px] text-on-surface-variant">{comment.time}</span>
-                  <button className="text-[11px] font-bold text-on-surface-variant hover:text-primary transition-colors">
-                    Reply
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="p-4 border-t border-gray-100 flex items-center gap-3">
-          <input
-            className="flex-1 bg-gray-50 border-none rounded-full px-4 py-2 text-sm focus:ring-1 focus:ring-primary-container outline-none"
-            placeholder="Add a comment..."
-            type="text"
+        <div className="flex-1 overflow-y-auto">
+          <CommentsSection
+            show={commentsOpen}
+            postId={activePost ? String(activePost.id) : undefined}
           />
-          <button className="text-primary-container font-bold text-sm px-2">Post</button>
         </div>
       </aside>
     </div>
   );
 }
-
-const MOCK_COMMENTS = [
-  {
-    name: 'Alex_Study',
-    body: 'This really helped me with my exam prep today. Simple and effective!',
-    time: '12m',
-  },
-  {
-    name: 'Nabin_QA',
-    body: 'Got it wrong the first time, the explanation made it click though.',
-    time: '48m',
-  },
-  {
-    name: 'mira.learns',
-    body: 'Would love a follow-up card that goes one level deeper on this.',
-    time: '3h',
-  },
-];
