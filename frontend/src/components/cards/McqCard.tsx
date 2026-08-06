@@ -241,13 +241,18 @@ function MCQFeed({
         userSaved={localUserSaved}
         postId={id as string}
       />
-      <CommentsSection show={showComments} />
+      <CommentsSection show={showComments} postId={id} />
     </div>
   );
 }
 
-function MCQReel({ question, options, correctIndex, explanation, tags, author, time, upvotes, comments, onCommentToggle }: McqProps) {
+function MCQReel({ id, question, options, correctIndex, explanation, tags, author, time, upvotes, comments, onCommentToggle, userVote, userSaved, onVote, onSave, onQuizAnswer }: McqProps) {
   const [selected, setSelected] = useState<number | null>(null);
+
+  const handleSelect = (index: number) => {
+    setSelected(index);
+    if (id) onQuizAnswer?.(String(id), index === correctIndex);
+  };
 
   return (
     <section className="h-[100svh] w-full snap-start flex items-center justify-center relative">
@@ -281,7 +286,7 @@ function MCQReel({ question, options, correctIndex, explanation, tags, author, t
                 <button
                   key={opt}
                   disabled={selected !== null}
-                  onClick={() => setSelected(i)}
+                  onClick={() => handleSelect(i)}
                   className={`w-full p-4 rounded-xl border-2 flex items-center justify-between text-left transition-all ${btnClasses}`}
                 >
                   <span className="font-medium text-[16px]">{opt}</span>
@@ -330,7 +335,16 @@ function MCQReel({ question, options, correctIndex, explanation, tags, author, t
           </div>
         </div>
 
-        <ReelActions upvotes={upvotes || 0} comments={comments || 0} onCommentToggle={onCommentToggle} />
+        <ReelActions
+          upvotes={upvotes || 0}
+          comments={comments || 0}
+          onCommentToggle={onCommentToggle}
+          postId={id}
+          userVote={userVote}
+          userSaved={userSaved}
+          onVote={onVote}
+          onSave={onSave}
+        />
       </div>
     </section>
   );

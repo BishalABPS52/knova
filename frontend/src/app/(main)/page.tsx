@@ -281,9 +281,10 @@ export default function HomePage() {
     telemetry.trackFlip(postId);
   }, [trackingEnabled]);
 
-  const handleExpand = useCallback((postId: string) => {
+  // Feed cards report a single expand and no depth, which means "read in full".
+  const handleExpand = useCallback((postId: string, depth = 1) => {
     if (!trackingEnabled) return;
-    telemetry.trackScroll(postId, 1);
+    telemetry.trackScroll(postId, depth);
   }, [trackingEnabled]);
 
   // Client-side navigation off the feed fires neither pagehide nor
