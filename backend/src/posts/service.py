@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, literal, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -96,29 +96,34 @@ def _serialize_post(
 async def _user_states(
     db: AsyncSession, user_id: UUID | None, post_ids: list[UUID]
 ) -> tuple[dict[UUID, int], set[UUID]]:
-    """Fetch this user's vote value and saved state for the given posts in two
-    batched queries (returns empties for anonymous requests)."""
+    """Fetch this user's vote value and saved state for the given posts in a single
+    batched UNION query (returns empties for anonymous requests)."""
     if not user_id or not post_ids:
         return {}, set()
 
-    vote_rows = (
-        await db.execute(
-            select(Vote.post_id, Vote.value).where(
-                Vote.user_id == user_id, Vote.post_id.in_(post_ids)
-            )
-        )
-    ).all()
-    votes_map = {pid: value for pid, value in vote_rows}
+    vote_q = select(
+        Vote.post_id,
+        Vote.value,
+        literal(1).label("_kind"),
+    ).where(Vote.user_id == user_id, Vote.post_id.in_(post_ids))
+    saved_q = select(
+        SavedPost.post_id,
+        literal(None).label("value"),
+        literal(2).label("_kind"),
+    ).where(SavedPost.user_id == user_id, SavedPost.post_id.in_(post_ids))
 
-    saved_rows = (
-        await db.execute(
-            select(SavedPost.post_id).where(
-                SavedPost.user_id == user_id, SavedPost.post_id.in_(post_ids)
-            )
-        )
-    ).scalars().all()
+    query = vote_q.union_all(saved_q)
+    rows = (await db.execute(query)).all()
 
-    return votes_map, set(saved_rows)
+    votes_map: dict[UUID, int] = {}
+    saved_set: set[UUID] = set()
+    for post_id, value, kind in rows:
+        if kind == 2:
+            saved_set.add(post_id)
+        else:
+            votes_map[post_id] = value
+
+    return votes_map, saved_set
 
 
 def _order_clause(sort_by: str):
