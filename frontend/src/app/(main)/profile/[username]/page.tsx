@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Grid, BarChart2, ArrowUp, X, Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import Spinner, { ButtonSpinner } from "@/components/ui/Spinner";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/context/AuthContext";
-import { updateProfile } from "@/lib/profile";
+import { getMyProfile, getProfile, updateProfile } from "@/lib/profile";
 
 interface StatItem {
   name: string;
@@ -26,9 +26,18 @@ export default function ProfileScreen({
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const { user, refreshUser } = useAuth();
-  const { profile, setProfile, loading, error } = useProfile(
-    username as string,
+
+  const isOwnProfile =
+    !!user &&
+    user.username.toLowerCase() === (username as string).toLowerCase();
+
+  const profileFetcher = useCallback(
+    () =>
+      isOwnProfile ? getMyProfile() : getProfile(username as string),
+    [isOwnProfile, username as string],
   );
+
+  const { profile, setProfile, loading, error } = useProfile(profileFetcher);
 
   const [editUsername, setEditUsername] = useState("");
   const [editBio, setEditBio] = useState("");
@@ -63,9 +72,6 @@ export default function ProfileScreen({
       </div>
     );
   }
-
-  const isOwnProfile =
-    user?.username.toLowerCase() === (username as string).toLowerCase();
 
   const handleSave = async () => {
     try {
