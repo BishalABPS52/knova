@@ -8,9 +8,11 @@ import FlashCard from '@/components/cards/FlashCard';
 import McqCard from '@/components/cards/McqCard';
 import TextCard from '@/components/cards/TextContentCard';
 import { CommentsSection } from '@/components/cards/Shared';
+import TrackedCard from '@/components/feed/TrackedCard';
 import { spacePosts } from '@/data/mockData';
 import { useAuth } from '@/hooks/useAuth';
 import { PostService } from '@/lib/posts';
+import { telemetry } from '@/lib/telemetry';
 import type { Post } from '@/types/post';
 
 /** One card in the reel, shaped the same way the reel card variants expect. */
@@ -32,9 +34,23 @@ interface SpaceItem {
   options?: string[];
   correctIndex?: number;
   explanation?: string;
+  userVote?: number;
+  userSaved?: boolean;
 }
 
 const postService = new PostService();
+
+const PAGE_SIZE = 15;
+
+/**
+ * Consecutive empty batches tolerated before the reel stops paging. The server
+ * caches a feed response briefly, so the first empty batch is far more likely to
+ * be a cache hit than a genuinely exhausted reader.
+ */
+const MAX_EMPTY_BATCHES = 3;
+
+/** Backoff after an empty batch — comfortably past the server's feed cache TTL. */
+const EMPTY_RETRY_MS = 12_000;
 
 /** Compact, human-friendly timestamp for a post ("2h ago", "3d ago"). */
 function relativeTime(iso?: string): string {
@@ -65,6 +81,9 @@ function mapPostToSpaceItem(post: Post, index: number): SpaceItem {
     tag: post.tags?.[0] || 'General',
     // Alternate themes only for visual rhythm; the answer side is the real content.
     theme: index % 2 === 0 ? 'orange' : 'blue',
+    // Seeds the action rail so a vote/save the reader already made shows as set.
+    userVote: post.user_vote ?? 0,
+    userSaved: post.user_saved ?? false,
   };
 
   if (type === 'flashcard') {
@@ -91,7 +110,7 @@ function mapPostToSpaceItem(post: Post, index: number): SpaceItem {
 
 export default function SpaceReel() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, initializing } = useAuth();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [cards, setCards] = useState<SpaceItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -101,10 +120,16 @@ export default function SpaceReel() {
   const [useMockData, setUseMockData] = useState(false);
 
   const seenIdsRef = useRef<Set<string>>(new Set());
-  // Guards the endless loader against concurrent/dup requests and stops it once
-  // a fetch returns nothing new (the feed serves the same top ranks repeatedly).
+  // Guards the endless loader against concurrent/duplicate requests, and backs
+  // off (rather than giving up outright) when a fetch returns nothing new.
   const loadingMoreRef = useRef(false);
   const exhaustedRef = useRef(false);
+  const emptyBatchesRef = useRef(0);
+  const retryAfterRef = useRef(0);
+
+  // Telemetry is the whole point of this surface, but mock ids aren't real posts
+  // and a single non-UUID makes the server reject the entire batch.
+  const trackingEnabled = !useMockData;
 
   const activePost = cards[activeIndex];
 
@@ -118,9 +143,12 @@ export default function SpaceReel() {
 
   const loadBatch = useCallback(async () => {
     if (exhaustedRef.current || loadingMoreRef.current) return;
+    // Back off after an empty batch instead of re-asking on every scroll event,
+    // which would otherwise burn all the retries inside one cache window.
+    if (Date.now() < retryAfterRef.current) return;
     loadingMoreRef.current = true;
     try {
-      const response = await postService.getFeed({ size: 15 });
+      const response = await postService.getFeed({ size: PAGE_SIZE });
       const fresh = response.items
         .map(mapPostToSpaceItem)
         .filter((item) => !seenIdsRef.current.has(String(item.id)));
@@ -129,9 +157,16 @@ export default function SpaceReel() {
       if (fresh.length > 0) {
         setCards((prev) => [...prev, ...fresh]);
         setUseMockData(false);
+        emptyBatchesRef.current = 0;
       } else {
-        // No new posts anymore; stop paging instead of spinning forever.
-        exhaustedRef.current = true;
+        // An empty batch usually just means we re-read the cached feed inside its
+        // TTL, not that the reader is out of posts — the server re-runs retrieval
+        // per call and returns mostly-new candidates. So only give up after
+        // several consecutive empties, and let the next scroll retry once the
+        // cached response has expired.
+        emptyBatchesRef.current += 1;
+        retryAfterRef.current = Date.now() + EMPTY_RETRY_MS;
+        if (emptyBatchesRef.current >= MAX_EMPTY_BATCHES) exhaustedRef.current = true;
       }
     } catch (error) {
       console.error('Failed to load learn space from API:', error);
@@ -141,13 +176,60 @@ export default function SpaceReel() {
     }
   }, []);
 
+  const handleVote = useCallback(async (postId: string, value: number) => {
+    if (useMockData) return;
+    const updated = await postService.vote(postId, value);
+    // Keep the card's own counters in step, so scrolling away and back doesn't
+    // resurrect the pre-vote numbers.
+    setCards((prev) =>
+      prev.map((card) =>
+        String(card.id) === postId
+          ? { ...card, upvotes: updated.upvote_count, userVote: updated.user_vote ?? 0 }
+          : card,
+      ),
+    );
+  }, [useMockData]);
+
+  const handleSave = useCallback(async (postId: string) => {
+    if (useMockData) return;
+    const response = await postService.toggleSave(postId);
+    setCards((prev) =>
+      prev.map((card) =>
+        String(card.id) === postId ? { ...card, userSaved: response.saved } : card,
+      ),
+    );
+  }, [useMockData]);
+
+  const handleQuizAnswer = useCallback((postId: string, correct: boolean) => {
+    if (!trackingEnabled) return;
+    telemetry.trackQuiz(postId, correct);
+  }, [trackingEnabled]);
+
+  const handleFlip = useCallback((postId: string) => {
+    if (!trackingEnabled) return;
+    telemetry.trackFlip(postId);
+  }, [trackingEnabled]);
+
+  const handleExpand = useCallback((postId: string, depth = 1) => {
+    if (!trackingEnabled) return;
+    telemetry.trackScroll(postId, depth);
+  }, [trackingEnabled]);
+
+  // Leaving the reel by client-side navigation fires neither pagehide nor
+  // visibilitychange, so the buffered batch has to be pushed on unmount.
+  useEffect(() => () => { void telemetry.flush(); }, []);
+
   // Initial load: hit the personalized feed; fall back to mock data (mirrors the
   // home feed's behavior) when the endpoint can't be reached.
   useEffect(() => {
+    // Wait for the session to settle rather than racing it — the feed needs a
+    // cookie, and a premature 401 would drop the reel onto mock data.
+    if (initializing) return;
+
     const bootstrap = async () => {
       setIsLoading(true);
       try {
-        const response = await postService.getFeed({ size: 15 });
+        const response = await postService.getFeed({ size: PAGE_SIZE });
         const initial = response.items.map(mapPostToSpaceItem);
         seenIdsRef.current = new Set(initial.map((item) => String(item.id)));
         setCards(initial);
@@ -168,9 +250,8 @@ export default function SpaceReel() {
         setIsLoading(false);
       }
     };
-    const timer = setTimeout(bootstrap, 150);
-    return () => clearTimeout(timer);
-  }, []);
+    void bootstrap();
+  }, [initializing]);
 
   // Track the card on screen (drives the comments panel and keyboard nav) and
   // append the next batch before the reader can reach the end.
@@ -293,18 +374,38 @@ export default function SpaceReel() {
             <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-[#f36710] animate-spin" />
           </div>
         ) : (
-          cards.map((post) => {
+          cards.map((post, index) => {
             const type = post.type.toLowerCase();
             const cardProps = {
               variant: 'reel' as const,
               onCommentToggle: () => setCommentsOpen((open) => !open),
+              onVote: handleVote,
+              onSave: handleSave,
+              onQuizAnswer: handleQuizAnswer,
+              onFlip: handleFlip,
+              onExpand: handleExpand,
               ...post,
             };
 
-            if (type === 'flashcard') return <FlashCard key={post.id} {...cardProps} />;
-            if (type === 'mcq') return <McqCard key={post.id} {...cardProps} />;
-            if (type === 'text') return <TextCard key={post.id} {...cardProps} />;
-            return null;
+            let card = null;
+            if (type === 'flashcard') card = <FlashCard {...cardProps} />;
+            else if (type === 'mcq') card = <McqCard {...cardProps} />;
+            else if (type === 'text') card = <TextCard {...cardProps} />;
+            if (!card) return null;
+
+            // The wrapper becomes the scroller's child, so it carries the snap and
+            // height rules the card's own <section> would otherwise own.
+            return (
+              <TrackedCard
+                key={post.id}
+                postId={String(post.id)}
+                feedPosition={index}
+                enabled={trackingEnabled}
+                className="h-[100svh] w-full snap-start"
+              >
+                {card}
+              </TrackedCard>
+            );
           })
         )}
       </div>
@@ -356,10 +457,26 @@ export default function SpaceReel() {
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          <CommentsSection
-            show={commentsOpen}
-            postId={activePost ? String(activePost.id) : undefined}
-          />
+          {useMockData ? (
+            // Mock ids aren't real posts, so there is nothing to fetch or post to.
+            <p className="p-4 text-sm text-on-surface-variant">
+              Comments are unavailable while the feed is offline.
+            </p>
+          ) : (
+            <CommentsSection
+              show={commentsOpen}
+              postId={activePost ? String(activePost.id) : undefined}
+              onCommentCountChange={(delta) =>
+                setCards((prev) =>
+                  prev.map((card, index) =>
+                    index === activeIndex
+                      ? { ...card, comments: Math.max(0, card.comments + delta) }
+                      : card,
+                  ),
+                )
+              }
+            />
+          )}
         </div>
       </aside>
     </div>
