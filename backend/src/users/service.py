@@ -12,12 +12,15 @@ from .schemas import InterestItem, InterestListResponse, ProfileUpdateRequest
 EXPLICIT_INTEREST_SOURCES = {"onboarding", "manual"}
 MANUAL_AFFINITY = 1.0
 
-async def get_user_profile(db: AsyncSession, username: str) -> dict:
-    result = await db.execute(select(User).where(func.lower(User.username) == username.lower()))
-    user = result.scalar_one_or_none()
+async def get_user_profile(db: AsyncSession, user_id: UUID) -> dict:
+    """Build a profile for an existing user, looked up by primary key. This is the
+    canonical way to fetch a profile (the caller almost always has the id from a
+    session/token). Usernames are NOT unique in this app, so we never resolve a
+    profile by username here — doing so would 500 on duplicates."""
+    user = await db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-        
+
     # Get following count
     following_result = await db.execute(
         select(func.count(CreatorFollow.id)).where(CreatorFollow.follower_id == user.id)
@@ -92,6 +95,22 @@ async def get_user_profile(db: AsyncSession, username: str) -> dict:
         "total_shares": total_shares
     }
 
+async def get_user_profile_by_username(db: AsyncSession, username: str) -> dict:
+    """Public profile lookup by display handle. Usernames are not unique, so an
+    ambiguous handle resolves deterministically to the oldest matching user
+    instead of crashing on duplicates. Prefer id-based lookups elsewhere."""
+    result = await db.execute(
+        select(User)
+        .where(func.lower(User.username) == username.lower())
+        .order_by(User.created_at.asc())
+        .limit(1)
+    )
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return await get_user_profile(db, user.id)
+
+
 async def update_user_profile(db: AsyncSession, user_id: UUID, data: ProfileUpdateRequest) -> dict:
     user = await db.get(User, user_id)
     if not user:
@@ -101,11 +120,6 @@ async def update_user_profile(db: AsyncSession, user_id: UUID, data: ProfileUpda
         new_username = data.username.strip()
         if not new_username:
             raise HTTPException(status_code=400, detail="Username cannot be empty")
-        taken_result = await db.execute(
-            select(User).where(func.lower(User.username) == new_username.lower(), User.id != user_id)
-        )
-        if taken_result.scalar_one_or_none():
-            raise HTTPException(status_code=409, detail="Username already taken")
         user.username = new_username
         
     if data.avatar_url is not None:
@@ -141,7 +155,7 @@ async def update_user_profile(db: AsyncSession, user_id: UUID, data: ProfileUpda
     await db.commit()
     await db.refresh(user)
 
-    return await get_user_profile(db, user.username)
+    return await get_user_profile(db, user_id)
 
 
 async def get_user_interests(db: AsyncSession, user_id: UUID) -> InterestListResponse:
