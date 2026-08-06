@@ -59,7 +59,8 @@ export interface Comment {
   parent_comment_id?: string;
   body: string;
   created_at: string;
-  updated_at: string;
+  /** Comments have no edit endpoint yet, so the API doesn't return this. */
+  updated_at?: string;
   user?: User;
   replies?: Comment[];
 }
