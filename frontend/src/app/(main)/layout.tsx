@@ -7,7 +7,7 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-[#F5F5F5]">
       <Navbar />
 
       {/* Bottom padding clears the floating mobile nav (and the iOS safe area). */}
@@ -18,4 +18,4 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <BottomBar />
     </div>
   );
-}
+} 
