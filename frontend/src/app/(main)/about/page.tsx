@@ -6,11 +6,8 @@ import { BookOpen, TrendingUp, GraduationCap } from 'lucide-react';
 
 // Define props type if this component is used elsewhere with props, 
 // otherwise remove setCurrentScreen if it's not used in this specific file structure.
-interface AboutScreenProps {
-  setCurrentScreen?: (screen: string) => void;
-}
 
-export default function AboutScreen({ setCurrentScreen }: AboutScreenProps) {
+export default function AboutScreen() {
   return (
     <div className="max-w-[860px] mx-auto p-6 md:p-10 space-y-12 md:space-y-16">
       
