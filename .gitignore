@@ -27,6 +27,14 @@ node_modules/
 /out/
 .turbo/
 
+# ── PWA (Serwist generated service worker) ──────────────────────
+frontend/public/sw.js
+frontend/public/sw.js.map
+frontend/public/workbox-*.js
+frontend/public/workbox-*.js.map
+frontend/public/fallback-*.js
+frontend/public/fallback-*.js.map
+
 # ── Production build (frontend / backend) ───────────────────────
 build/
 dist/

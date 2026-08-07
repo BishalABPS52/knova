@@ -15,11 +15,7 @@ interface StatItem {
   score: number;
 }
 
-export default function ProfileScreen({
-  setCurrentScreen,
-}: {
-  setCurrentScreen?: (screen: string) => void;
-}) {
+export default function ProfileScreen() {
   const { username } = useParams();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"posts" | "stats">("posts");

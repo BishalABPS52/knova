@@ -13,7 +13,7 @@ interface FAQ {
   a: string;
 }
 
-export default function HelpScreen({ setCurrentScreen }: { setCurrentScreen?: (screen: string) => void }) {
+export default function HelpScreen() {
   const [openCategory, setOpenCategory] = useState<string | null>('getting-started');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 

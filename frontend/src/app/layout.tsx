@@ -23,14 +23,34 @@ export const metadata: Metadata = {
   title: "Knova – Learning Platform for you all.",
   description:
     "A telemetry-driven educational platform applying social media engagement mechanics to personalize learning content.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Knova",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
-    icon: "/logos/Knova.png",
+    icon: [
+      { url: "/logos/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/logos/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/logos/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  minimumScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f36710" },
+    { media: "(prefers-color-scheme: dark)", color: "#f36710" },
+  ],
 };
 
 interface RootLayoutProps {
