@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   IdCard,
   Lock,
@@ -23,6 +24,7 @@ import { getMyInterests, updateMyInterests } from "@/lib/interests";
 type ModalType = "personal" | "password" | "topics" | null;
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [activeModal, setActiveModal] = useState<ModalType>(null);
 
   const closeModal = () => setActiveModal(null);
@@ -79,16 +81,19 @@ export default function SettingsPage() {
             <SettingsButton
               icon={<HelpCircle size={20} className="text-[#594137]" />}
               label="Help / FAQ"
+              onClick={() => router.push("/help")}
             />
             <Divider />
             <SettingsButton
               icon={<Info size={20} className="text-[#594137]" />}
               label="About"
+              onClick={() => router.push("/about")}
             />
             <Divider />
             <SettingsButton
               icon={<Mail size={20} className="text-[#594137]" />}
               label="Contact Us"
+              onClick={() => router.push("/contact")}
             />
           </div>
         </section>
