@@ -13,6 +13,7 @@ import CreatePostModal from '@/components/ui/CreatePostModal';
 import { feedItems, FeedItem } from '@/data/feedData';
 import TrackedCard from '@/components/feed/TrackedCard';
 import { PostService } from '@/lib/posts';
+import { feedCache } from '@/lib/feedCache';
 import { telemetry } from '@/lib/telemetry';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -127,9 +128,29 @@ export default function HomePage() {
   }, [mapPostToFeedItem]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      loadFeed(1, false);
-    }, 500);
+    // Restore the feed from the in-memory cache when returning to this page,
+    // instead of refetching and flashing the skeleton. A hard reload clears the
+    // module cache, so it never stands in the way of a genuinely fresh feed.
+    const cached = feedCache.get();
+    const cacheHit = cached !== null && cached.userId === (user?.id ?? null) && cached.items.length > 0;
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    if (cacheHit) {
+      seenIdsRef.current = new Set(cached!.seenIds);
+      setFeed(cached!.items);
+      setTotal(cached!.items.length);
+      setPage(cached!.page);
+      setHasNext(cached!.hasNext);
+      setUseMockData(false);
+      setIsLoading(false);
+      // Restore scroll position after the list has painted.
+      const y = cached!.scrollY;
+      requestAnimationFrame(() => window.scrollTo(0, y));
+    } else {
+      timer = setTimeout(() => {
+        loadFeed(1, false);
+      }, 500);
+    }
 
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -154,7 +175,33 @@ export default function HomePage() {
       window.removeEventListener('resize', checkScreenSize);
       window.removeEventListener('open-create-modal', handleOpen);
     };
-  }, [loadFeed]);
+  }, [loadFeed, user]);
+
+  // Keep the in-memory cache in step with the live feed, so returning to this
+  // page restores it instead of refetching. Skip the loading and mock-fallback
+  // states — neither is real, cacheable feed data.
+  useEffect(() => {
+    if (isLoading || useMockData || feed.length === 0) return;
+    feedCache.set({
+      userId: user?.id ?? null,
+      items: feed,
+      seenIds: Array.from(seenIdsRef.current),
+      page,
+      hasNext,
+      scrollY: feedCache.get()?.scrollY ?? 0,
+    });
+  }, [feed, page, hasNext, isLoading, useMockData, user]);
+
+  // Persist scroll position when leaving (unmount) or hiding the tab, so the
+  // restored feed lands where the reader left off.
+  useEffect(() => {
+    const save = () => feedCache.setScroll(window.scrollY);
+    window.addEventListener('pagehide', save);
+    return () => {
+      save();
+      window.removeEventListener('pagehide', save);
+    };
+  }, []);
 
   // Load more when scrolling
   useEffect(() => {

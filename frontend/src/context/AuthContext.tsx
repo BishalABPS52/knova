@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { login as apiLogin, register as apiRegister, logout as apiLogout } from "@/lib/auth";
 import { telemetry } from "@/lib/telemetry";
+import { feedCache } from "@/lib/feedCache";
 import { api } from "@/lib/api";
 import { AuthUser, LoginRequest, RegisterRequest } from "@/types/authentication";
 
@@ -75,6 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // telemetry.
         void telemetry.flush();
         telemetry.reset();
+        feedCache.clear();
 
         try {
             await apiLogout();
