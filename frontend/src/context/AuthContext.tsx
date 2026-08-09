@@ -6,6 +6,8 @@ import { login as apiLogin, register as apiRegister, logout as apiLogout } from 
 import { telemetry } from "@/lib/telemetry";
 import { feedCache } from "@/lib/feedCache";
 import { exploreCache } from "@/lib/exploreCache";
+import { followStore } from "@/lib/followStore";
+import { getFollowing } from "@/lib/creator";
 import { api } from "@/lib/api";
 import { AuthUser, LoginRequest, RegisterRequest } from "@/types/authentication";
 
@@ -30,10 +32,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
 
+    // Seed the global follow store from the server so every FollowButton shows the
+    // right state on load. Fire-and-forget: a failure just leaves buttons unset.
+    const hydrateFollows = () => {
+        getFollowing()
+            .then((res) => followStore.hydrate(res.following.map((c) => c.creator_id)))
+            .catch(() => {});
+    };
+
     const fetchCurrentUser = async () => {
         try {
             const data = await api<AuthUser>("/api/v1/users/me");
             setUser(data);
+            hydrateFollows();
         } catch (err) {
             setUser(null);
         } finally {
@@ -62,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const login = async (data: LoginRequest) => {
         const response = await apiLogin(data);
         setUser(response.user);
+        hydrateFollows();
     };
 
     const register = async (data: RegisterRequest) => {
@@ -79,6 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         telemetry.reset();
         feedCache.clear();
         exploreCache.clear();
+        followStore.clear();
 
         try {
             await apiLogout();

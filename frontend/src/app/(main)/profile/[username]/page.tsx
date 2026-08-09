@@ -11,6 +11,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/context/AuthContext";
 import { getMyProfile, getProfile, updateProfile } from "@/lib/profile";
 import { getFollowing, type FollowedCreator } from "@/lib/creator";
+import { followStore } from "@/lib/followStore";
 
 interface StatItem {
   name: string;
@@ -61,6 +62,7 @@ export default function ProfileScreen() {
       .then((res) => {
         setFollowing(res.following);
         setFollowingLoaded(true);
+        followStore.hydrate(res.following.map((c) => c.creator_id));
       })
       .catch((err) => console.error("Failed to load following:", err))
       .finally(() => setFollowingLoading(false));
@@ -150,12 +152,17 @@ export default function ProfileScreen() {
                   </span>
                   <span className="text-sm text-[#5c5c5c]">Followers</span>
                 </div>
-                <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => isOwnProfile && setActiveTab("following")}
+                  disabled={!isOwnProfile}
+                  className={`flex items-center gap-1 ${isOwnProfile ? "hover:opacity-70 transition-opacity cursor-pointer" : "cursor-default"}`}
+                >
                   <span className="font-bold text-[#1b1c1c]">
                     {profile.following}
                   </span>
                   <span className="text-sm text-[#5c5c5c]">Following</span>
-                </div>
+                </button>
               </div>
             </div>
             {isOwnProfile && (
@@ -339,7 +346,7 @@ export default function ProfileScreen() {
                       {c.headline || `${c.follower_count} followers`}
                     </p>
                   </div>
-                  <FollowButton creatorId={c.creator_id} author={c.username} initialFollowing />
+                  <FollowButton creatorId={c.creator_id} author={c.username} />
                 </div>
               ))}
             </div>
