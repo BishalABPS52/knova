@@ -36,9 +36,14 @@ export class PostService {
   // Personalized recommendation feed (interest/CF/Thompson/creator retrieval +
   // LightGBM ranking). Requires an authenticated session. Paging is repeated
   // requests: each call re-runs retrieval excluding already-seen posts.
-  async getFeed(params: { size?: number } = {}): Promise<PostListResponse> {
+  async getFeed(
+    params: { size?: number; exclude_ids?: string[] } = {}
+  ): Promise<PostListResponse> {
     const query = new URLSearchParams();
     if (params.size !== undefined) query.append("size", String(params.size));
+    // Repeated ?exclude_ids= params: posts already shown this session, so the
+    // server pages through fresh posts instead of re-serving the top ranks.
+    params.exclude_ids?.forEach((id) => query.append("exclude_ids", id));
     const qs = query.toString();
     return api<PostListResponse>(`/api/v1/posts/feed${qs ? `?${qs}` : ""}`);
   }

@@ -4,7 +4,6 @@
 import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { Plus, Loader2 } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
-import CreatorCard from '@/components/cards/CreatorCard';
 import FlashCard from '@/components/cards/FlashCard';
 import TextCard from '@/components/cards/TextContentCard';
 import McqCard from '@/components/cards/McqCard';
@@ -81,9 +80,13 @@ export default function HomePage() {
         setIsLoadingMore(true);
       }
 
-      // Personalized recommendation feed. Paging re-runs retrieval, so we filter
-      // out any post already shown and stop when a batch yields nothing new.
-      const response = await postService.getFeed({ size: 15 });
+      // Personalized recommendation feed. Paging re-runs retrieval; we pass the
+      // ids already shown so the server returns fresh posts, and stop when a batch
+      // comes back empty (the pool is genuinely exhausted).
+      const response = await postService.getFeed({
+        size: 15,
+        exclude_ids: append ? Array.from(seenIdsRef.current) : undefined,
+      });
       const mapped = response.items.map(mapPostToFeedItem);
 
       if (!append) {
@@ -92,11 +95,12 @@ export default function HomePage() {
         setTotal(mapped.length);
         setHasNext(mapped.length > 0);
       } else {
+        // The server already excluded shown ids; dedupe defensively anyway.
         const fresh = mapped.filter(it => !seenIdsRef.current.has(String(it.id)));
         fresh.forEach(it => seenIdsRef.current.add(String(it.id)));
         setFeed(prev => [...prev, ...fresh]);
         setTotal(prev => prev + fresh.length);
-        setHasNext(fresh.length > 0);
+        setHasNext(mapped.length > 0);
       }
 
       setPage(pageNum);
@@ -369,8 +373,6 @@ export default function HomePage() {
   return (
     <div className="flex min-h-screen">
       <main className={`flex-1 ${isMobile ? 'px-4 py-4 pb-[100px]' : 'px-4 md:px-[64px] py-12 pt-32 pb-12'}`}>
-        <CreatorCard onCreateClick={() => setCreateModalOpen(true)} />
-
         {isLoading ? (
           <FeedSkeleton />
         ) : (
