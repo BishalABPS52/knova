@@ -105,4 +105,5 @@ async def update_my_interests(
     # Interests drive the personalized feed, so refresh both caches.
     await cache_delete_prefix(interests_cache_key(user_id))
     await cache_delete_prefix(f"feed:{user_id}:")
+    await cache_delete_prefix(f"explore:{user_id}:")
     return interests

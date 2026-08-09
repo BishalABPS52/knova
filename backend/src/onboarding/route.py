@@ -41,6 +41,7 @@ async def save_interests(
     # New interests change the personalized feed, so drop those caches.
     await cache_delete_prefix(f"interests:{user_id}")
     await cache_delete_prefix(f"feed:{user_id}:")
+    await cache_delete_prefix(f"explore:{user_id}:")
 
     return OnboardingResponse(
         message="Interests saved successfully."
