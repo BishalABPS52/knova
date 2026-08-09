@@ -7,6 +7,7 @@ import McqCard from '@/components/cards/McqCard';
 import TextCard from '@/components/cards/TextContentCard';
 import ShareModal from '@/components/ui/ShareModal';
 import { postService } from '@/lib/posts';
+import { exploreCache } from '@/lib/exploreCache';
 import { useAuth } from '@/hooks/useAuth';
 import type { Post, TopicSection } from '@/types/post';
 
@@ -87,6 +88,21 @@ export default function Explore() {
   const [shareId, setShareId] = useState<string | number | null>(null);
 
   useEffect(() => {
+    // Restore from the in-memory cache when returning to this page, instead of
+    // refetching and flashing the loader. A hard reload clears the cache.
+    const cached = exploreCache.get();
+    if (cached && cached.userId === (user?.id ?? null) && (cached.forYou.length || cached.sections.length)) {
+      setForYou(cached.forYou);
+      setSections(cached.sections);
+      setPages(cached.pages);
+      setActiveTab(cached.activeTab);
+      setError(false);
+      setIsLoading(false);
+      const y = cached.scrollY;
+      requestAnimationFrame(() => window.scrollTo(0, y));
+      return;
+    }
+
     let active = true;
     (async () => {
       try {
@@ -109,6 +125,29 @@ export default function Explore() {
     })();
     return () => {
       active = false;
+    };
+  }, [user]);
+
+  // Keep the cache in step with the loaded explore data + active tab.
+  useEffect(() => {
+    if (isLoading || error || (forYou.length === 0 && sections.length === 0)) return;
+    exploreCache.set({
+      userId: user?.id ?? null,
+      forYou,
+      sections,
+      pages,
+      activeTab,
+      scrollY: exploreCache.get()?.scrollY ?? 0,
+    });
+  }, [forYou, sections, pages, activeTab, isLoading, error, user]);
+
+  // Persist scroll position on the way out (and on tab hide).
+  useEffect(() => {
+    const save = () => exploreCache.setScroll(window.scrollY);
+    window.addEventListener('pagehide', save);
+    return () => {
+      save();
+      window.removeEventListener('pagehide', save);
     };
   }, []);
 

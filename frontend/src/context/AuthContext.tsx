@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { login as apiLogin, register as apiRegister, logout as apiLogout } from "@/lib/auth";
 import { telemetry } from "@/lib/telemetry";
 import { feedCache } from "@/lib/feedCache";
+import { exploreCache } from "@/lib/exploreCache";
 import { api } from "@/lib/api";
 import { AuthUser, LoginRequest, RegisterRequest } from "@/types/authentication";
 
@@ -77,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         void telemetry.flush();
         telemetry.reset();
         feedCache.clear();
+        exploreCache.clear();
 
         try {
             await apiLogout();
