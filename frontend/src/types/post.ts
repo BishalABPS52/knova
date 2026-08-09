@@ -73,6 +73,18 @@ export interface PostListResponse {
   has_next: boolean;
 }
 
+export interface TopicSection {
+  topic_id: string;
+  topic_name: string;
+  items: Post[];
+  has_more: boolean;
+}
+
+export interface ExploreResponse {
+  for_you: Post[];
+  topics: TopicSection[];
+}
+
 export interface CommentListResponse {
   items: Comment[];
   total: number;

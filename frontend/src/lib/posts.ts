@@ -9,6 +9,7 @@ import {
   SaveResponse,
   CreatePostRequest,
   UpdatePostRequest,
+  ExploreResponse,
 } from "@/types/post";
 
 export class PostService {
@@ -40,6 +41,22 @@ export class PostService {
     if (params.size !== undefined) query.append("size", String(params.size));
     const qs = query.toString();
     return api<PostListResponse>(`/api/v1/posts/feed${qs ? `?${qs}` : ""}`);
+  }
+
+  // Explore page: the personalized "For You" feed plus per-topic rails, in one
+  // call. Requires an authenticated session (like getFeed). Per-topic "see all"
+  // pages via getPosts({ topic_id }).
+  async getExplore(
+    params: { for_you_size?: number; topic_size?: number; topics_limit?: number } = {}
+  ): Promise<ExploreResponse> {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        query.append(key, String(value));
+      }
+    });
+    const qs = query.toString();
+    return api<ExploreResponse>(`/api/v1/posts/explore${qs ? `?${qs}` : ""}`);
   }
 
   async getPost(postId: string): Promise<Post> {
