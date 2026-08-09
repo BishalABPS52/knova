@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, FileText, LayoutTemplate, HelpCircle, FileType2, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FeedItem } from '@/data/feedData';
+import { useAuth } from '@/hooks/useAuth';
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface CreatePostModalProps {
 type Format = 'note' | 'flashcard' | 'mcq' | 'article' | null;
 
 export default function CreatePostModal({ isOpen, onClose, onCreate }: CreatePostModalProps) {
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [format, setFormat] = useState<Format>(null);
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -49,11 +51,13 @@ export default function CreatePostModal({ isOpen, onClose, onCreate }: CreatePos
   };
 
   const handlePublish = () => {
+    const displayName = user?.username || 'You';
+    const initials = user?.username?.slice(0, 2).toUpperCase() || 'ME';
     const baseProps = {
       id: Date.now(),
-      author: isAnonymous ? 'Anonymous User' : 'Biren Rawat',
-      authorInitial: isAnonymous ? 'AU' : 'BR',
-      authorBg: isAnonymous ? 'bg-gray-500 text-white' : 'bg-blue-500 text-white',
+      author: isAnonymous ? 'Anonymous User' : displayName,
+      authorInitial: isAnonymous ? 'AU' : initials,
+      authorBg: isAnonymous ? 'bg-gray-500 text-white' : 'bg-orange-500 text-white',
       time: 'Just now',
       category: tags.length > 0 ? tags[0] : 'General',
       upvotes: 0,
