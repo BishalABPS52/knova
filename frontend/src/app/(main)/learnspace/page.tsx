@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { ChevronUp, X, Bell } from 'lucide-react';
+import { ChevronUp, X } from 'lucide-react';
 import FlashCard from '@/components/cards/FlashCard';
 import McqCard from '@/components/cards/McqCard';
 import TextCard from '@/components/cards/TextContentCard';
@@ -110,7 +109,7 @@ function mapPostToSpaceItem(post: Post, index: number): SpaceItem {
 
 export default function SpaceReel() {
   const router = useRouter();
-  const { user, initializing } = useAuth();
+  const { initializing } = useAuth();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [cards, setCards] = useState<SpaceItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -333,47 +332,6 @@ export default function SpaceReel() {
         <div className="absolute -top-1/4 -left-1/4 w-[70vw] h-[70vw] rounded-full bg-[#f36710] opacity-[0.18] blur-[120px]" />
         <div className="absolute -bottom-1/4 -right-1/4 w-[70vw] h-[70vw] rounded-full bg-[#00afef] opacity-[0.18] blur-[120px]" />
       </div>
-
-      {/* Top bar */}
-      <header className="fixed top-0 left-0 w-full z-50 pointer-events-none">
-        <div className="h-24 bg-gradient-to-b from-black/70 via-black/30 to-transparent" />
-        <div className="absolute inset-x-0 top-0 h-20 flex items-center justify-between px-4 md:px-6">
-          <div className="flex items-center gap-3 pointer-events-auto">
-            <button
-              aria-label="Close learn space"
-              onClick={() => router.push('/')}
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors"
-            >
-              <X size={22} />
-            </button>
-            <p className="text-sm font-bold font-display">Learn Space</p>
-          </div>
-
-          <div className="flex items-center gap-3 pointer-events-auto">
-            <Link
-              href="/notifications"
-              aria-label="Notifications"
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-            >
-              <Bell size={20} />
-            </Link>
-            <div className="w-10 h-10 rounded-full border-2 border-white/40 hover:border-white overflow-hidden bg-white/10 cursor-pointer transition-colors">
-              {user?.avatar_url ? (
-                <img
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                  src={user.avatar_url}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white/90">
-                  {user?.username?.slice(0, 2).toUpperCase() || 'ME'}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-      </header>
 
       {/* The reel */}
       <div

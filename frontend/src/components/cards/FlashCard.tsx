@@ -261,25 +261,20 @@ function FlashCardReel({ id, question, answer, subtitle, theme, tag, author, tim
   );
 }
 
-function FlashCardExplore({ question, author, upvotes, bg = "bg-[#fef3ea]" }: CardProps) {
+function FlashCardExplore({ tag, question, author, upvotes }: CardProps) {
   return (
-    <div className={`h-[340px] rounded-xl relative flex flex-col p-6 hover-lift cursor-pointer border border-primary/10 ${bg}`}>
-      <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <span className="material-symbols-outlined text-primary-container text-4xl mb-4 opacity-50">help_center</span>
-        <h3 className="text-headline-md font-semibold text-on-primary-container leading-tight px-2">{question || 'Question'}</h3>
-      </div>
-      <div className="pt-4 border-t border-primary/10 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-primary-fixed"></div>
-          <span className="text-sm text-on-primary-container/70 font-semibold">{author || 'Unknown'}</span>
-        </div>
-        <div className="flex items-center gap-1 text-primary-container">
-          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>arrow_upward</span>
-          <span className="text-sm font-bold">{upvotes || 0}</span>
-        </div>
-      </div>
-      <div className="absolute bottom-16 left-0 right-0 flex justify-center opacity-30">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-primary-container">Tap to flip</span>
+    <div className="bg-white rounded-xl border border-[#ece9e7] p-4 md:p-5 hover:shadow-md hover:border-[#e1bfb1] transition-all cursor-pointer">
+      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[#f36710] bg-[#fef3ea] px-2 py-0.5 rounded-full mb-2.5">
+        <span className="material-symbols-outlined text-[12px]">style</span>
+        {tag || 'Flashcard'}
+      </span>
+      <h3 className="text-[14px] md:text-[15px] font-semibold text-[#1b1c1c] leading-snug line-clamp-4">{question || 'Question'}</h3>
+      <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#f3f1ef]">
+        <span className="text-xs text-[#8d7165] font-medium truncate">{author || 'Unknown'}</span>
+        <span className="flex items-center gap-1 text-[#f36710] text-xs font-bold shrink-0">
+          <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>arrow_upward</span>
+          {upvotes || 0}
+        </span>
       </div>
     </div>
   );

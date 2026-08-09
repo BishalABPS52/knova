@@ -19,7 +19,7 @@ function renderExploreCard(post: Post): ReactNode {
 
   if (post.content_type === 'flashcard') {
     return (
-      <FlashCard variant="explore" question={post.flashcard?.front} author={author} upvotes={upvotes} />
+      <FlashCard variant="explore" tag={tag} question={post.flashcard?.front} author={author} upvotes={upvotes} />
     );
   }
   if (post.content_type === 'mcq') {

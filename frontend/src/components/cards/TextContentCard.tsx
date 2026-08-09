@@ -256,29 +256,18 @@ function TextReel({ id, title, content, tags, author, time, upvotes, comments, o
   );
 }
 
-function TextExplore({ tag, title, content, author, upvotes, color = "border-l-secondary" }: TextProps) {
+function TextExplore({ tag, title, content, author, upvotes }: TextProps) {
   return (
-    <div className={`h-[340px] bg-white rounded-xl flex flex-col p-0 hover-lift cursor-pointer border border-surface-container-high overflow-hidden border-l-[4px] ${color} relative`}>
-      <div className="absolute inset-0 bg-[#00afef]/5 pointer-events-none" />
-      <div className="p-6 flex flex-col h-full relative z-10">
-        <div className="flex justify-between items-start mb-4">
-          <div className="bg-[#e0f6fe] text-secondary text-[10px] font-bold px-2 py-1 rounded-full">{tag || 'General'}</div>
-        </div>
-        <h3 className="text-headline-sm font-bold text-on-surface mb-3">{title || 'Untitled'}</h3>
-        <div className="text-sm text-on-surface-variant leading-relaxed flex-1 relative overflow-hidden">
-          <p>{content || 'No content'}</p>
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent"></div>
-        </div>
-        <div className="pt-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-outline-variant"></div>
-            <span className="text-sm text-on-surface-variant font-medium">{author || 'Unknown'}</span>
-          </div>
-          <div className="flex items-center gap-1 text-primary">
-            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>arrow_upward</span>
-            <span className="text-sm font-bold">{upvotes || 0}</span>
-          </div>
-        </div>
+    <div className="bg-white rounded-xl border border-[#ece9e7] p-4 md:p-5 hover:shadow-md hover:border-[#e1bfb1] transition-all cursor-pointer">
+      <span className="inline-block text-[10px] font-bold uppercase tracking-wide text-[#8d7165] bg-[#f3f1ef] px-2 py-0.5 rounded-full mb-2.5">{tag || 'General'}</span>
+      <h3 className="text-[14px] md:text-[15px] font-semibold text-[#1b1c1c] leading-snug line-clamp-2 mb-1.5">{title || 'Untitled'}</h3>
+      <p className="text-[13px] text-[#594137]/80 leading-relaxed line-clamp-3">{content || 'No content'}</p>
+      <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#f3f1ef]">
+        <span className="text-xs text-[#8d7165] font-medium truncate">{author || 'Unknown'}</span>
+        <span className="flex items-center gap-1 text-[#f36710] text-xs font-bold shrink-0">
+          <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>arrow_upward</span>
+          {upvotes || 0}
+        </span>
       </div>
     </div>
   );

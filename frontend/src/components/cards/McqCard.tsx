@@ -352,28 +352,28 @@ function MCQReel({ id, question, options, correctIndex, explanation, tags, autho
 
 function MCQExplore({ tag, question, options, author, upvotes, correctIndex = -1 }: McqProps) {
   return (
-    <div className="h-75 bg-white rounded-xl flex flex-col p-5 hover-lift cursor-pointer border border-surface-container-high relative overflow-hidden">
-      <div className="absolute inset-0 bg-[#00afef]/5 pointer-events-none" />
-      <div className="flex justify-between items-start mb-3 relative z-10">
-        <span className="text-xs font-bold text-secondary uppercase tracking-widest">{tag || 'General'}</span>
-      </div>
-      <h3 className="text-[18px] font-semibold text-on-surface line-clamp-2 mb-4 relative z-10 leading-snug">{question || 'Question'}</h3>
-      <div className="space-y-2 flex-1 relative z-10 overflow-hidden">
-        {options?.map((opt, i) => (
-          <div key={opt} className={`px-3 py-2 rounded-lg text-sm flex items-center gap-2 border ${i === correctIndex ? 'border-primary/30 font-bold bg-primary/5' : 'border-outline-variant/20 bg-surface-container-low text-on-surface-variant'}`}>
-            <span className="font-bold text-primary">{String.fromCharCode(65 + i)}</span> {opt}
+    <div className="bg-white rounded-xl border border-[#ece9e7] p-4 md:p-5 hover:shadow-md hover:border-[#e1bfb1] transition-all cursor-pointer">
+      <span className="inline-block text-[10px] font-bold uppercase tracking-wide text-[#8d7165] bg-[#f3f1ef] px-2 py-0.5 rounded-full mb-2.5">{tag || 'General'}</span>
+      <h3 className="text-[14px] md:text-[15px] font-semibold text-[#1b1c1c] line-clamp-2 mb-3 leading-snug">{question || 'Question'}</h3>
+      <div className="space-y-1.5">
+        {options?.slice(0, 4).map((opt, i) => (
+          <div
+            key={opt}
+            className={`px-2.5 py-1.5 rounded-lg text-[12px] flex items-center gap-2 ${
+              i === correctIndex ? 'bg-[#f36710]/10 text-[#1b1c1c] font-semibold' : 'bg-[#f7f5f4] text-[#594137]/80'
+            }`}
+          >
+            <span className="font-bold text-[#f36710] text-[11px] shrink-0">{String.fromCharCode(65 + i)}</span>
+            <span className="line-clamp-1">{opt}</span>
           </div>
         ))}
       </div>
-      <div className="pt-3 mt-auto flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-secondary-fixed"></div>
-          <span className="text-sm text-on-surface-variant font-medium">{author || 'Unknown'}</span>
-        </div>
-        <div className="flex items-center gap-1 text-primary">
-          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>arrow_upward</span>
-          <span className="text-sm font-bold">{upvotes || 0}</span>
-        </div>
+      <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#f3f1ef]">
+        <span className="text-xs text-[#8d7165] font-medium truncate">{author || 'Unknown'}</span>
+        <span className="flex items-center gap-1 text-[#f36710] text-xs font-bold shrink-0">
+          <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>arrow_upward</span>
+          {upvotes || 0}
+        </span>
       </div>
     </div>
   );
