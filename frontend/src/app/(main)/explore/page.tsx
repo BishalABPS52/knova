@@ -11,15 +11,30 @@ import type { Post, TopicSection } from '@/types/post';
 const FOR_YOU = 'for-you';
 const TOPIC_PAGE_SIZE = 10;
 
-// Explore-variant cards are display-only, so we only need the preview fields.
-function renderExploreCard(post: Post): ReactNode {
+interface CardActions {
+  onVote: (id: string, value: number) => Promise<void>;
+  onSave: (id: string) => Promise<void>;
+}
+
+// The explore variants are interactive: flashcards flip, MCQs are answerable,
+// text expands, and every card can be upvoted/saved through these handlers.
+function renderExploreCard(post: Post, actions: CardActions): ReactNode {
   const author = post.creator?.user?.username || 'Unknown';
   const tag = post.tags?.[0] || 'General';
   const upvotes = post.upvote_count || 0;
+  const common = {
+    id: post.id,
+    author,
+    upvotes,
+    userVote: post.user_vote,
+    userSaved: post.user_saved,
+    onVote: actions.onVote,
+    onSave: actions.onSave,
+  };
 
   if (post.content_type === 'flashcard') {
     return (
-      <FlashCard variant="explore" tag={tag} question={post.flashcard?.front} author={author} upvotes={upvotes} />
+      <FlashCard variant="explore" tag={tag} question={post.flashcard?.front} answer={post.flashcard?.back} {...common} />
     );
   }
   if (post.content_type === 'mcq') {
@@ -30,23 +45,21 @@ function renderExploreCard(post: Post): ReactNode {
         question={post.mcq?.question}
         options={post.mcq?.options}
         correctIndex={post.mcq?.correct_index}
-        author={author}
-        upvotes={upvotes}
+        explanation={post.mcq?.explanation}
+        {...common}
       />
     );
   }
   // text and short_note both render as the text card
-  return (
-    <TextCard variant="explore" tag={tag} title={post.title} content={post.body} author={author} upvotes={upvotes} />
-  );
+  return <TextCard variant="explore" tag={tag} title={post.title} content={post.body} {...common} />;
 }
 
-function MasonryGrid({ posts }: { posts: Post[] }) {
+function MasonryGrid({ posts, actions }: { posts: Post[]; actions: CardActions }) {
   return (
     <div className="columns-2 md:columns-3 gap-3 md:gap-4">
       {posts.map((post) => (
         <div key={post.id} className="break-inside-avoid mb-3 md:mb-4">
-          {renderExploreCard(post)}
+          {renderExploreCard(post, actions)}
         </div>
       ))}
     </div>
@@ -120,6 +133,48 @@ export default function Explore() {
     },
     [pages]
   );
+
+  // Patch a post wherever it appears (For You and any topic rail) so its vote/save
+  // state stays consistent across tabs.
+  const patchPost = useCallback((id: string, patch: (p: Post) => Post) => {
+    setForYou((prev) => prev.map((p) => (p.id === id ? patch(p) : p)));
+    setSections((prev) =>
+      prev.map((s) => ({ ...s, items: s.items.map((p) => (p.id === id ? patch(p) : p)) }))
+    );
+  }, []);
+
+  const handleVote = useCallback(
+    async (id: string, value: number) => {
+      try {
+        const updated = await postService.vote(id, value);
+        patchPost(id, (p) => ({
+          ...p,
+          upvote_count: updated.upvote_count,
+          downvote_count: updated.downvote_count,
+          user_vote: updated.user_vote,
+        }));
+      } catch (err) {
+        console.error('Failed to vote:', err);
+        throw err; // let the card roll back its optimistic state
+      }
+    },
+    [patchPost]
+  );
+
+  const handleSave = useCallback(
+    async (id: string) => {
+      try {
+        const res = await postService.toggleSave(id);
+        patchPost(id, (p) => ({ ...p, user_saved: res.saved, save_count: res.save_count }));
+      } catch (err) {
+        console.error('Failed to save:', err);
+        throw err;
+      }
+    },
+    [patchPost]
+  );
+
+  const actions: CardActions = { onVote: handleVote, onSave: handleSave };
 
   const tabs = [{ key: FOR_YOU, label: 'For You' }, ...sections.map((s) => ({ key: s.topic_id, label: s.topic_name }))];
   const activeSection = sections.find((s) => s.topic_id === activeTab);
@@ -202,7 +257,7 @@ export default function Explore() {
         {!isLoading && !error && !isEmpty && (
           <>
             {activePosts.length > 0 ? (
-              <MasonryGrid posts={activePosts} />
+              <MasonryGrid posts={activePosts} actions={actions} />
             ) : (
               <p className="text-center text-[#8d7165] py-16">No posts in this topic yet.</p>
             )}

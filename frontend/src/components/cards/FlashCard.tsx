@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FeedActions, ReelActions, CommentsSection } from './Shared';
+import { FeedActions, ReelActions, CommentsSection, ExploreActions } from './Shared';
 import FollowButton from '@/components/ui/FollowButton';
 import PostMenu from '@/components/ui/PostMenu';
 
@@ -261,20 +261,36 @@ function FlashCardReel({ id, question, answer, subtitle, theme, tag, author, tim
   );
 }
 
-function FlashCardExplore({ tag, question, author, upvotes }: CardProps) {
+function FlashCardExplore({ id, tag, question, answer, author, upvotes, userVote, userSaved, onVote, onSave, onFlip }: CardProps) {
+  const [flipped, setFlipped] = useState(false);
+
+  const toggle = () => {
+    const next = !flipped;
+    setFlipped(next);
+    if (next && id) onFlip?.(String(id));
+  };
+
   return (
-    <div className="bg-white rounded-xl border border-[#ece9e7] p-4 md:p-5 hover:shadow-md hover:border-[#e1bfb1] transition-all cursor-pointer">
+    <div
+      onClick={toggle}
+      className="bg-white rounded-xl border border-[#ece9e7] p-4 md:p-5 hover:shadow-md hover:border-[#e1bfb1] transition-all cursor-pointer"
+    >
       <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[#f36710] bg-[#fef3ea] px-2 py-0.5 rounded-full mb-2.5">
         <span className="material-symbols-outlined text-[12px]">style</span>
         {tag || 'Flashcard'}
       </span>
-      <h3 className="text-[14px] md:text-[15px] font-semibold text-[#1b1c1c] leading-snug line-clamp-4">{question || 'Question'}</h3>
+      {!flipped ? (
+        <h3 className="text-[14px] md:text-[15px] font-semibold text-[#1b1c1c] leading-snug line-clamp-4">{question || 'Question'}</h3>
+      ) : (
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wide text-[#f36710] mb-1">Answer</p>
+          <p className="text-[13px] text-[#594137] leading-relaxed line-clamp-5">{answer || 'No answer'}</p>
+        </div>
+      )}
+      <p className="text-[11px] text-[#b0a49d] mt-2">{flipped ? 'Tap to hide answer' : 'Tap to reveal answer'}</p>
       <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#f3f1ef]">
         <span className="text-xs text-[#8d7165] font-medium truncate">{author || 'Unknown'}</span>
-        <span className="flex items-center gap-1 text-[#f36710] text-xs font-bold shrink-0">
-          <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>arrow_upward</span>
-          {upvotes || 0}
-        </span>
+        <ExploreActions upvotes={upvotes ?? 0} postId={id} userVote={userVote} userSaved={userSaved} onVote={onVote} onSave={onSave} />
       </div>
     </div>
   );

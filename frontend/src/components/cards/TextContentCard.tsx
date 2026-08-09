@@ -1,7 +1,7 @@
 // components/cards/TextContentCard.tsx
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FeedActions, ReelActions, CommentsSection } from './Shared';
+import { FeedActions, ReelActions, CommentsSection, ExploreActions } from './Shared';
 import FollowButton from '@/components/ui/FollowButton';
 import PostMenu from '@/components/ui/PostMenu';
 
@@ -256,18 +256,32 @@ function TextReel({ id, title, content, tags, author, time, upvotes, comments, o
   );
 }
 
-function TextExplore({ tag, title, content, author, upvotes }: TextProps) {
+function TextExplore({ id, tag, title, content, author, upvotes, userVote, userSaved, onVote, onSave, onExpand }: TextProps) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = (content?.length || 0) > 160;
+
+  const toggle = () => {
+    const next = !expanded;
+    setExpanded(next);
+    if (next && id) onExpand?.(String(id));
+  };
+
   return (
-    <div className="bg-white rounded-xl border border-[#ece9e7] p-4 md:p-5 hover:shadow-md hover:border-[#e1bfb1] transition-all cursor-pointer">
+    <div className="bg-white rounded-xl border border-[#ece9e7] p-4 md:p-5 hover:shadow-md hover:border-[#e1bfb1] transition-all">
       <span className="inline-block text-[10px] font-bold uppercase tracking-wide text-[#8d7165] bg-[#f3f1ef] px-2 py-0.5 rounded-full mb-2.5">{tag || 'General'}</span>
       <h3 className="text-[14px] md:text-[15px] font-semibold text-[#1b1c1c] leading-snug line-clamp-2 mb-1.5">{title || 'Untitled'}</h3>
-      <p className="text-[13px] text-[#594137]/80 leading-relaxed line-clamp-3">{content || 'No content'}</p>
+      <p className={`text-[13px] text-[#594137]/80 leading-relaxed whitespace-pre-wrap ${expanded ? '' : 'line-clamp-3'}`}>{content || 'No content'}</p>
+      {isLong && (
+        <button
+          onClick={toggle}
+          className="text-[12px] font-bold text-[#f36710] mt-1.5 hover:underline"
+        >
+          {expanded ? 'Show less' : 'Read more'}
+        </button>
+      )}
       <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#f3f1ef]">
         <span className="text-xs text-[#8d7165] font-medium truncate">{author || 'Unknown'}</span>
-        <span className="flex items-center gap-1 text-[#f36710] text-xs font-bold shrink-0">
-          <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>arrow_upward</span>
-          {upvotes || 0}
-        </span>
+        <ExploreActions upvotes={upvotes ?? 0} postId={id} userVote={userVote} userSaved={userSaved} onVote={onVote} onSave={onSave} />
       </div>
     </div>
   );

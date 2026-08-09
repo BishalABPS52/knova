@@ -113,6 +113,84 @@ export function FeedActions({
   );
 }
 
+interface ExploreActionsProps {
+  upvotes: number | string;
+  postId?: string | number;
+  userVote?: number;
+  userSaved?: boolean;
+  onVote?: (id: string, value: number) => Promise<void>;
+  onSave?: (id: string) => Promise<void>;
+}
+
+/**
+ * Compact upvote + save controls for the explore grid's small cards. Keeps its
+ * own optimistic state (seeded from the server) so a tap reacts instantly and
+ * rolls back if the write fails. stopPropagation so tapping an action never
+ * triggers the card's own flip/expand click.
+ */
+export function ExploreActions({
+  upvotes,
+  postId,
+  userVote,
+  userSaved,
+  onVote,
+  onSave,
+}: ExploreActionsProps) {
+  const [vote, setVote] = useState<0 | 1 | -1>((userVote as 0 | 1 | -1) || 0);
+  const [saved, setSaved] = useState(!!userSaved);
+
+  const label =
+    typeof upvotes === 'number' ? upvotes + (vote === 1 ? 1 : 0) - (userVote === 1 ? 1 : 0) : upvotes;
+
+  const handleUpvote = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const previous = vote;
+    setVote(vote === 1 ? 0 : 1);
+    if (!postId || !onVote) return;
+    try {
+      await onVote(String(postId), 1);
+    } catch {
+      setVote(previous);
+    }
+  };
+
+  const handleSave = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = !saved;
+    setSaved(next);
+    if (!postId || !onSave) return;
+    try {
+      await onSave(String(postId));
+    } catch {
+      setSaved(!next);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-3 shrink-0">
+      <button
+        onClick={handleUpvote}
+        aria-label="Upvote"
+        aria-pressed={vote === 1}
+        className={`flex items-center gap-1 text-xs font-bold transition-colors ${
+          vote === 1 ? 'text-[#f36710]' : 'text-[#8d7165] hover:text-[#f36710]'
+        }`}
+      >
+        <ArrowUp size={15} strokeWidth={2.5} />
+        {label}
+      </button>
+      <button
+        onClick={handleSave}
+        aria-label={saved ? 'Remove from saved' : 'Save'}
+        aria-pressed={saved}
+        className={`transition-colors ${saved ? 'text-[#f36710]' : 'text-[#8d7165] hover:text-[#f36710]'}`}
+      >
+        <Bookmark size={15} fill={saved ? 'currentColor' : 'none'} />
+      </button>
+    </div>
+  );
+}
+
 interface CommentsSectionProps {
   show?: boolean;
   postId?: string | number;
