@@ -1,12 +1,14 @@
 // components/cards/Shared.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { ArrowUp, ArrowDown, MessageSquare, Share2, Bookmark, Loader2 } from 'lucide-react';
 import { PostService } from '@/lib/posts';
 import { Comment } from '@/types/post';
 import { useAuth } from '@/hooks/useAuth';
 import { CommentItem } from '@/components/post/commentItem';
+import FollowButton from '@/components/ui/FollowButton';
+import PostMenu from '@/components/ui/PostMenu';
 import { toast } from 'sonner';
 
 interface FeedActionsProps {
@@ -113,80 +115,155 @@ export function FeedActions({
   );
 }
 
-interface ExploreActionsProps {
-  upvotes: number | string;
-  postId?: string | number;
+interface ExploreCardShellProps {
+  id?: string | number;
+  author?: string;
+  /** Creator profile id, for the follow button. */
+  creatorId?: string;
+  /** The tag/type chip rendered above the content. */
+  chip?: ReactNode;
+  upvotes?: number | string;
+  comments?: number;
   userVote?: number;
   userSaved?: boolean;
+  isOwner?: boolean;
   onVote?: (id: string, value: number) => Promise<void>;
   onSave?: (id: string) => Promise<void>;
+  onShare?: (id: string | number) => void;
+  onDelete?: (id: string) => Promise<void>;
+  children: ReactNode;
 }
 
 /**
- * Compact upvote + save controls for the explore grid's small cards. Keeps its
- * own optimistic state (seeded from the server) so a tap reacts instantly and
- * rolls back if the write fails. stopPropagation so tapping an action never
- * triggers the card's own flip/expand click.
+ * Chrome shared by every explore-grid card: an author header (avatar + name +
+ * follow + overflow menu with copy-link/share/save/report/delete) and a footer
+ * action bar (upvote, comment, share, save) with inline comments. Wraps each
+ * card type's own interactive content (`children`). Keeps optimistic vote/save
+ * state seeded from the server so taps react instantly and roll back on failure.
  */
-export function ExploreActions({
+export function ExploreCardShell({
+  id,
+  author,
+  creatorId,
+  chip,
   upvotes,
-  postId,
+  comments = 0,
   userVote,
   userSaved,
+  isOwner = false,
   onVote,
   onSave,
-}: ExploreActionsProps) {
+  onShare,
+  onDelete,
+  children,
+}: ExploreCardShellProps) {
   const [vote, setVote] = useState<0 | 1 | -1>((userVote as 0 | 1 | -1) || 0);
   const [saved, setSaved] = useState(!!userSaved);
+  const [showComments, setShowComments] = useState(false);
+  const [commentCount, setCommentCount] = useState(comments);
 
   const label =
     typeof upvotes === 'number' ? upvotes + (vote === 1 ? 1 : 0) - (userVote === 1 ? 1 : 0) : upvotes;
 
-  const handleUpvote = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleUpvote = async () => {
     const previous = vote;
     setVote(vote === 1 ? 0 : 1);
-    if (!postId || !onVote) return;
+    if (!id || !onVote) return;
     try {
-      await onVote(String(postId), 1);
+      await onVote(String(id), 1);
     } catch {
       setVote(previous);
     }
   };
 
-  const handleSave = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleSave = async () => {
     const next = !saved;
     setSaved(next);
-    if (!postId || !onSave) return;
+    if (!id || !onSave) return;
     try {
-      await onSave(String(postId));
+      await onSave(String(id));
     } catch {
       setSaved(!next);
     }
   };
 
+  const handleDelete = onDelete && id ? () => onDelete(String(id)) : undefined;
+
   return (
-    <div className="flex items-center gap-3 shrink-0">
-      <button
-        onClick={handleUpvote}
-        aria-label="Upvote"
-        aria-pressed={vote === 1}
-        className={`flex items-center gap-1 text-xs font-bold transition-colors ${
-          vote === 1 ? 'text-[#f36710]' : 'text-[#8d7165] hover:text-[#f36710]'
-        }`}
-      >
-        <ArrowUp size={15} strokeWidth={2.5} />
-        {label}
-      </button>
-      <button
-        onClick={handleSave}
-        aria-label={saved ? 'Remove from saved' : 'Save'}
-        aria-pressed={saved}
-        className={`transition-colors ${saved ? 'text-[#f36710]' : 'text-[#8d7165] hover:text-[#f36710]'}`}
-      >
-        <Bookmark size={15} fill={saved ? 'currentColor' : 'none'} />
-      </button>
+    <div className="bg-white rounded-xl border border-[#ece9e7] hover:shadow-md hover:border-[#e1bfb1] transition-all overflow-hidden">
+      <div className="p-4 md:p-5">
+        <div className="flex items-center justify-between mb-3 gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 rounded-full bg-[#f36710] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+              {author?.slice(0, 2).toUpperCase() || 'U'}
+            </div>
+            <span className="text-[13px] font-semibold text-[#1b1c1c] truncate">{author || 'Unknown'}</span>
+            <FollowButton creatorId={creatorId} author={author} hidden={isOwner} />
+          </div>
+          <PostMenu
+            postId={id}
+            author={author}
+            isOwner={isOwner}
+            onShare={onShare && id ? () => onShare(id) : undefined}
+            onSave={onSave && id ? handleSave : undefined}
+            onDelete={handleDelete}
+            saved={saved}
+          />
+        </div>
+        {chip && <div className="mb-2.5">{chip}</div>}
+        {children}
+      </div>
+
+      <div className="px-4 md:px-5 py-2.5 border-t border-[#f3f1ef] flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleUpvote}
+            aria-label="Upvote"
+            aria-pressed={vote === 1}
+            className={`flex items-center gap-1 text-xs font-bold transition-colors ${
+              vote === 1 ? 'text-[#f36710]' : 'text-[#8d7165] hover:text-[#f36710]'
+            }`}
+          >
+            <ArrowUp size={16} strokeWidth={2.5} />
+            {label}
+          </button>
+          <button
+            onClick={() => setShowComments((v) => !v)}
+            aria-label="Comments"
+            className={`flex items-center gap-1 text-xs font-bold transition-colors ${
+              showComments ? 'text-[#f36710]' : 'text-[#8d7165] hover:text-[#f36710]'
+            }`}
+          >
+            <MessageSquare size={16} />
+            {commentCount}
+          </button>
+          {onShare && (
+            <button
+              onClick={() => id && onShare(id)}
+              aria-label="Share"
+              className="text-[#8d7165] hover:text-[#f36710] transition-colors"
+            >
+              <Share2 size={16} />
+            </button>
+          )}
+        </div>
+        <button
+          onClick={handleSave}
+          aria-label={saved ? 'Remove from saved' : 'Save'}
+          aria-pressed={saved}
+          className={`transition-colors ${saved ? 'text-[#f36710]' : 'text-[#8d7165] hover:text-[#f36710]'}`}
+        >
+          <Bookmark size={16} fill={saved ? 'currentColor' : 'none'} />
+        </button>
+      </div>
+
+      {showComments && (
+        <CommentsSection
+          show={showComments}
+          postId={id}
+          onCommentCountChange={(delta) => setCommentCount((c) => Math.max(0, c + delta))}
+        />
+      )}
     </div>
   );
 }

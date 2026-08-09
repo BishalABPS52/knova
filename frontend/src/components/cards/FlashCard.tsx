@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FeedActions, ReelActions, CommentsSection, ExploreActions } from './Shared';
+import { FeedActions, ReelActions, CommentsSection, ExploreCardShell } from './Shared';
 import FollowButton from '@/components/ui/FollowButton';
 import PostMenu from '@/components/ui/PostMenu';
 
@@ -261,7 +261,7 @@ function FlashCardReel({ id, question, answer, subtitle, theme, tag, author, tim
   );
 }
 
-function FlashCardExplore({ id, tag, question, answer, author, upvotes, userVote, userSaved, onVote, onSave, onFlip }: CardProps) {
+function FlashCardExplore({ id, tag, question, answer, author, creatorId, upvotes, comments, userVote, userSaved, isOwner, onVote, onSave, onShare, onDelete, onFlip }: CardProps) {
   const [flipped, setFlipped] = useState(false);
 
   const toggle = () => {
@@ -270,29 +270,41 @@ function FlashCardExplore({ id, tag, question, answer, author, upvotes, userVote
     if (next && id) onFlip?.(String(id));
   };
 
+  const chip = (
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[#f36710] bg-[#fef3ea] px-2 py-0.5 rounded-full">
+      <span className="material-symbols-outlined text-[12px]">style</span>
+      {tag || 'Flashcard'}
+    </span>
+  );
+
   return (
-    <div
-      onClick={toggle}
-      className="bg-white rounded-xl border border-[#ece9e7] p-4 md:p-5 hover:shadow-md hover:border-[#e1bfb1] transition-all cursor-pointer"
+    <ExploreCardShell
+      id={id}
+      author={author}
+      creatorId={creatorId}
+      chip={chip}
+      upvotes={upvotes}
+      comments={comments}
+      userVote={userVote}
+      userSaved={userSaved}
+      isOwner={isOwner}
+      onVote={onVote}
+      onSave={onSave}
+      onShare={onShare}
+      onDelete={onDelete}
     >
-      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[#f36710] bg-[#fef3ea] px-2 py-0.5 rounded-full mb-2.5">
-        <span className="material-symbols-outlined text-[12px]">style</span>
-        {tag || 'Flashcard'}
-      </span>
-      {!flipped ? (
-        <h3 className="text-[14px] md:text-[15px] font-semibold text-[#1b1c1c] leading-snug line-clamp-4">{question || 'Question'}</h3>
-      ) : (
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-wide text-[#f36710] mb-1">Answer</p>
-          <p className="text-[13px] text-[#594137] leading-relaxed line-clamp-5">{answer || 'No answer'}</p>
-        </div>
-      )}
-      <p className="text-[11px] text-[#b0a49d] mt-2">{flipped ? 'Tap to hide answer' : 'Tap to reveal answer'}</p>
-      <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#f3f1ef]">
-        <span className="text-xs text-[#8d7165] font-medium truncate">{author || 'Unknown'}</span>
-        <ExploreActions upvotes={upvotes ?? 0} postId={id} userVote={userVote} userSaved={userSaved} onVote={onVote} onSave={onSave} />
+      <div onClick={toggle} className="cursor-pointer">
+        {!flipped ? (
+          <h3 className="text-[14px] md:text-[15px] font-semibold text-[#1b1c1c] leading-snug line-clamp-4">{question || 'Question'}</h3>
+        ) : (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-[#f36710] mb-1">Answer</p>
+            <p className="text-[13px] text-[#594137] leading-relaxed line-clamp-5">{answer || 'No answer'}</p>
+          </div>
+        )}
+        <p className="text-[11px] text-[#b0a49d] mt-2">{flipped ? 'Tap to hide answer' : 'Tap to reveal answer'}</p>
       </div>
-    </div>
+    </ExploreCardShell>
   );
 }
 

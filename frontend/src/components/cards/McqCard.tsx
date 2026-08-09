@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FeedActions, ReelActions, CommentsSection, ExploreActions } from './Shared';
+import { FeedActions, ReelActions, CommentsSection, ExploreCardShell } from './Shared';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import FollowButton from '@/components/ui/FollowButton';
 import PostMenu from '@/components/ui/PostMenu';
@@ -350,20 +350,36 @@ function MCQReel({ id, question, options, correctIndex, explanation, tags, autho
   );
 }
 
-function MCQExplore({ id, tag, question, options, explanation, author, upvotes, correctIndex = -1, userVote, userSaved, onVote, onSave, onQuizAnswer }: McqProps) {
+function MCQExplore({ id, tag, question, options, explanation, author, creatorId, upvotes, comments, correctIndex = -1, userVote, userSaved, isOwner, onVote, onSave, onShare, onDelete, onQuizAnswer }: McqProps) {
   const [selected, setSelected] = useState<number | null>(null);
   const answered = selected !== null;
 
-  const choose = (e: React.MouseEvent, i: number) => {
-    e.stopPropagation();
+  const choose = (i: number) => {
     if (answered) return;
     setSelected(i);
     if (id) onQuizAnswer?.(String(id), i === correctIndex);
   };
 
+  const chip = (
+    <span className="inline-block text-[10px] font-bold uppercase tracking-wide text-[#8d7165] bg-[#f3f1ef] px-2 py-0.5 rounded-full">{tag || 'General'}</span>
+  );
+
   return (
-    <div className="bg-white rounded-xl border border-[#ece9e7] p-4 md:p-5 hover:shadow-md hover:border-[#e1bfb1] transition-all">
-      <span className="inline-block text-[10px] font-bold uppercase tracking-wide text-[#8d7165] bg-[#f3f1ef] px-2 py-0.5 rounded-full mb-2.5">{tag || 'General'}</span>
+    <ExploreCardShell
+      id={id}
+      author={author}
+      creatorId={creatorId}
+      chip={chip}
+      upvotes={upvotes}
+      comments={comments}
+      userVote={userVote}
+      userSaved={userSaved}
+      isOwner={isOwner}
+      onVote={onVote}
+      onSave={onSave}
+      onShare={onShare}
+      onDelete={onDelete}
+    >
       <h3 className="text-[14px] md:text-[15px] font-semibold text-[#1b1c1c] line-clamp-2 mb-3 leading-snug">{question || 'Question'}</h3>
       <div className="space-y-1.5">
         {options?.map((opt, i) => {
@@ -380,7 +396,7 @@ function MCQExplore({ id, tag, question, options, explanation, author, upvotes, 
               key={opt}
               type="button"
               disabled={answered}
-              onClick={(e) => choose(e, i)}
+              onClick={() => choose(i)}
               className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[12px] flex items-center gap-2 transition-colors ${cls}`}
             >
               <span className="font-bold text-[#f36710] text-[11px] shrink-0">{String.fromCharCode(65 + i)}</span>
@@ -394,11 +410,7 @@ function MCQExplore({ id, tag, question, options, explanation, author, upvotes, 
       {answered && explanation && (
         <p className="mt-2.5 text-[12px] text-[#594137]/80 bg-[#f7f5f4] rounded-lg p-2.5 leading-relaxed">{explanation}</p>
       )}
-      <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#f3f1ef]">
-        <span className="text-xs text-[#8d7165] font-medium truncate">{author || 'Unknown'}</span>
-        <ExploreActions upvotes={upvotes ?? 0} postId={id} userVote={userVote} userSaved={userSaved} onVote={onVote} onSave={onSave} />
-      </div>
-    </div>
+    </ExploreCardShell>
   );
 }
 

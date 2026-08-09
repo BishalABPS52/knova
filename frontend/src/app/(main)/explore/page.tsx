@@ -5,31 +5,41 @@ import { Search, SlidersHorizontal, Loader2, Sparkles } from 'lucide-react';
 import FlashCard from '@/components/cards/FlashCard';
 import McqCard from '@/components/cards/McqCard';
 import TextCard from '@/components/cards/TextContentCard';
+import ShareModal from '@/components/ui/ShareModal';
 import { postService } from '@/lib/posts';
+import { useAuth } from '@/hooks/useAuth';
 import type { Post, TopicSection } from '@/types/post';
 
 const FOR_YOU = 'for-you';
 const TOPIC_PAGE_SIZE = 10;
 
 interface CardActions {
+  currentUserId?: string;
   onVote: (id: string, value: number) => Promise<void>;
   onSave: (id: string) => Promise<void>;
+  onShare: (id: string | number) => void;
+  onDelete: (id: string) => Promise<void>;
 }
 
-// The explore variants are interactive: flashcards flip, MCQs are answerable,
-// text expands, and every card can be upvoted/saved through these handlers.
+// Explore cards are full post cards: author header with follow + overflow menu
+// (copy link / share / save / report / delete), interactive content (flip /
+// answer / read-more), and a vote / comment / share / save action bar.
 function renderExploreCard(post: Post, actions: CardActions): ReactNode {
   const author = post.creator?.user?.username || 'Unknown';
   const tag = post.tags?.[0] || 'General';
-  const upvotes = post.upvote_count || 0;
   const common = {
     id: post.id,
     author,
-    upvotes,
+    creatorId: post.creator?.id,
+    upvotes: post.upvote_count || 0,
+    comments: post.comment_count || 0,
     userVote: post.user_vote,
     userSaved: post.user_saved,
+    isOwner: actions.currentUserId != null && actions.currentUserId === post.creator?.user?.id,
     onVote: actions.onVote,
     onSave: actions.onSave,
+    onShare: actions.onShare,
+    onDelete: actions.onDelete,
   };
 
   if (post.content_type === 'flashcard') {
@@ -54,19 +64,18 @@ function renderExploreCard(post: Post, actions: CardActions): ReactNode {
   return <TextCard variant="explore" tag={tag} title={post.title} content={post.body} {...common} />;
 }
 
-function MasonryGrid({ posts, actions }: { posts: Post[]; actions: CardActions }) {
+function CardGrid({ posts, actions }: { posts: Post[]; actions: CardActions }) {
   return (
-    <div className="columns-2 md:columns-3 gap-3 md:gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 items-start">
       {posts.map((post) => (
-        <div key={post.id} className="break-inside-avoid mb-3 md:mb-4">
-          {renderExploreCard(post, actions)}
-        </div>
+        <div key={post.id}>{renderExploreCard(post, actions)}</div>
       ))}
     </div>
   );
 }
 
 export default function Explore() {
+  const { user } = useAuth();
   const [query, setQuery] = useState('');
   const [forYou, setForYou] = useState<Post[]>([]);
   const [sections, setSections] = useState<TopicSection[]>([]);
@@ -75,6 +84,7 @@ export default function Explore() {
   const [activeTab, setActiveTab] = useState<string>(FOR_YOU);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [shareId, setShareId] = useState<string | number | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -174,7 +184,26 @@ export default function Explore() {
     [patchPost]
   );
 
-  const actions: CardActions = { onVote: handleVote, onSave: handleSave };
+  const handleShare = useCallback((id: string | number) => setShareId(id), []);
+
+  const handleDelete = useCallback(async (id: string) => {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+    try {
+      await postService.deletePost(id);
+      setForYou((prev) => prev.filter((p) => p.id !== id));
+      setSections((prev) => prev.map((s) => ({ ...s, items: s.items.filter((p) => p.id !== id) })));
+    } catch (err) {
+      console.error('Failed to delete post:', err);
+    }
+  }, []);
+
+  const actions: CardActions = {
+    currentUserId: user?.id,
+    onVote: handleVote,
+    onSave: handleSave,
+    onShare: handleShare,
+    onDelete: handleDelete,
+  };
 
   const tabs = [{ key: FOR_YOU, label: 'For You' }, ...sections.map((s) => ({ key: s.topic_id, label: s.topic_name }))];
   const activeSection = sections.find((s) => s.topic_id === activeTab);
@@ -257,7 +286,7 @@ export default function Explore() {
         {!isLoading && !error && !isEmpty && (
           <>
             {activePosts.length > 0 ? (
-              <MasonryGrid posts={activePosts} actions={actions} />
+              <CardGrid posts={activePosts} actions={actions} />
             ) : (
               <p className="text-center text-[#8d7165] py-16">No posts in this topic yet.</p>
             )}
@@ -282,6 +311,8 @@ export default function Explore() {
           </>
         )}
       </div>
+
+      <ShareModal isOpen={shareId !== null} onClose={() => setShareId(null)} contentId={shareId} />
     </main>
   );
 }
