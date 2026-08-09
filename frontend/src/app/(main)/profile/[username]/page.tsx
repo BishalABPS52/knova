@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Grid, BarChart2, ArrowUp, X, Settings } from "lucide-react";
+import { Grid, BarChart2, ArrowUp, X, Settings, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import Spinner, { ButtonSpinner } from "@/components/ui/Spinner";
+import FollowButton from "@/components/ui/FollowButton";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/context/AuthContext";
 import { getMyProfile, getProfile, updateProfile } from "@/lib/profile";
+import { getFollowing, type FollowedCreator } from "@/lib/creator";
 
 interface StatItem {
   name: string;
@@ -18,8 +20,11 @@ interface StatItem {
 export default function ProfileScreen() {
   const { username } = useParams();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"posts" | "stats">("posts");
+  const [activeTab, setActiveTab] = useState<"posts" | "stats" | "following">("posts");
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [following, setFollowing] = useState<FollowedCreator[]>([]);
+  const [followingLoading, setFollowingLoading] = useState(false);
+  const [followingLoaded, setFollowingLoaded] = useState(false);
 
   const { user, refreshUser } = useAuth();
 
@@ -46,6 +51,20 @@ export default function ProfileScreen() {
       setEditBio(profile.bio || "");
     }
   }, [profile, isEditing]);
+
+  // The following list is the current user's own follow graph, so it's only
+  // available (and only shown) on your own profile. Fetched lazily on first view.
+  useEffect(() => {
+    if (activeTab !== "following" || !isOwnProfile || followingLoaded) return;
+    setFollowingLoading(true);
+    getFollowing()
+      .then((res) => {
+        setFollowing(res.following);
+        setFollowingLoaded(true);
+      })
+      .catch((err) => console.error("Failed to load following:", err))
+      .finally(() => setFollowingLoading(false));
+  }, [activeTab, isOwnProfile, followingLoaded]);
 
   if (loading) {
     return (
@@ -203,24 +222,23 @@ export default function ProfileScreen() {
         </div>
       </section>
 
-      <section className="bg-white rounded-full p-1 flex relative w-max mx-auto shadow-sm border border-[#efeded]">
-        <div
-          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#fef3ea] rounded-full transition-transform duration-300 ${activeTab === "stats" ? "translate-x-[calc(100%+4px)]" : "translate-x-0"}`}
-        ></div>
-        <button
-          onClick={() => setActiveTab("posts")}
-          className={`flex-1 px-8 py-2 flex items-center justify-center gap-2 font-semibold relative z-10 transition-colors ${activeTab === "posts" ? "text-[#f36710]" : "text-[#5c5c5c]"}`}
-        >
-          <Grid className="w-4 h-4" />
-          <span className="text-sm">Posts</span>
-        </button>
-        <button
-          onClick={() => setActiveTab("stats")}
-          className={`flex-1 px-8 py-2 flex items-center justify-center gap-2 font-semibold relative z-10 transition-colors ${activeTab === "stats" ? "text-[#f36710]" : "text-[#5c5c5c]"}`}
-        >
-          <BarChart2 className="w-4 h-4" />
-          <span className="text-sm">Stats</span>
-        </button>
+      <section className="bg-white rounded-full p-1 flex w-max mx-auto shadow-sm border border-[#efeded]">
+        {([
+          { key: "posts", label: "Posts", icon: Grid },
+          { key: "stats", label: "Stats", icon: BarChart2 },
+          ...(isOwnProfile ? [{ key: "following", label: "Following", icon: Users }] : []),
+        ] as const).map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => setActiveTab(key as typeof activeTab)}
+            className={`px-6 md:px-8 py-2 flex items-center justify-center gap-2 font-semibold rounded-full transition-colors ${
+              activeTab === key ? "bg-[#fef3ea] text-[#f36710]" : "text-[#5c5c5c] hover:text-[#1b1c1c]"
+            }`}
+          >
+            <Icon className="w-4 h-4" />
+            <span className="text-sm">{label}</span>
+          </button>
+        ))}
       </section>
 
       {activeTab === "posts" && (
@@ -277,6 +295,55 @@ export default function ProfileScreen() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {activeTab === "following" && (
+        <div className="pb-8">
+          {followingLoading ? (
+            <div className="flex justify-center py-10">
+              <Spinner size={28} className="text-orange-500" label="Loading following" />
+            </div>
+          ) : following.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="font-semibold text-[#594137]">Not following anyone yet</p>
+              <p className="text-sm text-[#8d7165] mt-1">Follow creators and they&apos;ll show up here.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {following.map((c) => (
+                <div
+                  key={c.creator_id}
+                  className="bg-white rounded-2xl p-4 shadow-sm border border-[#efeded] flex items-center gap-4"
+                >
+                  <Link
+                    href={`/profile/${c.username}`}
+                    className="w-12 h-12 rounded-full overflow-hidden bg-[#f5f5f5] shrink-0"
+                  >
+                    <Image
+                      src={c.avatar_url || "/logos/default-avatar.png"}
+                      alt={c.username}
+                      width={48}
+                      height={48}
+                      className="object-cover w-full h-full"
+                    />
+                  </Link>
+                  <div className="flex-1 min-w-0">
+                    <Link
+                      href={`/profile/${c.username}`}
+                      className="font-bold text-[#1b1c1c] hover:underline truncate block"
+                    >
+                      {c.username}
+                    </Link>
+                    <p className="text-sm text-[#8d7165] truncate">
+                      {c.headline || `${c.follower_count} followers`}
+                    </p>
+                  </div>
+                  <FollowButton creatorId={c.creator_id} author={c.username} initialFollowing />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
