@@ -59,6 +59,7 @@ async def get_feed(
     user: User,
     size: int,
     background_tasks: BackgroundTasks | None = None,
+    exclude_ids: set[UUID] | None = None,
 ) -> PostListResponse:
     # Warm-load artifacts on first use (idempotent).
     if not models.is_loaded:
@@ -67,7 +68,7 @@ async def get_feed(
     empty = PostListResponse(items=[], total=0, page=1, size=size, has_next=False)
 
     ctx = await load_user_context(db, user)
-    candidates = await retrieve_candidates(db, ctx)
+    candidates = await retrieve_candidates(db, ctx, exclude_ids)
     if not candidates:
         return empty
 

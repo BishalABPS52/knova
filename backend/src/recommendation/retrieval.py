@@ -117,7 +117,9 @@ def _row(record, tier: str, followed: bool) -> CandidateRow:
     )
 
 
-async def retrieve_candidates(db: AsyncSession, ctx: UserContext) -> list[CandidateRow]:
+async def retrieve_candidates(
+    db: AsyncSession, ctx: UserContext, exclude_ids: set[UUID] | None = None
+) -> list[CandidateRow]:
     # "Seen" means actually looked at, not merely served. The feed writes an
     # impression row for everything it returns, so filtering on row existence
     # alone would burn a post the user scrolled straight past.
@@ -130,6 +132,13 @@ async def retrieve_candidates(db: AsyncSession, ctx: UserContext) -> list[Candid
             Interaction.card_flipped.is_(True),
         ),
     )
+
+    # Posts the client has already displayed this browsing session. Engagement-based
+    # "seen" lags behind (telemetry flushes on an interval, and a fast scroll rarely
+    # dwells long enough to qualify), so paging by repeated requests would otherwise
+    # re-serve the same top-ranked posts. This exclusion is ephemeral and per-request:
+    # a scrolled-past post can still reappear in a future session.
+    exclude_ids = exclude_ids or set()
 
     def tier_stmt(*, tier, followed, limit, prio, topic_names=None, creator_ids=None, randomize=True):
         """One SELECT for a tier, tagged with literal tier/followed/priority markers
@@ -153,6 +162,8 @@ async def retrieve_candidates(db: AsyncSession, ctx: UserContext) -> list[Candid
                 Post.id.notin_(seen_subq),
             )
         )
+        if exclude_ids:
+            stmt = stmt.where(Post.id.notin_(exclude_ids))
         if topic_names:
             stmt = stmt.where(Topic.name.in_(list(topic_names)))
         if creator_ids:
