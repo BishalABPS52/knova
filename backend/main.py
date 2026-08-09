@@ -117,6 +117,7 @@ from src.posts.router import router as posts_router
 from src.recommendation.router import router as feed_router
 from src.quiz.router import router as quiz_router
 from src.telemetry.router import router as telemetry_router
+from src.creator.router import router as creator_router
 
 base_router.include_router(auth_router, prefix="/auth")
 base_router.include_router(onboarding_router)
@@ -124,6 +125,7 @@ base_router.include_router(ref_router, prefix="/reference")
 base_router.include_router(quiz_router, prefix="/quiz")
 base_router.include_router(users_router, prefix="/users")
 base_router.include_router(telemetry_router, prefix="/interactions")
+base_router.include_router(creator_router, prefix="/creator")
 # Feed router must be registered before the posts router so /posts/feed matches
 # before the /posts/{post_id} catch-all.
 base_router.include_router(feed_router, prefix="/posts")
