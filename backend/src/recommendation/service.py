@@ -17,6 +17,7 @@ from fastapi import BackgroundTasks
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.config import get_settings
 from ml.loader import models
 from src.db.models import Post, Topic, User, UserTopicInterest
 from src.posts.schemas import PostListResponse
@@ -27,6 +28,7 @@ from .features import build_feature_frame
 from .ranker import assemble_feed
 from .retrieval import CandidateRow, UserContext, load_user_context, retrieve_candidates
 from .schemas import ExploreResponse, TopicSection
+from .user_stats import load_user_stats
 
 
 def build_impression_rows(
@@ -72,7 +74,13 @@ async def get_feed(
     if not candidates:
         return empty
 
-    frame = build_feature_frame(ctx, candidates)
+    # Live per-user feature values (flag-gated). Off => build_feature_frame falls back
+    # to the frozen training medians for everything but the similarity signals.
+    stats = None
+    if get_settings().LIVE_FEATURES_ENABLED:
+        stats = await load_user_stats(db, user.id)
+
+    frame = build_feature_frame(ctx, candidates, stats)
     ranked = assemble_feed(frame, n_ranked=size)
     ordered_ids: list[UUID] = [r["post_id"] for r in ranked]
     if not ordered_ids:
