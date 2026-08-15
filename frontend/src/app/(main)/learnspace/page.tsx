@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import { motion, type PanInfo } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ChevronUp, Sparkles, X } from 'lucide-react';
 import FlashCard from '@/components/cards/FlashCard';
@@ -45,10 +45,10 @@ const postService = new PostService();
 
 const PAGE_SIZE = 15;
 
-/** Minimum horizontal travel (px) for a card swipe to register. */
-const SWIPE_THRESHOLD = 60;
-/** Horizontal travel must exceed vertical by this factor, so scrolling never triggers a swipe. */
-const SWIPE_RATIO = 1.4;
+/** Horizontal travel (px) past which a drag commits to a swipe. */
+const SWIPE_TRIGGER = 90;
+/** A quick horizontal flick (px/s) commits even below the distance threshold. */
+const SWIPE_VELOCITY = 500;
 
 /**
  * Consecutive empty batches tolerated before the reel stops paging. The server
@@ -141,7 +141,6 @@ export default function SpaceReel() {
   // Bumped to force the loader effect to re-run without changing the topic (used
   // after on-demand question generation).
   const [reloadNonce, setReloadNonce] = useState(0);
-  const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const seenIdsRef = useRef<Set<string>>(new Set());
   // Guards the endless loader against concurrent/duplicate requests, and backs
@@ -254,24 +253,17 @@ export default function SpaceReel() {
 
   const exitQuizMode = useCallback(() => setQuizTopic(null), []);
 
-  // Horizontal swipe on a card: left = drill this card's topic as a quiz; right
-  // (while in quiz mode) = back to the feed. We only act on a decisively horizontal
-  // gesture and never preventDefault, so vertical scroll-snap is unaffected.
-  const onCardPointerDown = useCallback((e: ReactPointerEvent) => {
-    swipeStartRef.current = { x: e.clientX, y: e.clientY };
-  }, []);
-
-  const makePointerUp = useCallback(
-    (topicId?: string, label?: string) => (e: ReactPointerEvent) => {
-      const start = swipeStartRef.current;
-      swipeStartRef.current = null;
-      if (!start) return;
-      const dx = e.clientX - start.x;
-      const dy = e.clientY - start.y;
-      if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) return;
-      if (dx < 0 && !quizTopic) enterQuizMode(topicId, label);
-      else if (dx > 0 && quizTopic) exitQuizMode();
-    },
+  // Horizontal drag on a card: left = drill this card's topic as a quiz; right
+  // (while in quiz mode) = back to the feed. motion's drag="x" sets touch-action
+  // to pan-y, so vertical scroll-snap keeps working and the card springs back.
+  const handleCardDragEnd = useCallback(
+    (topicId?: string, label?: string) =>
+      (_event: unknown, info: PanInfo) => {
+        const left = info.offset.x < -SWIPE_TRIGGER || info.velocity.x < -SWIPE_VELOCITY;
+        const right = info.offset.x > SWIPE_TRIGGER || info.velocity.x > SWIPE_VELOCITY;
+        if (left && !quizTopic) enterQuizMode(topicId, label);
+        else if (right && quizTopic) exitQuizMode();
+      },
     [quizTopic, enterQuizMode, exitQuizMode],
   );
 
@@ -481,13 +473,21 @@ export default function SpaceReel() {
             if (!card) return null;
 
             // The wrapper is the scroller's child, so it carries the snap/height
-            // rules and the swipe handlers; TrackedCard fills it for dwell tracking.
+            // rules and the drag gesture; TrackedCard fills it for dwell tracking.
+            // Only cards with a real topic are draggable (mock/organic-less cards aren't).
+            const draggable = !useMockData && !!post.topicId;
             return (
-              <div
+              <motion.div
                 key={post.id}
                 className="h-[100svh] w-full snap-start"
-                onPointerDown={onCardPointerDown}
-                onPointerUp={makePointerUp(post.topicId, post.tag)}
+                drag={draggable ? 'x' : false}
+                dragDirectionLock
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.7}
+                dragMomentum={false}
+                onDragEnd={draggable ? handleCardDragEnd(post.topicId, post.tag) : undefined}
+                whileDrag={{ scale: 0.97, cursor: 'grabbing' }}
+                transition={{ type: 'spring', stiffness: 500, damping: 40 }}
               >
                 <TrackedCard
                   postId={String(post.id)}
@@ -498,7 +498,7 @@ export default function SpaceReel() {
                 >
                   {card}
                 </TrackedCard>
-              </div>
+              </motion.div>
             );
           })
         )}
