@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "motion/react";
 import {
   IdCard,
   Lock,
@@ -20,14 +21,26 @@ import {
 } from "lucide-react";
 import { getTopics, Topic } from "@/lib/reference";
 import { getMyInterests, updateMyInterests } from "@/lib/interests";
+import { useAuth } from "@/context/AuthContext";
 
 type ModalType = "personal" | "password" | "topics" | null;
 
 export default function SettingsPage() {
   const router = useRouter();
+  const { logout } = useAuth();
   const [activeModal, setActiveModal] = useState<ModalType>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const closeModal = () => setActiveModal(null);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await logout();
+    } finally {
+      setLoggingOut(false);
+    }
+  };
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -43,16 +56,21 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] text-[#1a1a1a] pb-24 font-sans selection:bg-orange-100">
-      <main className="max-w-2xl mx-auto pt-10 px-4 sm:px-6 space-y-10">
-        <h1 className="text-3xl font-bold text-[#1a1a1a] tracking-tight">
-          Settings
-        </h1>
+      <main className="max-w-2xl mx-auto pt-10 px-4 sm:px-6 space-y-8">
+        <header className="space-y-1">
+          <h1 className="text-3xl font-bold text-[#1a1a1a] tracking-tight">
+            Settings
+          </h1>
+          <p className="text-sm text-[#8d7165]">
+            Manage your account, security and learning preferences.
+          </p>
+        </header>
 
         <section className="space-y-3">
           <h2 className="text-xs font-bold text-[#5c5c5c] uppercase tracking-wider px-1">
             Account
           </h2>
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-black/[0.04] overflow-hidden">
             <SettingsButton
               icon={<IdCard size={20} className="text-[#594137]" />}
               label="Personal Information"
@@ -77,7 +95,7 @@ export default function SettingsPage() {
           <h2 className="text-xs font-bold text-[#5c5c5c] uppercase tracking-wider px-1">
             Support
           </h2>
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-black/[0.04] overflow-hidden">
             <SettingsButton
               icon={<HelpCircle size={20} className="text-[#594137]" />}
               label="Help / FAQ"
@@ -99,28 +117,44 @@ export default function SettingsPage() {
         </section>
 
         <section>
-          <button className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4 hover:bg-red-50/50 transition-colors group">
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="w-full bg-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-black/[0.04] p-4 flex items-center gap-4 hover:bg-red-50/50 transition-colors group disabled:opacity-60 disabled:cursor-not-allowed"
+          >
             <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
-              <LogOut size={18} className="text-red-600 ml-1" />
+              {loggingOut ? (
+                <Loader2 size={18} className="text-red-600 animate-spin" />
+              ) : (
+                <LogOut size={18} className="text-red-600 ml-0.5" />
+              )}
             </div>
-            <span className="text-red-600 font-semibold text-sm">Log Out</span>
+            <span className="text-red-600 font-semibold text-sm">
+              {loggingOut ? "Logging out…" : "Log Out"}
+            </span>
           </button>
+
+          <p className="text-center text-xs text-[#b8b0ab] mt-6">
+            Knova · Learn a little every day
+          </p>
         </section>
       </main>
 
-      {activeModal && (
-        <ModalWrapper onClose={closeModal}>
-          {activeModal === "personal" && (
-            <PersonalInfoModal onClose={closeModal} />
-          )}
-          {activeModal === "password" && (
-            <ChangePasswordModal onClose={closeModal} />
-          )}
-          {activeModal === "topics" && (
-            <PreferredTopicsModal onClose={closeModal} />
-          )}
-        </ModalWrapper>
-      )}
+      <AnimatePresence>
+        {activeModal && (
+          <ModalWrapper onClose={closeModal}>
+            {activeModal === "personal" && (
+              <PersonalInfoModal onClose={closeModal} />
+            )}
+            {activeModal === "password" && (
+              <ChangePasswordModal onClose={closeModal} />
+            )}
+            {activeModal === "topics" && (
+              <PreferredTopicsModal onClose={closeModal} />
+            )}
+          </ModalWrapper>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -168,13 +202,22 @@ function ModalWrapper({
 }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div
+      <motion.div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
       />
-      <div className="relative w-full max-w-[512px] max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+      <motion.div
+        className="relative w-full max-w-[512px] max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ type: "spring", stiffness: 320, damping: 28 }}
+      >
         {children}
-      </div>
+      </motion.div>
     </div>
   );
 }
