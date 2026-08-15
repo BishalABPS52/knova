@@ -12,6 +12,8 @@ from core.security import (
     issue_tokens, set_auth_cookies,
 )
 
+MIN_PASSWORD_LENGTH = 8
+
 
 async def refresh_user_session(response: Response, db: AsyncSession, refresh_token: str) -> dict:
     payload = decode_token(refresh_token)
@@ -79,6 +81,33 @@ async def register_user(response: Response, db: AsyncSession, body: RegisterRequ
             "onboarding_completed": user.onboarding_completed,
         },
     }
+
+
+async def change_user_password(
+    db: AsyncSession, user_id: uuid.UUID, current_password: str, new_password: str
+) -> None:
+    """Change the signed-in user's password. Verifies the current password before
+    accepting the new one; OAuth-only accounts (no password_hash) can't use this."""
+    user = await db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not user.password_hash or not verify_password(current_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+
+    if len(new_password) < MIN_PASSWORD_LENGTH:
+        raise HTTPException(
+            status_code=400,
+            detail=f"New password must be at least {MIN_PASSWORD_LENGTH} characters",
+        )
+
+    if verify_password(new_password, user.password_hash):
+        raise HTTPException(
+            status_code=400, detail="New password must be different from the current one"
+        )
+
+    user.password_hash = hash_password(new_password)
+    await db.commit()
 
 
 async def login_user(response: Response, db: AsyncSession, body: LoginRequest) -> dict:

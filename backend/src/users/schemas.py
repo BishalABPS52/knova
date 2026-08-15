@@ -31,6 +31,7 @@ class UserProfileResponse(BaseModel):
 
 class ProfileUpdateRequest(BaseModel):
     username: str | None = None
+    email: EmailStr | None = None
     avatar_url: str | None = None
     bio: str | None = None
     headline: str | None = None

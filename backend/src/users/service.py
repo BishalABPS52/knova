@@ -121,7 +121,23 @@ async def update_user_profile(db: AsyncSession, user_id: UUID, data: ProfileUpda
         if not new_username:
             raise HTTPException(status_code=400, detail="Username cannot be empty")
         user.username = new_username
-        
+
+    if data.email is not None:
+        new_email = data.email.strip().lower()
+        if not new_email:
+            raise HTTPException(status_code=400, detail="Email cannot be empty")
+        if new_email != (user.email or "").lower():
+            taken = (
+                await db.execute(
+                    select(User).where(
+                        func.lower(User.email) == new_email, User.id != user_id
+                    )
+                )
+            ).scalar_one_or_none()
+            if taken:
+                raise HTTPException(status_code=409, detail="Email already in use")
+            user.email = new_email
+
     if data.avatar_url is not None:
         user.avatar_url = data.avatar_url
         
