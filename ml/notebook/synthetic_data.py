@@ -401,6 +401,11 @@ def generate_text_content(topic):
 
 # ==========================================
 # 4. GENERATE CONTENT (10,000)
+# NOTE: this step produces placeholder/template text only. After running it,
+# regenerate real educational content with:
+#     python ml/notebook/build_real_content.py
+# (rewrites title/description/front/back/options/explanation in
+#  ml/data/knova_content.csv from the curated knowledge base in ml/notebook/kb/)
 # ==========================================
 print(f"Generating {N_CONTENT} content items...")
 

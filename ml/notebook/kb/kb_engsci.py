@@ -1,0 +1,387 @@
+"""Knowledge base — engineering, mathematics & natural science topics.
+
+Same contract as kb_tech.py: definitions compose as "<Term> is <phrase>.",
+facts are standalone true sentences.
+"""
+
+KB_ENGSCI = {
+    "Classical Mechanics": {
+        "terms": {
+            "Newton's laws": "three rules of motion: inertia, F = ma, and equal-and-opposite reaction forces",
+            "Kinematics": "the description of motion through position, velocity and acceleration versus time",
+            "Vector math": "representing quantities with magnitude and direction so they add tip-to-tail",
+            "Torque": "the turning effect of a force, equal to the lever arm times the perpendicular force component",
+            "Friction": "the force opposing relative sliding between two surfaces in contact",
+            "Momentum": "mass times velocity, conserved whenever no external net force acts on a system",
+            "Work-energy theorem": "the net work done on an object equals its change in kinetic energy",
+            "Projectile motion": "curved flight under gravity alone, combining constant horizontal velocity with vertical acceleration",
+        },
+        "facts": [
+            "Newton's first law implies that a moving object needs no force to keep moving at constant velocity.",
+            "Friction always acts opposite to the direction of relative sliding.",
+            "Momentum is conserved in collisions even when kinetic energy is not.",
+            "In projectile motion, horizontal and vertical motions are independent of each other.",
+        ],
+    },
+    "Fluid Mechanics": {
+        "terms": {
+            "Bernoulli equation": "an energy balance for steady ideal flow stating that faster fluid exerts lower pressure",
+            "Reynolds number": "the dimensionless ratio of inertial to viscous forces that predicts flow regime",
+            "Viscosity": "a fluid's internal resistance to shearing or flowing",
+            "Pipe flow": "confined flow where friction causes progressive head loss along the pipe",
+            "Hydrostatic pressure": "pressure at depth in a fluid at rest, growing as rho-g-h",
+            "Laminar flow": "smooth flow in parallel layers with no mixing between them",
+            "Turbulent flow": "chaotic, eddy-filled flow that mixes strongly and loses more energy to friction",
+            "Continuity equation": "mass conservation stating that flow rate in equals flow rate out for incompressible fluids",
+        },
+        "facts": [
+            "For pipe flow, Reynolds numbers below about 2300 indicate laminar conditions and above 4000 turbulent ones.",
+            "Bernoulli's principle explains lift on an airfoil and pressure drop at a pipe constriction.",
+            "Doubling a pipe's diameter cuts its per-length friction losses dramatically, since area grows fourfold.",
+            "A venturi meter measures flow rate from the pressure drop across a narrowed section.",
+        ],
+    },
+    "Thermodynamics": {
+        "terms": {
+            "Entropy": "a measure of how dispersed a system's energy is, which isolated systems never decrease overall",
+            "Laws of thermodynamics": "the four governing principles covering thermal equilibrium, energy conservation, entropy growth and absolute-zero behavior",
+            "Heat engines": "devices converting heat flow between hot and cold reservoirs into work",
+            "Refrigeration cycles": "cycles that move heat from cold to hot by supplying work, using refrigerant phase changes",
+            "First law": "energy conservation stating that heat added equals internal energy rise plus work done",
+            "Carnot efficiency": "the maximum possible efficiency of any heat engine, one minus T-cold over T-hot in kelvin",
+            "Conduction": "heat transfer through direct molecular contact within or between solids",
+        },
+        "facts": [
+            "No heat engine can exceed Carnot efficiency set by its reservoir temperatures alone.",
+            "Perpetual motion machines violate the first or second law of thermodynamics.",
+            "Refrigerators and heat pumps are the same machine viewed from opposite purposes.",
+            "Metals feel colder than wood at room temperature because they conduct heat away from skin faster.",
+        ],
+    },
+    "Soil Mechanics": {
+        "terms": {
+            "Soil compaction": "mechanically densifying soil by expelling air from its voids to raise strength",
+            "Bearing capacity": "the maximum pressure foundation soil can carry before shear failure beneath it",
+            "Effective stress": "total stress minus pore water pressure, the stress actually carried by soil grains",
+            "Slope stability": "analysis of whether resisting shear strength exceeds driving forces on a slope",
+            "Shear strength": "soil's resistance to sliding along internal planes, from cohesion and friction",
+            "Consolidation": "slow volume reduction of saturated clay as excess pore water drains out under load",
+        },
+        "facts": [
+            "Terzaghi's effective stress principle underpins nearly all soil strength and settlement analysis.",
+            "Over-compacting some clays can break their particles down and reduce strength instead of raising it.",
+            "Rapid loading of saturated clay triggers undrained behavior because water cannot escape instantly.",
+            "Most landslides follow rainfall that raises pore pressure and lowers effective stress in the slope.",
+        ],
+    },
+    "Electrical Engineering": {
+        "terms": {
+            "Circuit analysis": "solving for currents and voltages using Ohm's law with Kirchhoff's current and voltage laws",
+            "Power systems": "networks that generate, transmit and distribute electrical power, usually three-phase AC",
+            "Transformers": "static machines that change AC voltage levels through electromagnetic induction between windings",
+            "Signal processing": "filtering, transforming and analyzing signals such as audio or sensor data",
+            "Kirchhoff's laws": "current entering a node equals current leaving; voltages around any loop sum to zero",
+            "Impedance": "the AC generalization of resistance, combining resistive and reactive opposition",
+            "Three-phase power": "generation and transmission using three sinusoids offset by 120 degrees for constant delivered power",
+        },
+        "facts": [
+            "Transformers only work with alternating current, because induction requires changing flux.",
+            "Transmitting power at higher voltage lowers current and therefore reduces I-squared-R line losses.",
+            "Resistors in series add directly, while parallel resistors combine reciprocally.",
+            "The Nyquist rate says a signal must be sampled at more than twice its highest frequency to reconstruct it.",
+        ],
+    },
+    "Mechanical Engineering": {
+        "terms": {
+            "CAD modeling": "creating precise parametric 3D geometry used for design, simulation and manufacture",
+            "Machine design": "sizing components like shafts, bearings and fasteners against load and fatigue demands",
+            "Manufacturing processes": "shaping methods such as casting, machining, forming and welding chosen per part",
+            "Gear systems": "toothed wheel trains that trade torque for speed at a fixed ratio",
+            "Stress concentration": "localized stress spikes at holes, notches and sharp corners where cracks start",
+            "Fatigue": "progressive damage from repeated loading at stresses far below static failure levels",
+        },
+        "facts": [
+            "A gear ratio multiplies torque while dividing rotational speed by the same factor.",
+            "Most metal mechanical failures originate as fatigue cracks at stress concentrations.",
+            "Fillets and generous radii reduce stress concentration around corners.",
+            "Tolerancing defines allowable dimensional variation so parts assemble interchangeably.",
+        ],
+    },
+    "Structural Engineering": {
+        "terms": {
+            "Concrete mix": "proportioned blend of cement, aggregates and water whose strength grows with proper curing",
+            "Beam deflection": "the elastic sag of a beam under load, proportional to load and length cubed over stiffness",
+            "Shear force": "internal force acting perpendicular to a member's axis, tending to slice it",
+            "Bending moment": "internal moment that curves a beam, largest where shear force crosses zero",
+            "Reinforced concrete": "concrete cast around steel rebar so steel carries tension while concrete carries compression",
+            "Factor of safety": "the margin by which capacity exceeds expected load, covering uncertainty",
+        },
+        "facts": [
+            "Concrete is strong in compression but weak in tension, which is why beams need rebar near their bottoms.",
+            "Deflection grows with the cube of span, so doubling length makes a beam sag about eight times as much.",
+            "Curing keeps concrete moist so cement hydration continues gaining strength for weeks.",
+            "Buckling can collapse slender columns at loads well below their material crush strength.",
+        ],
+    },
+    "Civil Engineering & Construction": {
+        "terms": {
+            "Site surveying": "measuring positions and elevations on land to map and control construction layout",
+            "Building codes": "legal minimum standards governing structural safety, fire protection and accessibility",
+            "Project estimation": "forecasting quantities, costs and durations before and during construction",
+            "Construction materials": "structural materials such as concrete, steel, timber and masonry with distinct behaviors",
+            "Project scheduling": "sequencing activities into timelines using tools like Gantt charts and critical path method",
+            "Foundation types": "shallow footings and deep piles chosen according to soil conditions and loads",
+        },
+        "facts": [
+            "The critical path is the longest chain of dependent tasks and sets the minimum project duration.",
+            "Codes exist because failures teach lessons; modern seismic codes grew out of earthquake damage studies.",
+            "Soil investigation before design prevents most settlement-related foundation failures.",
+            "Retaining walls must resist lateral earth pressure that grows linearly with depth.",
+        ],
+    },
+    "Automobiles & EVs": {
+        "terms": {
+            "Engine maintenance": "routine servicing such as oil changes, filter replacement and timing checks that prolong engine life",
+            "EV battery tech": "rechargeable lithium-ion packs whose energy density sets driving range",
+            "Fuel efficiency": "distance traveled per unit of fuel, improved by aerodynamics, weight reduction and drivetrain tuning",
+            "Regenerative braking": "recovering kinetic energy during deceleration by running the motor as a generator",
+            "Torque curve": "how engine or motor torque varies with speed, shaping acceleration behavior",
+            "Powertrain": "the chain of components delivering power from source to wheels",
+        },
+        "facts": [
+            "Electric motors deliver peak torque from standstill, giving EVs instant response off the line.",
+            "Regenerative braking recovers part of the vehicle's kinetic energy that friction brakes would waste as heat.",
+            "Cold weather reduces lithium-ion range because both chemistry slowdown and cabin heating draw energy.",
+            "Engine oil degrades with heat and contamination, which is why change intervals are distance- or time-based.",
+        ],
+    },
+    "Linear Algebra": {
+        "terms": {
+            "Matrices": "rectangular arrays of numbers representing linear transformations or systems of equations",
+            "Eigenvalues": "scalars lambda for which a matrix stretches a nonzero vector without rotating it",
+            "Vector spaces": "sets closed under vector addition and scalar multiplication, obeying linear axioms",
+            "Matrix multiplication": "row-by-column composition of transformations, which is associative but not commutative",
+            "Determinant": "a matrix invariant giving the signed volume scale factor of its transformation; zero means non-invertible",
+            "Rank": "the number of independent rows or columns, equal to the dimension of the output space",
+            "Identity matrix": "the square matrix with ones on the diagonal that leaves every vector unchanged",
+        },
+        "facts": [
+            "A square matrix is invertible exactly when its determinant is nonzero.",
+            "Eigenvectors point along directions a transformation merely scales.",
+            "Matrix multiplication does not commute: AB and BA generally differ.",
+            "Every system Ax = b is solvable precisely when b lies in the column space of A.",
+        ],
+    },
+    "Calculus": {
+        "terms": {
+            "Derivatives": "instantaneous rates of change, geometrically the slope of the tangent line to a curve",
+            "Integration": "accumulation of quantities, geometrically the signed area under a curve",
+            "Limits": "values a function approaches as its input approaches some point, the foundation of calculus",
+            "Gradient descent": "iteratively stepping downhill along the negative gradient to minimize a function",
+            "Chain rule": "differentiating composites by multiplying outer and inner derivatives",
+            "Fundamental theorem": "the result linking differentiation and integration as inverse operations",
+            "Critical points": "interior points where the derivative vanishes, candidates for maxima and minima",
+        },
+        "facts": [
+            "The derivative of a position function gives velocity; differentiating again gives acceleration.",
+            "Definite integrals accumulate rates back into total change over an interval.",
+            "Optimization problems are solved by setting derivatives to zero and testing critical points.",
+            "Machine learning training minimizes loss functions using gradient-based methods.",
+        ],
+    },
+    "Probability & Stats": {
+        "terms": {
+            "Bayes theorem": "the rule updating P(A given B) from the prior and the likelihood P(B given A)",
+            "Normal distribution": "the symmetric bell-shaped distribution fully described by its mean and standard deviation",
+            "Standard deviation": "the typical distance of data points from their mean",
+            "Central limit theorem": "sample means approach a normal distribution as sample size grows, whatever the population shape",
+            "Hypothesis testing": "deciding whether data are surprising enough under a null hypothesis to reject it",
+            "P-value": "the probability of results at least as extreme as observed, assuming the null hypothesis is true",
+            "Expected value": "the long-run average of a random variable, weighting outcomes by probability",
+            "Confidence interval": "a range of plausible parameter values produced by a procedure with fixed coverage probability",
+        },
+        "facts": [
+            "Bayes theorem formalizes how evidence shifts belief from prior to posterior probabilities.",
+            "About 68 percent of normal-distributed data lie within one standard deviation of the mean.",
+            "A p-value is not the probability that the null hypothesis is true.",
+            "Larger samples shrink confidence intervals roughly with the square root of n.",
+        ],
+    },
+    "Classical Physics": {
+        "terms": {
+            "Wave-particle duality": "the finding that light and matter show both wave interference and particle-like impacts",
+            "Electromagnetism": "the unified theory of electric and magnetic fields that propagate as light",
+            "Optics": "the study of light including reflection, refraction, lenses and interference",
+            "Nuclear physics": "the physics of atomic nuclei, including radioactivity, fission and fusion",
+            "Photoelectric effect": "electron emission by light, proving energy arrives in quantized photons",
+            "Snell's law": "the bending rule for light crossing media, n-one sine theta-one equals n-two sine theta-two",
+            "Special relativity": "Einstein's theory making the speed of light invariant and linking mass to energy",
+        },
+        "facts": [
+            "Maxwell's equations predict electromagnetic waves traveling at the speed of light.",
+            "Refraction bends light toward the normal when entering a denser medium.",
+            "Nuclear fission powers reactors by splitting heavy nuclei such as uranium-235.",
+            "Fusion combines light nuclei and powers stars, releasing far more energy per kilogram than fission.",
+        ],
+    },
+    "Astronomy & Space": {
+        "terms": {
+            "Stellar evolution": "the life cycle of stars from nebular birth through main sequence to remnant",
+            "Black holes": "regions where gravity is so strong that nothing, not even light, escapes past the event horizon",
+            "Space missions": "planned voyages of probes, rovers and crewed craft to explore space",
+            "Stargazing tips": "practices like dark sites, dark adaptation and star charts that improve naked-eye observing",
+            "Light-year": "the distance light travels in one year, about 9.46 trillion kilometers",
+            "Redshift": "stretching of light to longer wavelengths, revealing cosmic expansion",
+        },
+        "facts": [
+            "Stars like the Sun end as white dwarfs, while massive stars explode as supernovae leaving neutron stars or black holes.",
+            "The nearest star system, Alpha Centauri, is about 4.4 light-years away.",
+            "Eyes need up to half an hour of darkness to reach full night-vision sensitivity.",
+            "Telescopes gather light; magnification matters less than aperture for faint objects.",
+        ],
+    },
+    "Cell Biology": {
+        "terms": {
+            "Mitosis": "cell division producing two genetically identical diploid daughter cells",
+            "Organelles": "membrane-bound structures inside eukaryotic cells that divide up specialized functions",
+            "Cell membrane": "the phospholipid bilayer surrounding the cell, selectively controlling what enters and leaves",
+            "ATP synthesis": "production of adenosine triphosphate, the cell's usable energy currency, mainly in mitochondria",
+            "Photosynthesis": "conversion of light, water and carbon dioxide into glucose and oxygen in chloroplasts",
+            "Osmosis": "diffusion of water across a semipermeable membrane toward higher solute concentration",
+        },
+        "facts": [
+            "Mitochondria generate most cellular ATP through cellular respiration.",
+            "Mitosis keeps chromosome number constant, while meiosis halves it for gametes.",
+            "Membrane proteins act as channels and pumps deciding which molecules cross.",
+            "Plant cells additionally have a rigid cellulose wall outside their membrane.",
+        ],
+    },
+    "Genetics": {
+        "terms": {
+            "DNA replication": "semiconservative copying in which each new double helix keeps one original strand",
+            "RNA transcription": "copying a gene's DNA sequence into messenger RNA for translation into protein",
+            "Mendelian laws": "inheritance rules covering segregation of alleles and independent assortment of genes",
+            "CRISPR": "a gene-editing system in which guide RNA directs the Cas9 enzyme to cut specific DNA sequences",
+            "Allele": "one alternative form of a gene at a particular locus",
+            "Genotype vs phenotype": "genotype is the underlying allele pair; phenotype is the observable trait it produces",
+        },
+        "facts": [
+            "DNA replication is called semiconservative because every daughter molecule retains one parental strand.",
+            "Transcription happens in the nucleus, while translation occurs on ribosomes in the cytoplasm.",
+            "Two carriers of a recessive allele can produce an affected child, per Mendelian segregation.",
+            "CRISPR-Cas9 editing requires a twenty-nucleotide guide RNA matching the target site.",
+        ],
+    },
+    "Human Anatomy": {
+        "terms": {
+            "Cardiovascular system": "the heart and blood vessels circulating blood to deliver oxygen and remove wastes",
+            "Synaptic transmission": "chemical signaling across the gap between neurons via neurotransmitters",
+            "Endocrine glands": "ductless glands releasing hormones directly into the bloodstream",
+            "Respiratory system": "airways and lungs exchanging oxygen and carbon dioxide with the blood",
+            "Homeostasis": "active maintenance of stable internal conditions such as temperature and blood glucose",
+            "Neuron": "the electrically excitable cell that transmits information through action potentials",
+        },
+        "facts": [
+            "The left ventricle has the thickest muscular wall because it pumps blood to the entire body.",
+            "Neurotransmitters like dopamine and serotonin cross synapses to pass signals between neurons.",
+            "The pituitary gland coordinates many other endocrine glands under brain control.",
+            "Arteries carry blood away from the heart; veins return it, helped by one-way valves.",
+        ],
+    },
+    "Organic Chemistry": {
+        "terms": {
+            "Hydrocarbons": "compounds containing only carbon and hydrogen, ranging from methane to polymers",
+            "Functional groups": "reactive atom clusters like hydroxyl or carboxyl that determine a molecule's chemistry",
+            "Resonance structures": "alternative electron arrangements whose blending stabilizes molecules such as benzene",
+            "Isomers": "compounds sharing a molecular formula but differing in structure and properties",
+            "Stereochemistry": "the study of three-dimensional arrangement, including chirality and optical activity",
+            "Substitution reactions": "reactions replacing one atom or group with another on a carbon skeleton",
+        },
+        "facts": [
+            "Alcohols carry a hydroxyl group, while carboxylic acids combine carbonyl and hydroxyl groups.",
+            "Benzene's real structure is an average of resonance forms, with all six bonds equivalent.",
+            "Enantiomers are mirror-image molecules that can behave very differently in biology.",
+            "Carbon forms four covalent bonds, enabling the vast diversity of organic compounds.",
+        ],
+    },
+    "Environmental Science": {
+        "terms": {
+            "Carbon cycle": "the circulation of carbon among atmosphere, oceans, organisms and rocks",
+            "Biodiversity tracking": "monitoring species richness and abundance to assess ecosystem health",
+            "Trophic levels": "feeding positions in a food chain, losing roughly ninety percent of energy at each step up",
+            "Ecosystem services": "benefits nature provides people, such as pollination, water purification and climate regulation",
+            "Nitrogen cycle": "bacteria-driven conversions between atmospheric nitrogen and biologically usable forms",
+            "Bioaccumulation": "buildup of persistent toxins in organisms up the food chain",
+        },
+        "facts": [
+            "Photosynthesis removes carbon dioxide from the atmosphere; respiration and combustion return it.",
+            "Only about ten percent of energy transfers upward between trophic levels, capping food-chain length.",
+            "Mercury bioaccumulates, so apex predators carry the highest contaminant loads.",
+            "Keystone species affect ecosystems disproportionately relative to their numbers.",
+        ],
+    },
+    "Climate & Sustainability": {
+        "terms": {
+            "Renewable energy": "power from sources that replenish naturally, including solar, wind, hydro and geothermal",
+            "Air quality": "the level of pollutants such as PM2.5, ozone and NO2 in the air we breathe",
+            "Recycling myths": "common misconceptions, such as assuming all plastics are recyclable when few grades actually are",
+            "Green tech": "technologies reducing environmental impact, from heat pumps to grid batteries",
+            "Greenhouse effect": "warming caused by gases absorbing outgoing infrared radiation and re-radiating it downward",
+            "Carbon footprint": "total greenhouse gas emissions attributable to a person, product or activity",
+        },
+        "facts": [
+            "Carbon dioxide, methane and water vapor are the greenhouse gases most responsible for atmospheric warming.",
+            "Solar panels convert sunlight directly to electricity through the photovoltaic effect.",
+            "Reducing consumption generally saves more emissions than recycling the leftovers.",
+            "PM2.5 particles penetrate deep into lungs, which is why fine-particulate standards are strictest.",
+        ],
+    },
+    "Geomorphology": {
+        "terms": {
+            "Plate tectonics": "the theory that lithospheric plates move, producing earthquakes, volcanoes and mountain belts",
+            "Rock cycle": "continuous transformation among igneous, sedimentary and metamorphic rocks via melting, erosion and heat",
+            "River erosion": "wearing away and transport of sediment by flowing water, carving valleys over time",
+            "Glacial landforms": "landscapes such as U-shaped valleys, moraines and cirques carved by moving ice",
+            "Weathering": "in-place breakdown of rock by physical, chemical and biological processes",
+            "Mass wasting": "downslope movement of rock and soil under gravity, from creep to landslides",
+        },
+        "facts": [
+            "Convergent plate boundaries build mountains, while divergent boundaries create new crust at ridges.",
+            "The Himalaya continues rising as India pushes into Eurasia along a convergent boundary.",
+            "Glaciers carve broad U-shaped valleys, whereas rivers cut narrow V-shaped ones.",
+            "Limestone dissolves in weak carbonic acid, producing karst caves and sinkholes.",
+        ],
+    },
+    "Hydrology": {
+        "terms": {
+            "Rainfall-runoff": "the partitioning of precipitation into infiltration, storage and surface flow",
+            "Catchment area": "the land region draining to a common outlet, also called a watershed",
+            "Groundwater flow": "subsurface movement of water through soil and rock toward streams and wells",
+            "Hydrograph": "a plot of stream discharge against time showing storm response and recession",
+            "Aquifer": "a permeable underground layer storing and transmitting usable groundwater",
+            "Evapotranspiration": "combined evaporation from surfaces and transpiration from plants returning water to the atmosphere",
+        },
+        "facts": [
+            "Urban pavement increases peak runoff and shortens the lag time on a storm hydrograph.",
+            "The water table marks the top of the saturated zone below which pores are full of water.",
+            "Overpumping aquifers lowers water tables and can cause land subsidence.",
+            "Watershed shape and slope control how quickly a basin delivers rain to its outlet.",
+        ],
+    },
+    "Agronomy": {
+        "terms": {
+            "Soil nutrients": "essential elements such as nitrogen, phosphorus and potassium that crops draw from soil",
+            "Crop rotation": "alternating crop species across seasons to break pest cycles and balance nutrient demand",
+            "Irrigation efficiency": "the fraction of applied water actually used by the crop, highest in drip systems",
+            "Urban farming": "growing food in and around cities using beds, containers or vertical systems",
+            "Legume nitrogen fixation": "rhizobia bacteria in legume roots converting atmospheric nitrogen into plant-usable forms",
+            "Cover cropping": "planting non-cash crops to protect soil, suppress weeds and add organic matter",
+        },
+        "facts": [
+            "Legumes enrich soil because symbiotic rhizobia fix atmospheric nitrogen in root nodules.",
+            "Rotating cereals with legumes reduces fertilizer need and interrupts pest life cycles.",
+            "Drip irrigation can exceed ninety percent efficiency by watering roots directly.",
+            "Organic matter improves soil structure, water holding and nutrient exchange simultaneously.",
+        ],
+    },
+}
