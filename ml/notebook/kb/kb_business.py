@@ -1,0 +1,295 @@
+"""Knowledge base — business, finance & exam-prep topics."""
+
+KB_BUSINESS = {
+    "Financial Accounting": {
+        "terms": {
+            "Balance sheets": "statements showing assets, liabilities and equity at a single point in time",
+            "Income statements": "reports of revenues minus expenses over a period, ending in net profit or loss",
+            "Cash flow": "tracking actual cash moving in and out across operating, investing and financing activities",
+            "Double entry": "bookkeeping in which every transaction posts equal debits and credits",
+            "Depreciation": "allocating an asset's cost over its useful life rather than expensing it at once",
+            "Accrual accounting": "recording revenue when earned and expenses when incurred, regardless of cash timing",
+        },
+        "facts": [
+            "The balance sheet always balances because assets equal liabilities plus owners' equity.",
+            "Profit on the income statement does not guarantee positive operating cash flow.",
+            "Debits must equal credits at all times in double-entry bookkeeping.",
+            "Accrual basis reporting matches revenues to the expenses that generated them.",
+        ],
+    },
+    "Corporate Finance": {
+        "terms": {
+            "Portfolio diversification": "spreading investments across assets whose returns do not move together to cut overall risk",
+            "Capital budgeting": "evaluating long-term projects with tools like NPV and IRR before committing funds",
+            "Valuation basics": "estimating what an asset is worth, commonly via discounted future cash flows",
+            "Time value of money": "the principle that a rupee today is worth more than a rupee received later",
+            "Net present value": "the sum of discounted cash inflows minus outflows; positive NPV projects add value",
+            "Weighted average cost of capital": "the blended required return of debt and equity used as a discount rate",
+            "Working capital": "current assets minus current liabilities, measuring short-term financial headroom",
+            "Leverage": "using borrowed funds to amplify both potential returns and potential losses",
+        },
+        "facts": [
+            "Diversification reduces risk most when asset returns are uncorrelated or negatively correlated.",
+            "A project creates value exactly when its net present value is positive at the firm's discount rate.",
+            "Higher leverage magnifies swings in shareholder returns in both directions.",
+            "Internal rate of return is the discount rate that drives a project's NPV to zero.",
+        ],
+    },
+    "Personal Finance": {
+        "terms": {
+            "Budgeting apps": "tools that categorize spending automatically so income can be allocated deliberately",
+            "Emergency fund": "cash reserved for shocks, typically three to six months of essential expenses",
+            "Credit score": "a number summarizing borrowing behavior, driven mainly by payment history and utilization",
+            "Debt payoff": "systematic repayment strategies such as highest-interest-first avalanche or smallest-balance snowball",
+            "Compound interest": "interest that earns interest, growing savings exponentially over long horizons",
+            "Net worth": "everything you own minus everything you owe",
+        },
+        "facts": [
+            "Paying bills on time influences credit scores more than any other factor.",
+            "Keeping credit utilization below roughly thirty percent protects your score.",
+            "The avalanche method minimizes total interest; the snowball method maximizes early wins.",
+            "An emergency fund keeps unexpected costs from turning into high-interest debt.",
+        ],
+    },
+    "Stock Market Investing": {
+        "terms": {
+            "Nepal Stock Exchange": "NEPSE, the national exchange where listed Nepali shares trade publicly",
+            "Mutual funds": "pooled investments managed professionally and spread across many securities",
+            "Dividend stocks": "shares of companies distributing part of profits to shareholders regularly",
+            "Index": "a basket tracking a market segment, such as the NEPSE index itself",
+            "Price-to-earnings ratio": "share price divided by earnings per share, a quick gauge of relative valuation",
+            "Market order vs limit order": "market orders execute immediately at best price; limit orders execute only at your specified price or better",
+        },
+        "facts": [
+            "Diversifying across sectors cushions a portfolio against single-industry downturns.",
+            "Dividends are not guaranteed; boards can cut them when earnings fall.",
+            "A high P/E can signal either growth expectations or overvaluation.",
+            "Mutual funds charge expense ratios that compound against long-term returns.",
+        ],
+    },
+    "Macroeconomics": {
+        "terms": {
+            "GDP calculation": "measuring total output as consumption plus investment plus government spending plus net exports",
+            "Inflation metrics": "indices like CPI tracking how general price levels change over time",
+            "Fiscal policy": "government use of spending and taxation to influence aggregate demand",
+            "Monetary policy": "central bank management of interest rates and money supply to steer inflation and growth",
+            "Unemployment rate": "the share of the labor force actively seeking work but without jobs",
+            "Recession": "a broad, sustained fall in economic activity, conventionally identified by falling real GDP",
+        },
+        "facts": [
+            "GDP counts final goods and services produced within a country during a specific period.",
+            "Central banks fight inflation by raising policy rates, which cools borrowing and demand.",
+            "Expansionary fiscal policy stimulates demand but can widen budget deficits.",
+            "CPI measures the price of a fixed consumer basket, so substitution bias can overstate inflation.",
+        ],
+    },
+    "Microeconomics": {
+        "terms": {
+            "Monopoly pricing": "a sole supplier restricting output and charging above competitive price levels",
+            "Oligopoly": "markets dominated by a few large firms whose decisions affect each other strategically",
+            "Consumer surplus": "the gap between what buyers are willing to pay and what they actually pay",
+            "Opportunity cost": "the value of the best alternative given up when a choice is made",
+            "Supply and demand equilibrium": "the price where quantity supplied equals quantity demanded",
+            "Elasticity": "how strongly quantity responds to changes in price or income",
+        },
+        "facts": [
+            "Raising minimum wage effects depend on elasticity of demand for low-wage labor.",
+            "Perfectly inelastic goods see quantity barely change when prices rise, as with lifesaving medicine.",
+            "Price ceilings below equilibrium create persistent shortages.",
+            "Marginal analysis compares the extra benefit of one more unit against its extra cost.",
+        ],
+    },
+    "Strategic Management": {
+        "terms": {
+            "SWOT analysis": "assessing internal strengths and weaknesses against external opportunities and threats",
+            "Porter's five forces": "framework scoring industry rivalry, entrants, substitutes, buyer power and supplier power",
+            "Market penetration": "growth strategy selling more of existing products in existing markets",
+            "Competitive advantage": "a durable edge letting a firm create more value than rivals",
+            "Core competency": "a capability that is valuable, rare and hard to imitate",
+            "Value chain": "the sequence of activities through which a firm adds margin to its outputs",
+        },
+        "facts": [
+            "Five forces analysis explains why some industries stay structurally more profitable than others.",
+            "Strategy means choosing what not to do as much as choosing what to pursue.",
+            "Cost leadership and differentiation are the classic generic strategies Porter described.",
+            "Threat of substitutes caps the prices any industry can sustainably charge.",
+        ],
+    },
+    "HR Management": {
+        "terms": {
+            "Talent acquisition": "sourcing, assessing and hiring candidates aligned to current and future needs",
+            "Performance appraisal": "structured evaluation of employee work against agreed goals and behaviors",
+            "Labor relations": "managing the employer-workforce relationship, including unions and collective agreements",
+            "Onboarding": "integrating new hires into role, culture and workflows during their first months",
+            "Employee engagement": "the degree of commitment and energy employees bring to their work",
+            "Attrition": "normal workforce shrinkage from resignations and retirements over time",
+        },
+        "facts": [
+            "Structured interviews predict job performance far better than unstructured conversations.",
+            "Replacing a departing employee typically costs far more than retaining an existing one.",
+            "Clear goals plus regular feedback drive measurable gains in engagement scores.",
+            "Exit interviews surface systemic issues that surveys often miss.",
+        ],
+    },
+    "Startups & Entrepreneurship": {
+        "terms": {
+            "Pitch decks": "short slide presentations telling investors what problem you solve and why you win",
+            "MVP building": "shipping the smallest product that validates a core assumption with real users",
+            "Bootstrapping": "funding growth from revenue rather than outside investors",
+            "Fundraising": "raising capital in stages such as pre-seed, seed and Series A in exchange for equity",
+            "Product-market fit": "the point where demand pulls the product faster than the team can serve it",
+            "Burn rate": "net cash consumed per month, determining runway before the next raise",
+        },
+        "facts": [
+            "An MVP tests learning questions cheaply, not a half-built version of everything.",
+            "Runway equals cash on hand divided by monthly burn rate.",
+            "Investors fund traction and insight, not just ideas on slides.",
+            "Premature scaling is among the most common causes of startup failure.",
+        ],
+    },
+    "Freelancing": {
+        "terms": {
+            "Client contracts": "written agreements defining scope, deadlines, revisions and payment terms",
+            "Pricing your work": "setting rates by value delivered rather than hours spent alone",
+            "Invoicing": "billing clients with clear itemization, due dates and late-fee terms",
+            "Scope creep": "gradual expansion of requested work beyond what was originally agreed",
+            "Retainer agreement": "a recurring arrangement guaranteeing a set amount of your time each month",
+            "Portfolio": "curated samples proving capability to prospective clients",
+        },
+        "facts": [
+            "Written change orders keep scope creep from becoming unpaid work.",
+            "Value-based pricing captures outcomes, while hourly billing caps your upside.",
+            "Deposits up front filter out non-serious clients and smooth cash flow.",
+            "Specialists generally command higher rates than generalists in the same field.",
+        ],
+    },
+    "E-commerce & Online Business": {
+        "terms": {
+            "Dropshipping": "selling products the supplier ships directly, so the store holds no inventory",
+            "Shopify setup": "configuring a hosted storefront with payments, shipping and apps",
+            "Ad campaigns": "paid promotions targeted by audience, keyword or lookalike segments",
+            "Conversion rate": "the percentage of visitors completing a desired action such as purchasing",
+            "Cart abandonment": "shoppers adding items but leaving before checkout, often over surprise costs",
+            "Customer acquisition cost": "total marketing spend divided by customers gained",
+        },
+        "facts": [
+            "Dropshipping trades thin margins and less quality control for lower upfront risk.",
+            "Unexpected shipping costs are the leading reported cause of cart abandonment.",
+            "Improving conversion rate raises revenue without raising ad spend.",
+            "Lifetime value should comfortably exceed customer acquisition cost for sustainable growth.",
+        ],
+    },
+    "Career Growth": {
+        "terms": {
+            "Salary negotiation": "discussing pay using market benchmarks, documented impact and alternatives",
+            "Performance reviews": "periodic evaluations that shape raises, promotions and development plans",
+            "Networking": "building genuine professional relationships that exchange information and opportunity",
+            "Career pivots": "transferring existing strengths into an adjacent field or role",
+            "Personal brand": "the reputation and visibility you build around your expertise",
+            "Upskilling": "deliberately learning capabilities that raise your market value",
+        },
+        "facts": [
+            "Negotiating early compounds: raises build on whatever baseline you start from.",
+            "Documenting quantified wins gives review conversations concrete evidence.",
+            "Most opportunities travel through weak ties rather than close friends.",
+            "Skills adjacent to your strengths make pivots faster than starting over.",
+        ],
+    },
+    "Real Estate & Property": {
+        "terms": {
+            "Renting vs buying": "choosing between flexibility and no maintenance versus building equity and fixed costs",
+            "Property investment": "earning through rental income plus appreciation, net of costs and vacancy",
+            "Home loans": "mortgages repaid in principal-plus-interest installments, usually amortized over years",
+            "Down payment": "upfront equity in a purchase; larger amounts cut interest and avoid insurance thresholds",
+            "Location fundamentals": "access, zoning, schools and employment drivers behind land value",
+            "Cash flow vs appreciation": "ongoing rental profit versus long-term increase in property value",
+        },
+        "facts": [
+            "Early mortgage installments are mostly interest, so extra principal payments shorten loans sharply.",
+            "Vacancy, repairs and taxes reduce gross rental yield to a much thinner net figure.",
+            "Buying beats renting financially mainly after several years of ownership.",
+            "Zoning changes can shift land values dramatically in either direction.",
+        ],
+    },
+    "IOE Entrance Exam": {
+        "terms": {
+            "IOE syllabus": "the prescribed physics, chemistry, mathematics and English scope for Tribhuvan University's engineering entrance",
+            "Previous year questions": "past papers revealing recurring patterns and weightings across subjects",
+            "Objective-type practice": "MCQ drills building speed and accuracy under strict time pressure",
+            "Merit list cutoffs": "score thresholds determining who secures seats each intake",
+            "Entrance mock tests": "full-length timed rehearsals that expose pacing gaps before exam day",
+            "Engineering mathematics": "calculus, algebra and trigonometry topics carrying heavy question weight",
+        },
+        "facts": [
+            "IOE admission ranks candidates purely on entrance score, so every mark shifts the merit list.",
+            "Reviewing past papers is more efficient than rereading entire textbooks near the exam.",
+            "Timed mocks train elimination strategy for MCQs where guessing rules apply.",
+            "Balanced coverage usually beats perfection in one subject because rank uses the combined score.",
+        ],
+    },
+    "CEE Exam": {
+        "terms": {
+            "Biology MCQs": "botany and zoology questions demanding rapid recall of diagrams, processes and classifications",
+            "Physics for CEE": "mechanics, electricity and optics numericals tested at Class 11-12 level",
+            "Chemistry for CEE": "organic, inorganic and physical chemistry questions emphasizing mechanisms and facts",
+            "CEE syllabus": "the National Medical Education Commission-prescribed scope for medical entrance in Nepal",
+            "MBBS admission": "selection into bachelor-of-medicine programs through the common entrance process",
+            "BDS admission": "entry to dental surgery programs via the same centralized examination",
+            "Previous year CEE papers": "archived exams showing chapter-wise question distribution and difficulty trends",
+        },
+        "facts": [
+            "CEE uses multiple-choice questions answered on optical sheets under strict time limits.",
+            "Biology carries the largest share of questions, reflecting its clinical relevance.",
+            "Accuracy matters: wrong answers forfeit the chance of marks elsewhere under standard MCQ scoring.",
+            "Aspirants typically finish the syllabus first, then shift most hours to question practice.",
+        ],
+    },
+    "NEET Exam": {
+        "terms": {
+            "NEET Biology": "botany and zoology sections forming half of India's national medical entrance paper",
+            "NCERT based questions": "items drawn almost verbatim from NCERT textbooks, making line-by-line reading productive",
+            "Mock test series": "scheduled full simulations that build stamina and reveal weak chapters",
+            "Rank prediction": "estimating All-India rank from mock scores and previous-year cutoffs",
+            "NEET Physics": "numerical-heavy section rewarding formula fluency and quick calculation",
+            "NEET Chemistry": "physical, organic and inorganic chemistry spanning factual recall and problem solving",
+        },
+        "facts": [
+            "Biology decides most NEET ranks because it carries the maximum questions.",
+            "NCERT diagrams and examples repeatedly appear as direct NEET questions.",
+            "Attempting full mocks weekly trains the four-hour pacing the real paper demands.",
+            "Negative marking rewards leaving genuinely unknown questions untouched.",
+        ],
+    },
+    "IELTS Preparation": {
+        "terms": {
+            "Listening practice": "training on accents, paraphrase and note completion across the four recorded sections",
+            "Reading comprehension": "skimming, scanning and true-false-not-given techniques for three long passages",
+            "Writing task 1 & 2": "Task 1 describes visual data or letters; Task 2 is a formal argumentative essay",
+            "Speaking fluency": "extending answers naturally in the face-to-face interview without long pauses",
+            "Band score criteria": "examiners grade task response, coherence, lexical resource and grammatical range",
+            "Academic vs General IELTS": "Academic serves university admission; General Training serves migration and work",
+        },
+        "facts": [
+            "IELTS band scores range from zero to nine and average across the four skills.",
+            "Writing Task 2 carries twice the weight of Task 1, so it deserves the larger time share.",
+            "Not Given differs from False: it means the passage simply does not say.",
+            "Memorized template answers are penalized once examiners detect rehearsed language.",
+        ],
+    },
+    "PTE Preparation": {
+        "terms": {
+            "PTE speaking tasks": "recorded prompts such as read-aloud and describe-image scored by automated systems",
+            "PTE writing essays": "timed argumentative writing graded on content, form, grammar and vocabulary",
+            "PTE reading fill-in-blanks": "drag-and-drop items testing collocation and grammar in context",
+            "PTE listening summarize": "condensing spoken lectures into short written summaries within word limits",
+            "Score prediction": "practice-platform estimates mapping mock performance to the ten-to-ninety scale",
+            "Template strategies": "reusable structures for essays and summaries that save planning time",
+        },
+        "facts": [
+            "PTE Academic is fully computer-based and machine-scored, including speaking.",
+            "Fluency and pronunciation feed scoring algorithms, so steady pacing beats dramatic delivery.",
+            "Integrated tasks score several skills at once; summarize-spoken-text feeds listening and writing.",
+            "Word limits matter: exceeding them zeroes out form scores on summary tasks.",
+        ],
+    },
+}

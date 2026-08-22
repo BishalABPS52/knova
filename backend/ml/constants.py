@@ -49,7 +49,7 @@ SCALE_FEATURES = [
 # for an unseen (user, post) pair. Mirrors df_features[FEATURES_ALL].median().
 FEATURE_MEDIANS = {
     "dwell_norm_by_type": -0.293515,
-    "read_velocity": -0.381948,
+    "read_velocity": -0.380358,
     "mastery_score": 0.5,
     "kg_readiness": -0.016,
     "depth_alignment": 0.767,
@@ -62,7 +62,7 @@ FEATURE_MEDIANS = {
     "creator_trust": 0.0,
     "user_topic_upvote_rate": 0.092499,
     "user_topic_interaction_count": 0.0,
-    "similarity_weighted_engagement": 0.003568,
+    "similarity_weighted_engagement": 0.003555,
 }
 
 # Cold-start fill for als_score (mean, not median — matches the notebook's als_mean).
@@ -71,7 +71,7 @@ ALS_MEAN = 0.04676
 # Identifies the artifact set that produced a ranking, stamped onto every
 # interaction row. Bump this whenever backend/models/*.pkl is replaced, so
 # telemetry can be attributed to the model that actually served it.
-MODEL_VERSION = "synthetic-v1"
+MODEL_VERSION = "synthetic-v2"
 
 # --- Live feature serving (Phase 4) -----------------------------------------
 # Feature values computed per-user from real telemetry instead of the frozen
@@ -116,16 +116,16 @@ DWELL_STD_BY_TYPE = {
 }
 # read_velocity_raw (word_count / actual_dwell_sec) mean/std, by training type label.
 VELOCITY_MEAN_BY_TYPE = {
-    "flashcard": 7.136904,
-    "mcq": 8.121425,
-    "short_note": 7.444742,
-    "text_content": 8.096204,
+    "flashcard": 14.595512,
+    "mcq": 9.581552,
+    "short_note": 11.37895,
+    "text_content": 7.439515,
 }
 VELOCITY_STD_BY_TYPE = {
-    "flashcard": 5.034794,
-    "mcq": 7.173448,
-    "short_note": 5.583536,
-    "text_content": 7.300490,
+    "flashcard": 10.522042,
+    "mcq": 8.620989,
+    "short_note": 8.706735,
+    "text_content": 6.990085,
 }
 
 # Expertise nudge: after a quiz-bearing telemetry flush, User.estimated_expertise

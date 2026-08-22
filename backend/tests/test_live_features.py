@@ -134,7 +134,9 @@ class TelemetryGating(unittest.TestCase):
     def test_dwell_zscore_applied(self):
         feat = dict(C.FEATURE_MEDIANS)
         stats = UserStats(
-            by_type={"mcq": TypeStat(count=4, dwell_ratio_mean=0.647329, velocity_mean=8.121425)},
+            by_type={"mcq": TypeStat(count=4,
+                                     dwell_ratio_mean=C.DWELL_MEAN_BY_TYPE["mcq"],
+                                     velocity_mean=C.VELOCITY_MEAN_BY_TYPE["mcq"])},
         )
         _apply_live_features(feat, _ctx(), _cand(content_type="mcq"), stats)
         # mean equals the training per-type mean -> z-score ~0
