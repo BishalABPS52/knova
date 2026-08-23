@@ -15,9 +15,10 @@ jobs:
           username: ${{ secrets.VM_USER  }}
           key: ${{  secrets.VM_SSH_KEY  }}
           script: |
+            set -e
             cd ~/knova/backend
             git pull origin dev
-            .venv/bin/pip install -r requirements.txt
+            /home/azureuser/.local/bin/uv sync
             sudo systemctl restart knova
             echo "Knova backend deployed to VM"
           
