@@ -17,7 +17,8 @@ jobs:
           script: |
             set -e
             cd ~/knova/backend
-            git pull origin dev
+            git fetch origin dev
+            git reset --hard origin/dev
             /home/azureuser/.local/bin/uv sync
             sudo systemctl restart knova
             echo "Knova backend deployed to VM"
