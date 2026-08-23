@@ -1,0 +1,24 @@
+name: Deploy Knova Backend
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VM_HOST  }}
+          username: ${{ secrets.VM_USER  }}
+          key: ${{  secrets.VM_SSH_KEY  }}
+          script: |
+            cd ~/knova/backend
+            git pull origin dev
+            .venv/bin/pip install -r requirements.txt
+            sudo systemctl restart knova
+            echo "Knova backend deployed to VM"
+          
+
