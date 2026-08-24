@@ -71,7 +71,7 @@ ALS_MEAN = 0.04676
 # Identifies the artifact set that produced a ranking, stamped onto every
 # interaction row. Bump this whenever backend/models/*.pkl is replaced, so
 # telemetry can be attributed to the model that actually served it.
-MODEL_VERSION = "synthetic-v2"
+MODEL_VERSION = "synthetic-v3"
 
 # --- Live feature serving (Phase 4) -----------------------------------------
 # Feature values computed per-user from real telemetry instead of the frozen
