@@ -10,9 +10,6 @@ import {
   Users,
   MessageCircle,
   Share2,
-  FileText,
-  Hash,
-  Target,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -143,177 +140,190 @@ export default function ProfileScreen() {
     { label: "Shares", value: profile.total_shares, icon: Share2 },
   ];
 
+  const tabs = [
+    { key: "posts", label: "Posts", icon: Grid },
+    { key: "stats", label: "Stats", icon: BarChart2 },
+    ...(isOwnProfile ? [{ key: "following", label: "Following", icon: Users }] : []),
+  ] as const;
+
   const formatCount = (n: number) =>
     n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : `${n}`;
 
   return (
-    <div className="max-w-[880px] mx-auto p-4 space-y-6">
-      {/* ===== Header card with gradient cover ===== */}
-      <section className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] overflow-hidden border border-black/[0.04]">
-        {/* Cover banner */}
-        <div className="relative h-28 md:h-32 bg-gradient-to-r from-[#f36710] via-[#ff8a3d] to-[#00afef]">
-          <div
-            className="absolute inset-0 opacity-[0.18]"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.9) 1px, transparent 0)",
-              backgroundSize: "18px 18px",
-            }}
-          />
-          {isOwnProfile && (
-            <div className="absolute top-4 right-4 flex items-center gap-2">
+    <div className="max-w-[880px] mx-auto p-4 space-y-4 md:space-y-6">
+      {/* ===== Header card ===== */}
+      <section className="bg-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] p-5 md:p-8 relative">
+        {isOwnProfile && (
+          <Link
+            href="/settings"
+            aria-label="Settings"
+            title="Settings"
+            className="absolute top-4 right-4 md:hidden w-8 h-8 flex items-center justify-center rounded-full active:bg-[#f5f5f5] transition-colors"
+          >
+            <Settings className="w-[18px] h-[18px] text-[#1b1c1c]" />
+          </Link>
+        )}
+
+        <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+          <div className="w-16 h-16 md:w-[120px] md:h-[120px] rounded-full overflow-hidden border-2 md:border-4 border-white shadow-sm ring-1 ring-[#efeded] shrink-0 mx-auto md:mx-0">
+            <Image
+              src={profile.avatar_url || "/logos/default-avatar.png"}
+              alt={profile.username}
+              width={120}
+              height={120}
+              className="object-cover w-full h-full"
+            />
+          </div>
+
+          <div className="flex-1">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+              <div className="text-center md:text-left">
+                <h1 className="text-xl md:text-2xl font-bold text-[#1b1c1c] leading-tight">
+                  {profile.username}
+                </h1>
+                <p className="text-sm text-[#5c5c5c] mt-0.5">@{profile.username}</p>
+                <div className="flex gap-4 mt-2 justify-center md:justify-start">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-sm font-bold text-[#1b1c1c] tabular-nums">
+                      {formatCount(profile.followers)}
+                    </span>
+                    <span className="text-[13px] text-[#5c5c5c]">Followers</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => isOwnProfile && setActiveTab("following")}
+                    disabled={!isOwnProfile}
+                    className={`flex items-baseline gap-1 ${isOwnProfile ? "hover:opacity-70 transition-opacity cursor-pointer" : "cursor-default"}`}
+                  >
+                    <span className="text-sm font-bold text-[#1b1c1c] tabular-nums">
+                      {formatCount(profile.following)}
+                    </span>
+                    <span className="text-[13px] text-[#5c5c5c]">Following</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Desktop action buttons */}
+              {isOwnProfile ? (
+                <div className="hidden md:flex items-center gap-2">
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="px-5 py-2.5 border border-[#d9d9d9] text-sm font-semibold rounded-xl hover:bg-[#f5f5f5] transition active:scale-95"
+                  >
+                    Edit Profile
+                  </button>
+                  <Link
+                    href="/settings"
+                    aria-label="Settings"
+                    title="Settings"
+                    className="flex items-center gap-2 px-4 py-2.5 border border-[#d9d9d9] text-sm font-semibold rounded-xl hover:bg-[#f5f5f5] transition active:scale-95"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span className="lg:inline">Settings</span>
+                  </Link>
+                </div>
+              ) : (
+                <div className="hidden md:block">
+                  <FollowButton
+                    creatorId={profile.id}
+                    author={profile.username}
+                    className="px-5 py-2.5 rounded-xl text-sm"
+                  />
+                </div>
+              )}
+            </div>
+
+            {profile.bio && (
+              <p className="text-sm text-[#5c5c5c] leading-relaxed mt-4 md:max-w-lg text-center md:text-left">
+                {profile.bio}
+              </p>
+            )}
+
+            {profile.primary_topics.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
+                {profile.primary_topics.map((topic) => (
+                  <span
+                    key={topic}
+                    className="px-3 py-1 bg-[#fef3ea] text-[#f36710] rounded-full text-xs font-semibold tracking-wide"
+                  >
+                    #{topic}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Engagement strip (upvotes / comments / shares) */}
+            <div className="mt-5 grid grid-cols-3 divide-x divide-[#efeded] rounded-xl bg-[#faf9f8] border border-[#efeded]">
+              {engagement.map(({ label, value, icon: Icon }) => (
+                <div
+                  key={label}
+                  className="flex flex-col items-center justify-center py-3 gap-1"
+                >
+                  <div className="flex items-center gap-1.5 text-[#f36710]">
+                    <Icon className="w-3.5 h-3.5" />
+                    <span className="font-bold text-[#1b1c1c] text-sm tabular-nums">
+                      {formatCount(value)}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-[#8d7165] font-medium uppercase tracking-wide">
+                    {label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Mobile action button */}
+            {isOwnProfile ? (
               <button
                 onClick={() => setIsEditing(true)}
-                className="px-4 py-2 bg-white/90 backdrop-blur-sm text-[#1b1c1c] text-sm font-semibold rounded-xl hover:bg-white transition active:scale-95 shadow-sm"
+                className="md:hidden mt-5 w-full h-11 border border-[#d9d9d9] rounded-lg text-[#1b1c1c] font-semibold text-sm active:bg-[#f5f5f5] transition-colors"
               >
                 Edit Profile
               </button>
-              {/* Only entry point to settings now that it's out of the nav bars. */}
-              <Link
-                href="/settings"
-                aria-label="Settings"
-                title="Settings"
-                className="flex items-center justify-center w-9 h-9 bg-white/90 backdrop-blur-sm text-[#1b1c1c] rounded-xl hover:bg-white transition active:scale-95 shadow-sm"
-              >
-                <Settings className="w-4 h-4" />
-              </Link>
-            </div>
-          )}
-        </div>
-
-        <div className="px-6 md:px-8 pb-7">
-          {/* Avatar overlapping the banner */}
-          <div className="flex flex-col md:flex-row md:items-end md:gap-5 -mt-14 md:-mt-16">
-            <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden ring-4 ring-white bg-[#efeded] shrink-0 mx-auto md:mx-0 shadow-md">
-              <Image
-                src={profile.avatar_url || "/logos/default-avatar.png"}
-                alt={profile.username}
-                width={128}
-                height={128}
-                className="object-cover w-full h-full"
-              />
-            </div>
-            <div className="pt-3 md:pb-1 text-center md:text-left">
-              <h1 className="text-2xl font-bold text-[#1b1c1c]">
-                {profile.username}
-              </h1>
-              <p className="text-[#8d7165] text-sm mt-0.5">@{profile.username}</p>
-            </div>
-          </div>
-
-          {/* Follower / following counts */}
-          <div className="flex gap-6 mt-5 justify-center md:justify-start">
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-bold text-[#1b1c1c] tabular-nums">
-                {formatCount(profile.followers)}
-              </span>
-              <span className="text-sm text-[#5c5c5c]">Followers</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => isOwnProfile && setActiveTab("following")}
-              disabled={!isOwnProfile}
-              className={`flex items-baseline gap-1.5 ${isOwnProfile ? "hover:opacity-70 transition-opacity cursor-pointer" : "cursor-default"}`}
-            >
-              <span className="font-bold text-[#1b1c1c] tabular-nums">
-                {formatCount(profile.following)}
-              </span>
-              <span className="text-sm text-[#5c5c5c]">Following</span>
-            </button>
-          </div>
-
-          {profile.bio && (
-            <p className="text-sm text-[#5c5c5c] leading-relaxed mt-4 max-w-prose">
-              {profile.bio}
-            </p>
-          )}
-
-          {profile.primary_topics.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
-              {profile.primary_topics.map((topic) => (
-                <span
-                  key={topic}
-                  className="px-3 py-1 bg-[#fef3ea] text-[#f36710] rounded-full text-xs font-semibold tracking-wide"
-                >
-                  #{topic}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Engagement strip (surfaces upvotes / comments / shares) */}
-          <div className="mt-6 grid grid-cols-3 divide-x divide-[#efeded] rounded-2xl bg-[#faf9f8] border border-[#efeded]">
-            {engagement.map(({ label, value, icon: Icon }) => (
-              <div
-                key={label}
-                className="flex flex-col items-center justify-center py-3.5 gap-1"
-              >
-                <div className="flex items-center gap-1.5 text-[#f36710]">
-                  <Icon className="w-4 h-4" />
-                  <span className="font-bold text-[#1b1c1c] tabular-nums">
-                    {formatCount(value)}
-                  </span>
-                </div>
-                <span className="text-[11px] text-[#8d7165] font-medium uppercase tracking-wide">
-                  {label}
-                </span>
+            ) : (
+              <div className="md:hidden mt-5">
+                <FollowButton
+                  creatorId={profile.id}
+                  author={profile.username}
+                  className="w-full h-11 rounded-lg text-sm flex items-center justify-center"
+                />
               </div>
-            ))}
+            )}
           </div>
         </div>
       </section>
 
-      {/* ===== Primary stat cards ===== */}
+      {/* ===== Stat cards ===== */}
       <section className="grid grid-cols-3 gap-3 md:gap-4">
-        {[
-          {
-            label: "Posts Created",
-            value: `${profile.posts}`,
-            icon: FileText,
-            accent: "text-[#1b1c1c]",
-            tint: "bg-[#fef3ea] text-[#f36710]",
-          },
-          {
-            label: "Topics Covered",
-            value: `${profile.primary_topics.length}`,
-            icon: Hash,
-            accent: "text-[#1b1c1c]",
-            tint: "bg-[#e0f6fe] text-[#00afef]",
-          },
-          {
-            label: "Accuracy",
-            value: `${profile.authority_score.toFixed(0)}%`,
-            icon: Target,
-            accent: "text-[#f36710]",
-            tint: "bg-[#fef3ea] text-[#f36710]",
-          },
-        ].map(({ label, value, icon: Icon, accent, tint }) => (
-          <div
-            key={label}
-            className="bg-white rounded-2xl p-4 md:p-5 shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-black/[0.04] hover:shadow-[0_10px_28px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all"
-          >
-            <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center ${tint}`}
-            >
-              <Icon className="w-4.5 h-4.5" strokeWidth={2.2} />
-            </div>
-            <p className={`text-2xl md:text-3xl font-bold mt-3 tabular-nums ${accent}`}>
-              {value}
-            </p>
-            <p className="text-[10px] md:text-xs text-[#8d7165] uppercase tracking-wider font-semibold mt-1">
-              {label}
-            </p>
-          </div>
-        ))}
+        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-[0_4px_12px_rgba(0,0,0,0.05)] text-center">
+          <p className="text-[10px] md:text-xs text-[#5c5c5c] uppercase tracking-wider font-semibold">
+            Posts created
+          </p>
+          <p className="text-xl md:text-3xl font-bold text-[#1b1c1c] mt-2 tabular-nums">
+            {profile.posts}
+          </p>
+        </div>
+        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-[0_4px_12px_rgba(0,0,0,0.05)] text-center">
+          <p className="text-[10px] md:text-xs text-[#5c5c5c] uppercase tracking-wider font-semibold">
+            Topics Covered
+          </p>
+          <p className="text-xl md:text-3xl font-bold text-[#1b1c1c] mt-2 tabular-nums">
+            {profile.primary_topics.length}
+          </p>
+        </div>
+        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-[0_4px_12px_rgba(0,0,0,0.05)] text-center">
+          <p className="text-[10px] md:text-xs text-[#5c5c5c] uppercase tracking-wider font-semibold">
+            Accuracy
+          </p>
+          <p className="text-xl md:text-3xl font-bold text-[#f36710] mt-2 tabular-nums">
+            {profile.authority_score.toFixed(0)}%
+          </p>
+        </div>
       </section>
 
       {/* ===== Tabs ===== */}
       <section className="bg-white rounded-full p-1 flex w-max mx-auto shadow-sm border border-[#efeded]">
-        {([
-          { key: "posts", label: "Posts", icon: Grid },
-          { key: "stats", label: "Stats", icon: BarChart2 },
-          ...(isOwnProfile ? [{ key: "following", label: "Following", icon: Users }] : []),
-        ] as const).map(({ key, label, icon: Icon }) => (
+        {tabs.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => setActiveTab(key as typeof activeTab)}
@@ -328,30 +338,30 @@ export default function ProfileScreen() {
       </section>
 
       {activeTab === "posts" && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 pb-8">
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-4 pb-8">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((item, i) => (
             <div
               key={i}
-              className={`aspect-square rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer ${i % 2 === 0 ? "bg-[#fef3ea] border border-[#f36710]/10" : "bg-white border border-[#d9d9d9]/30 border-l-[3px] border-l-[#00afef]"}`}
+              className={`aspect-square rounded-xl p-2.5 md:p-4 flex flex-col justify-between hover:shadow-md transition cursor-pointer ${i % 2 === 0 ? "bg-[#fef3ea] border border-[#f36710]/10" : "bg-white border border-[#d9d9d9]/30 border-l-[3px] border-l-[#00afef]"}`}
             >
               <div className="flex justify-between items-start">
-                <span className="text-[10px] font-bold text-[#00afef]">
+                <span className="text-[8px] md:text-[10px] font-bold text-[#00afef]">
                   {i % 2 !== 0 ? "Note" : ""}
                 </span>
                 <span
-                  className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${i % 2 === 0 ? "bg-white/80 text-[#f36710]" : "bg-[#e0f6fe] text-[#00afef]"}`}
+                  className={`text-[7px] md:text-[9px] font-bold px-1.5 md:px-2 py-0.5 rounded-full ${i % 2 === 0 ? "bg-white/80 text-[#f36710]" : "bg-[#e0f6fe] text-[#00afef]"}`}
                 >
                   {i % 2 === 0 ? "FlashCard" : "Deep Dive"}
                 </span>
               </div>
-              <h3 className="text-sm font-bold text-[#1b1c1c] leading-tight line-clamp-3">
+              <h3 className="text-[9px] md:text-sm font-bold text-[#1b1c1c] leading-tight line-clamp-3">
                 {i % 2 === 0
                   ? "What is the difference between a process and a thread?"
                   : "Cognitive Load Theory in Digital Environments"}
               </h3>
               <div className="flex items-center justify-end gap-1 text-[#f36710] mt-2">
-                <ArrowUp className="w-3 h-3" />
-                <span className="text-xs font-bold">{12 + i * 7}</span>
+                <ArrowUp className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                <span className="text-[8px] md:text-xs font-bold">{12 + i * 7}</span>
               </div>
             </div>
           ))}
@@ -363,7 +373,7 @@ export default function ProfileScreen() {
           {statsData.map((item) => (
             <div
               key={item.name}
-              className="bg-white rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-black/[0.04] space-y-3"
+              className="bg-white rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.05)] space-y-3"
             >
               <div className="flex justify-between items-end">
                 <span className="font-bold text-[#1b1c1c]">{item.name}</span>
@@ -373,9 +383,9 @@ export default function ProfileScreen() {
                   {item.score}%
                 </span>
               </div>
-              <div className="w-full h-2.5 bg-[#f5f5f5] rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-[#f5f5f5] rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full ${item.score > 80 ? "bg-gradient-to-r from-[#00afef] to-[#2dbcfe]" : "bg-gradient-to-r from-[#f36710] to-[#ff8a3d]"}`}
+                  className={`h-full rounded-full ${item.score > 80 ? "bg-[#00afef]" : "bg-[#f36710]"}`}
                   style={{ width: `${item.score}%` }}
                 ></div>
               </div>
@@ -433,33 +443,35 @@ export default function ProfileScreen() {
         </div>
       )}
 
+      {/* ===== Edit Profile modal ===== */}
       <AnimatePresence>
         {isEditing && (
           <motion.div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/40 z-[100] flex items-end sm:items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => !isSaving && setIsEditing(false)}
           >
             <motion.div
-              className="bg-white rounded-3xl w-full max-w-md p-8 relative shadow-2xl"
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
               transition={{ type: "spring", stiffness: 320, damping: 28 }}
               onClick={(e) => e.stopPropagation()}
             >
+              <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4 sm:hidden" />
               <button
                 onClick={() => setIsEditing(false)}
                 className="absolute top-5 right-5 p-2 hover:bg-[#f5f5f5] rounded-full transition-colors"
               >
                 <X className="w-5 h-5 text-[#594137]" />
               </button>
-              <h2 className="text-2xl font-bold mb-6">Edit Profile</h2>
+              <h2 className="text-xl sm:text-2xl font-bold mb-6">Edit Profile</h2>
               <div className="space-y-5">
                 <div className="flex justify-center">
-                  <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-white shadow-sm bg-[#f5f5f5]">
+                  <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-sm bg-[#f5f5f5]">
                     <Image
                       src={profile.avatar_url || "/logos/default-avatar.png"}
                       alt={profile.username}
