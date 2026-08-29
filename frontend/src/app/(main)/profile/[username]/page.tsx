@@ -212,15 +212,6 @@ export default function ProfileScreen() {
                   >
                     Edit Profile
                   </button>
-                  <Link
-                    href="/settings"
-                    aria-label="Settings"
-                    title="Settings"
-                    className="flex items-center gap-2 px-4 py-2.5 border border-[#d9d9d9] text-sm font-semibold rounded-xl hover:bg-[#f5f5f5] transition active:scale-95"
-                  >
-                    <Settings className="w-4 h-4" />
-                    <span className="lg:inline">Settings</span>
-                  </Link>
                 </div>
               ) : (
                 <div className="hidden md:block">
