@@ -1,0 +1,1157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="633.240593926364 399.70463009175745 1546.006065957692 1324.4034437747148" width="1546.006065957692" height="1324.4034437747148">
+  <defs>
+    <style>
+      .table-header { font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif; font-size: 13px; font-weight: 600; fill: white; }
+      .svg-background { fill: var(--bg-main, #1e1e1e); }
+      .table-bg { fill: var(--erd-table-bg, #2a2a2a); }
+      .column-name { font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif; font-size: 11px; fill: var(--erd-text-primary, #e0e0e0); }
+      .column-type { font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif; font-size: 10px; fill: var(--erd-text-muted, #888); }
+      .pk-icon { font-family: 'Segoe UI', Arial, sans-serif; font-size: 9px; fill: #ffd700; font-weight: bold; }
+      .fk-icon { font-family: 'Segoe UI', Arial, sans-serif; font-size: 9px; fill: #64b5f6; font-weight: bold; }
+      .group-label { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; fill: var(--erd-text-muted, #aaa); font-weight: 500; }
+      .relation-line { stroke-width: 2; fill: none; }
+      .cardinality-label { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; font-weight: bold; }
+      .cardinality-bg { fill: var(--erd-card-bg, #2a2a2a); }
+      .col-row-alt { fill: var(--erd-row-alt, rgba(255,255,255,0.02)); }
+      .col-sep { stroke: var(--erd-separator, rgba(255,255,255,0.05)); stroke-width: 1; }
+      .draggable { cursor: move; }
+      .dragging { opacity: 0.8; }
+    </style>
+    
+    <!-- Arrow marker for end of line -->
+    <marker id="arrow-end" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L12,6 L0,12 L3,6 Z" fill="#64b5f6"/>
+    </marker>
+    
+    <!-- Circle marker for "one" side -->
+    <marker id="one-circle" markerWidth="16" markerHeight="16" refX="8" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+      <circle cx="8" cy="8" r="5" fill="none" stroke="#64b5f6" stroke-width="2"/>
+    </marker>
+    
+    <!-- Crow's foot marker for "many" side -->
+    <marker id="many-crow" markerWidth="20" markerHeight="20" refX="18" refY="10" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,10 L18,2 M0,10 L18,10 M0,10 L18,18" stroke="#64b5f6" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </marker>
+    
+    <!-- One with line marker -->
+    <marker id="one-line" markerWidth="16" markerHeight="20" refX="14" refY="10" orient="auto" markerUnits="userSpaceOnUse">
+      <line x1="4" y1="2" x2="4" y2="18" stroke="#64b5f6" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="12" y1="2" x2="12" y2="18" stroke="#64b5f6" stroke-width="2.5" stroke-linecap="round"/>
+    </marker>
+    
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+    
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect class="svg-background" x="633.240593926364" y="399.70463009175745" width="1546.006065957692" height="1324.4034437747148"/>
+  
+  <!-- Relationships layer -->
+  <g class="relationships-layer">
+
+    <g class="relationship" data-from="oauth.user_id" data-to="users.id" data-from-table="oauth" data-to-table="users">
+      <path d="M 1232.6422332706263 502.70463009175745 C 1182.6422332706263 502.70463009175745, 1236.5036472530428 734.2466598840559, 1186.5036472530428 734.2466598840559" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1232.6422332706263 502.70463009175745 C 1182.6422332706263 502.70463009175745, 1236.5036472530428 734.2466598840559, 1186.5036472530428 734.2466598840559" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1192.6422332706263" y="478.70463009175745" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1204.6422332706263" y="492.70463009175745" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1202.5036472530428" y="710.2466598840559" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1214.5036472530428" y="724.2466598840559" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="creatorprofiles.user_id" data-to="users.id" data-from-table="creatorprofiles" data-to-table="users">
+      <path d="M 1923.246659884056 544.7858390601605 C 1628.5494548316508 544.7858390601605, 1481.200852305448 734.2466598840559, 1186.5036472530428 734.2466598840559" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1923.246659884056 544.7858390601605 C 1628.5494548316508 544.7858390601605, 1481.200852305448 734.2466598840559, 1186.5036472530428 734.2466598840559" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1883.246659884056" y="520.7858390601605" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1895.246659884056" y="534.7858390601605" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1202.5036472530428" y="710.2466598840559" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1214.5036472530428" y="724.2466598840559" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="creator_follows.follower_id" data-to="users.id" data-from-table="creator_follows" data-to-table="users">
+      <path d="M 1591.2181345260494 760.474977924521 C 1429.3323396168466 760.474977924521, 1348.3894421622454 734.2466598840559, 1186.5036472530428 734.2466598840559" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1591.2181345260494 760.474977924521 C 1429.3323396168466 760.474977924521, 1348.3894421622454 734.2466598840559, 1186.5036472530428 734.2466598840559" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1551.2181345260494" y="736.474977924521" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1563.2181345260494" y="750.474977924521" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1202.5036472530428" y="710.2466598840559" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1214.5036472530428" y="724.2466598840559" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="creator_follows.creator_id" data-to="creatorprofiles.id" data-from-table="creator_follows" data-to-table="creatorprofiles">
+      <path d="M 1831.2181345260494 786.474977924521 C 1881.2181345260494 786.474977924521, 1873.246659884056 518.7858390601605, 1923.246659884056 518.7858390601605" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1831.2181345260494 786.474977924521 C 1881.2181345260494 786.474977924521, 1873.246659884056 518.7858390601605, 1923.246659884056 518.7858390601605" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1847.2181345260494" y="762.474977924521" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1859.2181345260494" y="776.474977924521" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1883.246659884056" y="494.78583906016047" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1895.246659884056" y="508.78583906016047" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="topics.parent_id" data-to="topics.id" data-from-table="topics" data-to-table="topics">
+      <path d="M 1475.3368238184821 1680.614754098361 C 1379.3368238184821 1680.614754098361, 1331.3368238184821 1628.614754098361, 1235.3368238184821 1628.614754098361" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1475.3368238184821 1680.614754098361 C 1379.3368238184821 1680.614754098361, 1331.3368238184821 1628.614754098361, 1235.3368238184821 1628.614754098361" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1491.3368238184821" y="1656.614754098361" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1503.3368238184821" y="1670.614754098361" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1195.3368238184821" y="1604.614754098361" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1207.3368238184821" y="1618.614754098361" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="user_topic_interests.user_id" data-to="users.id" data-from-table="user_topic_interests" data-to-table="users">
+      <path d="M 889.240593926364 1581.1080738664723 C 939.240593926364 1581.1080738664723, 896.5036472530428 734.2466598840559, 946.5036472530428 734.2466598840559" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 889.240593926364 1581.1080738664723 C 939.240593926364 1581.1080738664723, 896.5036472530428 734.2466598840559, 946.5036472530428 734.2466598840559" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="905.240593926364" y="1557.1080738664723" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="917.240593926364" y="1571.1080738664723" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="906.5036472530428" y="710.2466598840559" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="918.5036472530428" y="724.2466598840559" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="user_topic_interests.topic_id" data-to="topics.id" data-from-table="user_topic_interests" data-to-table="topics">
+      <path d="M 889.240593926364 1607.1080738664723 C 1027.6790858832112 1607.1080738664723, 1096.898331861635 1628.614754098361, 1235.3368238184821 1628.614754098361" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 889.240593926364 1607.1080738664723 C 1027.6790858832112 1607.1080738664723, 1096.898331861635 1628.614754098361, 1235.3368238184821 1628.614754098361" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="905.240593926364" y="1583.1080738664723" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="917.240593926364" y="1597.1080738664723" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1195.3368238184821" y="1604.614754098361" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1207.3368238184821" y="1618.614754098361" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="posts.creator_id" data-to="creatorprofiles.id" data-from-table="posts" data-to-table="creatorprofiles">
+      <path d="M 1824.792663262564 1216.0066802318884 C 1874.792663262564 1216.0066802318884, 1873.246659884056 518.7858390601605, 1923.246659884056 518.7858390601605" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1824.792663262564 1216.0066802318884 C 1874.792663262564 1216.0066802318884, 1873.246659884056 518.7858390601605, 1923.246659884056 518.7858390601605" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1840.792663262564" y="1192.0066802318884" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1852.792663262564" y="1206.0066802318884" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1883.246659884056" y="494.78583906016047" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1895.246659884056" y="508.78583906016047" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="posts.topic_id" data-to="topics.id" data-from-table="posts" data-to-table="topics">
+      <path d="M 1584.792663262564 1398.0066802318884 C 1534.792663262564 1398.0066802318884, 1525.3368238184821 1628.614754098361, 1475.3368238184821 1628.614754098361" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1584.792663262564 1398.0066802318884 C 1534.792663262564 1398.0066802318884, 1525.3368238184821 1628.614754098361, 1475.3368238184821 1628.614754098361" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1544.792663262564" y="1374.0066802318884" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1556.792663262564" y="1388.0066802318884" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1491.3368238184821" y="1604.614754098361" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1503.3368238184821" y="1618.614754098361" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="mcqs.post_id" data-to="posts.id" data-from-table="mcqs" data-to-table="posts">
+      <path d="M 1916.397233846508 1578.3545897800132 C 1866.397233846508 1578.3545897800132, 1874.792663262564 1164.0066802318884, 1824.792663262564 1164.0066802318884" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#one-line)" marker-end="url(#one-line)"/>
+      <path d="M 1916.397233846508 1578.3545897800132 C 1866.397233846508 1578.3545897800132, 1874.792663262564 1164.0066802318884, 1824.792663262564 1164.0066802318884" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1876.397233846508" y="1554.3545897800132" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1888.397233846508" y="1568.3545897800132" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1840.792663262564" y="1140.0066802318884" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1852.792663262564" y="1154.0066802318884" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="flashcards.post_id" data-to="posts.id" data-from-table="flashcards" data-to-table="posts">
+      <path d="M 1918.3875206357743 1374.9059008715012 C 1868.3875206357743 1374.9059008715012, 1874.792663262564 1164.0066802318884, 1824.792663262564 1164.0066802318884" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#one-line)" marker-end="url(#one-line)"/>
+      <path d="M 1918.3875206357743 1374.9059008715012 C 1868.3875206357743 1374.9059008715012, 1874.792663262564 1164.0066802318884, 1824.792663262564 1164.0066802318884" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1878.3875206357743" y="1350.9059008715012" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1890.3875206357743" y="1364.9059008715012" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1840.792663262564" y="1140.0066802318884" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1852.792663262564" y="1154.0066802318884" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship highlighted" data-from="tags.primary_topic_id" data-to="topics.id" data-from-table="tags" data-to-table="topics">
+      <path d="M 1169.0432583406923 1477.389939340423 C 1219.0432583406923 1477.389939340423, 1185.3368238184821 1628.614754098361, 1235.3368238184821 1628.614754098361" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1169.0432583406923 1477.389939340423 C 1219.0432583406923 1477.389939340423, 1185.3368238184821 1628.614754098361, 1235.3368238184821 1628.614754098361" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1185.0432583406923" y="1453.389939340423" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1197.0432583406923" y="1467.389939340423" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1195.3368238184821" y="1604.614754098361" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1207.3368238184821" y="1618.614754098361" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="post_tags.post_id" data-to="posts.id" data-from-table="post_tags" data-to-table="posts">
+      <path d="M 1473.287643490613 1503.3164951817866 C 1523.287643490613 1503.3164951817866, 1534.792663262564 1164.0066802318884, 1584.792663262564 1164.0066802318884" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1473.287643490613 1503.3164951817866 C 1523.287643490613 1503.3164951817866, 1534.792663262564 1164.0066802318884, 1584.792663262564 1164.0066802318884" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1489.287643490613" y="1479.3164951817866" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1501.287643490613" y="1493.3164951817866" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1544.792663262564" y="1140.0066802318884" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1556.792663262564" y="1154.0066802318884" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship highlighted" data-from="post_tags.tag_id" data-to="tags.id" data-from-table="post_tags" data-to-table="tags">
+      <path d="M 1233.287643490613 1529.3164951817866 C 1183.287643490613 1529.3164951817866, 1219.0432583406923 1425.389939340423, 1169.0432583406923 1425.389939340423" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1233.287643490613 1529.3164951817866 C 1183.287643490613 1529.3164951817866, 1219.0432583406923 1425.389939340423, 1169.0432583406923 1425.389939340423" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1193.287643490613" y="1505.3164951817866" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1205.287643490613" y="1519.3164951817866" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1185.0432583406923" y="1401.389939340423" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1197.0432583406923" y="1415.389939340423" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="interactions.user_id" data-to="users.id" data-from-table="interactions" data-to-table="users">
+      <path d="M 1922.2220697201212 909.2143433024914 C 1627.93470073329 909.2143433024914, 1480.7910162398741 734.2466598840559, 1186.5036472530428 734.2466598840559" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1922.2220697201212 909.2143433024914 C 1627.93470073329 909.2143433024914, 1480.7910162398741 734.2466598840559, 1186.5036472530428 734.2466598840559" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1882.2220697201212" y="885.2143433024914" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1894.2220697201212" y="899.2143433024914" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1202.5036472530428" y="710.2466598840559" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1214.5036472530428" y="724.2466598840559" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="interactions.post_id" data-to="posts.id" data-from-table="interactions" data-to-table="posts">
+      <path d="M 1922.2220697201212 935.2143433024914 C 1872.2220697201212 935.2143433024914, 1874.792663262564 1164.0066802318884, 1824.792663262564 1164.0066802318884" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1922.2220697201212 935.2143433024914 C 1872.2220697201212 935.2143433024914, 1874.792663262564 1164.0066802318884, 1824.792663262564 1164.0066802318884" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1882.2220697201212" y="911.2143433024914" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1894.2220697201212" y="925.2143433024914" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1840.792663262564" y="1140.0066802318884" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1852.792663262564" y="1154.0066802318884" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="votes.user_id" data-to="users.id" data-from-table="votes" data-to-table="users">
+      <path d="M 1588.4670691442395 955.4045283525934 C 1427.6817003877609 955.4045283525934, 1347.2890160095214 734.2466598840559, 1186.5036472530428 734.2466598840559" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1588.4670691442395 955.4045283525934 C 1427.6817003877609 955.4045283525934, 1347.2890160095214 734.2466598840559, 1186.5036472530428 734.2466598840559" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1548.4670691442395" y="931.4045283525934" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1560.4670691442395" y="945.4045283525934" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1202.5036472530428" y="710.2466598840559" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1214.5036472530428" y="724.2466598840559" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="votes.post_id" data-to="posts.id" data-from-table="votes" data-to-table="posts">
+      <path d="M 1828.4670691442395 981.4045283525934 C 1730.9973067915694 981.4045283525934, 1682.2624256152342 1164.0066802318884, 1584.792663262564 1164.0066802318884" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1828.4670691442395 981.4045283525934 C 1730.9973067915694 981.4045283525934, 1682.2624256152342 1164.0066802318884, 1584.792663262564 1164.0066802318884" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1844.4670691442395" y="957.4045283525934" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1856.4670691442395" y="971.4045283525934" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1544.792663262564" y="1140.0066802318884" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1556.792663262564" y="1154.0066802318884" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="saved_posts.user_id" data-to="users.id" data-from-table="saved_posts" data-to-table="users">
+      <path d="M 1239.6401025070068 1019.9254712634854 C 1189.6401025070068 1019.9254712634854, 1236.5036472530428 734.2466598840559, 1186.5036472530428 734.2466598840559" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1239.6401025070068 1019.9254712634854 C 1189.6401025070068 1019.9254712634854, 1236.5036472530428 734.2466598840559, 1186.5036472530428 734.2466598840559" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1199.6401025070068" y="995.9254712634854" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1211.6401025070068" y="1009.9254712634854" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1202.5036472530428" y="710.2466598840559" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1214.5036472530428" y="724.2466598840559" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="saved_posts.post_id" data-to="posts.id" data-from-table="saved_posts" data-to-table="posts">
+      <path d="M 1479.6401025070068 1045.9254712634854 C 1529.6401025070068 1045.9254712634854, 1534.792663262564 1164.0066802318884, 1584.792663262564 1164.0066802318884" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1479.6401025070068 1045.9254712634854 C 1529.6401025070068 1045.9254712634854, 1534.792663262564 1164.0066802318884, 1584.792663262564 1164.0066802318884" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1495.6401025070068" y="1021.9254712634854" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1507.6401025070068" y="1035.9254712634854" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1544.792663262564" y="1140.0066802318884" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1556.792663262564" y="1154.0066802318884" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="comments.post_id" data-to="posts.id" data-from-table="comments" data-to-table="posts">
+      <path d="M 1480.1959630667634 1205.3621722271278 C 1530.1959630667634 1205.3621722271278, 1534.792663262564 1164.0066802318884, 1584.792663262564 1164.0066802318884" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1480.1959630667634 1205.3621722271278 C 1530.1959630667634 1205.3621722271278, 1534.792663262564 1164.0066802318884, 1584.792663262564 1164.0066802318884" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1496.1959630667634" y="1181.3621722271278" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1508.1959630667634" y="1195.3621722271278" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1544.792663262564" y="1140.0066802318884" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1556.792663262564" y="1154.0066802318884" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="comments.user_id" data-to="users.id" data-from-table="comments" data-to-table="users">
+      <path d="M 1240.1959630667634 1231.3621722271278 C 1190.1959630667634 1231.3621722271278, 1236.5036472530428 734.2466598840559, 1186.5036472530428 734.2466598840559" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1240.1959630667634 1231.3621722271278 C 1190.1959630667634 1231.3621722271278, 1236.5036472530428 734.2466598840559, 1186.5036472530428 734.2466598840559" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1200.1959630667634" y="1207.3621722271278" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1212.1959630667634" y="1221.3621722271278" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1202.5036472530428" y="710.2466598840559" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1214.5036472530428" y="724.2466598840559" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>
+    <g class="relationship" data-from="comments.parent_comment_id" data-to="comments.id" data-from-table="comments" data-to-table="comments">
+      <path d="M 1480.1959630667634 1257.3621722271278 C 1384.1959630667634 1257.3621722271278, 1336.1959630667634 1179.3621722271278, 1240.1959630667634 1179.3621722271278" class="relation-line" stroke="#64b5f6" stroke-opacity="0.6" stroke-width="2" marker-start="url(#many-crow)" marker-end="url(#one-line)"/>
+      <path d="M 1480.1959630667634 1257.3621722271278 C 1384.1959630667634 1257.3621722271278, 1336.1959630667634 1179.3621722271278, 1240.1959630667634 1179.3621722271278" stroke="transparent" stroke-width="20" fill="none" class="relation-hover-target"/>
+      
+      <!-- From cardinality label with background -->
+      <rect x="1496.1959630667634" y="1233.3621722271278" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1508.1959630667634" y="1247.3621722271278" text-anchor="middle" class="cardinality-label" fill="#64b5f6">N</text>
+
+      <!-- To cardinality label with background -->
+      <rect x="1200.1959630667634" y="1155.3621722271278" width="24" height="20" rx="4" class="cardinality-bg" stroke="#64b5f6" stroke-width="1" opacity="0.9"/>
+      <text x="1212.1959630667634" y="1169.3621722271278" text-anchor="middle" class="cardinality-label" fill="#64b5f6">1</text>
+    </g>  </g>
+  
+  <!-- Tables layer -->
+  <g class="tables-layer">
+
+    <g class="table draggable" data-table="users" transform="">
+      <rect class="table-bg" x="946.5036472530428" y="673.2466598840559" width="240" height="422" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="946.5036472530428" y="673.2466598840559" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="946.5036472530428" y="703.2466598840559" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="946.5036472530428" y1="711.2466598840559" x2="1186.5036472530428" y2="711.2466598840559" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="1066.5036472530428" y="697.2466598840559" text-anchor="middle" class="table-header">users</text>
+
+      <g class="column" data-table="users" data-column="id">
+        <text x="956.5036472530428" y="734.2466598840559" class="pk-icon">🔑</text>
+        <text x="974.5036472530428" y="734.2466598840559" class="column-name">id</text>
+        <text x="1176.5036472530428" y="734.2466598840559" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="954.5036472530428" y1="746.2466598840559" x2="1178.5036472530428" y2="746.2466598840559"/>
+      <rect class="col-row-alt" x="948.5036472530428" y="745.2466598840559" width="236" height="26" rx="2"/>
+      <g class="column" data-table="users" data-column="ext_id">
+        <text x="960.5036472530428" y="760.2466598840559" class="column-name">ext_id</text>
+        <text x="1176.5036472530428" y="760.2466598840559" text-anchor="end" class="column-type">int</text>
+      </g>
+      <line class="col-sep" x1="954.5036472530428" y1="772.2466598840559" x2="1178.5036472530428" y2="772.2466598840559"/>
+      <g class="column" data-table="users" data-column="email">
+        <text x="960.5036472530428" y="786.2466598840559" class="column-name">email</text>
+        <text x="1176.5036472530428" y="786.2466598840559" text-anchor="end" class="column-type">varchar(255)</text>
+      </g>
+      <line class="col-sep" x1="954.5036472530428" y1="798.2466598840559" x2="1178.5036472530428" y2="798.2466598840559"/>
+      <rect class="col-row-alt" x="948.5036472530428" y="797.2466598840559" width="236" height="26" rx="2"/>
+      <g class="column" data-table="users" data-column="password_hash">
+        <text x="960.5036472530428" y="812.2466598840559" class="column-name">password_hash</text>
+        <text x="1176.5036472530428" y="812.2466598840559" text-anchor="end" class="column-type">varchar(255)</text>
+      </g>
+      <line class="col-sep" x1="954.5036472530428" y1="824.2466598840559" x2="1178.5036472530428" y2="824.2466598840559"/>
+      <g class="column" data-table="users" data-column="username">
+        <text x="960.5036472530428" y="838.2466598840559" class="column-name">username</text>
+        <text x="1176.5036472530428" y="838.2466598840559" text-anchor="end" class="column-type">varchar(50)</text>
+      </g>
+      <line class="col-sep" x1="954.5036472530428" y1="850.2466598840559" x2="1178.5036472530428" y2="850.2466598840559"/>
+      <rect class="col-row-alt" x="948.5036472530428" y="849.2466598840559" width="236" height="26" rx="2"/>
+      <g class="column" data-table="users" data-column="avatar_url">
+        <text x="960.5036472530428" y="864.2466598840559" class="column-name">avatar_url</text>
+        <text x="1176.5036472530428" y="864.2466598840559" text-anchor="end" class="column-type">varchar(512)</text>
+      </g>
+      <line class="col-sep" x1="954.5036472530428" y1="876.2466598840559" x2="1178.5036472530428" y2="876.2466598840559"/>
+      <g class="column" data-table="users" data-column="bio">
+        <text x="960.5036472530428" y="890.2466598840559" class="column-name">bio</text>
+        <text x="1176.5036472530428" y="890.2466598840559" text-anchor="end" class="column-type">varchar(500)</text>
+      </g>
+      <line class="col-sep" x1="954.5036472530428" y1="902.2466598840559" x2="1178.5036472530428" y2="902.2466598840559"/>
+      <rect class="col-row-alt" x="948.5036472530428" y="901.2466598840559" width="236" height="26" rx="2"/>
+      <g class="column" data-table="users" data-column="is_active">
+        <text x="960.5036472530428" y="916.2466598840559" class="column-name">is_active</text>
+        <text x="1176.5036472530428" y="916.2466598840559" text-anchor="end" class="column-type">boolean</text>
+      </g>
+      <line class="col-sep" x1="954.5036472530428" y1="928.2466598840559" x2="1178.5036472530428" y2="928.2466598840559"/>
+      <g class="column" data-table="users" data-column="onboarding_completed">
+        <text x="960.5036472530428" y="942.2466598840559" class="column-name">onboarding_completed</text>
+        <text x="1176.5036472530428" y="942.2466598840559" text-anchor="end" class="column-type">boolean</text>
+      </g>
+      <line class="col-sep" x1="954.5036472530428" y1="954.2466598840559" x2="1178.5036472530428" y2="954.2466598840559"/>
+      <rect class="col-row-alt" x="948.5036472530428" y="953.2466598840559" width="236" height="26" rx="2"/>
+      <g class="column" data-table="users" data-column="created_at">
+        <text x="960.5036472530428" y="968.2466598840559" class="column-name">created_at</text>
+        <text x="1176.5036472530428" y="968.2466598840559" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+      <line class="col-sep" x1="954.5036472530428" y1="980.2466598840559" x2="1178.5036472530428" y2="980.2466598840559"/>
+      <g class="column" data-table="users" data-column="updated_at">
+        <text x="960.5036472530428" y="994.2466598840559" class="column-name">updated_at</text>
+        <text x="1176.5036472530428" y="994.2466598840559" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+      <line class="col-sep" x1="954.5036472530428" y1="1006.2466598840559" x2="1178.5036472530428" y2="1006.2466598840559"/>
+      <rect class="col-row-alt" x="948.5036472530428" y="1005.2466598840559" width="236" height="26" rx="2"/>
+      <g class="column" data-table="users" data-column="last_active_at">
+        <text x="960.5036472530428" y="1020.2466598840559" class="column-name">last_active_at</text>
+        <text x="1176.5036472530428" y="1020.2466598840559" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+      <line class="col-sep" x1="954.5036472530428" y1="1032.246659884056" x2="1178.5036472530428" y2="1032.246659884056"/>
+      <g class="column" data-table="users" data-column="estimated_expertise">
+        <text x="960.5036472530428" y="1046.246659884056" class="column-name">estimated_expertise</text>
+        <text x="1176.5036472530428" y="1046.246659884056" text-anchor="end" class="column-type">float</text>
+      </g>
+      <line class="col-sep" x1="954.5036472530428" y1="1058.246659884056" x2="1178.5036472530428" y2="1058.246659884056"/>
+      <rect class="col-row-alt" x="948.5036472530428" y="1057.246659884056" width="236" height="26" rx="2"/>
+      <g class="column" data-table="users" data-column="curiosity_score">
+        <text x="960.5036472530428" y="1072.246659884056" class="column-name">curiosity_score</text>
+        <text x="1176.5036472530428" y="1072.246659884056" text-anchor="end" class="column-type">float</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="oauth" transform="">
+      <rect class="table-bg" x="1232.6422332706263" y="415.70463009175745" width="240" height="240" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="1232.6422332706263" y="415.70463009175745" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="1232.6422332706263" y="445.70463009175745" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="1232.6422332706263" y1="453.70463009175745" x2="1472.6422332706263" y2="453.70463009175745" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="1352.6422332706263" y="439.70463009175745" text-anchor="middle" class="table-header">oauth</text>
+
+      <g class="column" data-table="oauth" data-column="id">
+        <text x="1242.6422332706263" y="476.70463009175745" class="pk-icon">🔑</text>
+        <text x="1260.6422332706263" y="476.70463009175745" class="column-name">id</text>
+        <text x="1462.6422332706263" y="476.70463009175745" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1240.6422332706263" y1="488.70463009175745" x2="1464.6422332706263" y2="488.70463009175745"/>
+      <rect class="col-row-alt" x="1234.6422332706263" y="487.70463009175745" width="236" height="26" rx="2"/>
+      <g class="column" data-table="oauth" data-column="user_id">
+        <text x="1242.6422332706263" y="502.70463009175745" class="fk-icon">🔗</text>
+        <text x="1260.6422332706263" y="502.70463009175745" class="column-name">user_id</text>
+        <text x="1462.6422332706263" y="502.70463009175745" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1240.6422332706263" y1="514.7046300917575" x2="1464.6422332706263" y2="514.7046300917575"/>
+      <g class="column" data-table="oauth" data-column="provider">
+        <text x="1246.6422332706263" y="528.7046300917575" class="column-name">provider</text>
+        <text x="1462.6422332706263" y="528.7046300917575" text-anchor="end" class="column-type">oauthprovider</text>
+      </g>
+      <line class="col-sep" x1="1240.6422332706263" y1="540.7046300917575" x2="1464.6422332706263" y2="540.7046300917575"/>
+      <rect class="col-row-alt" x="1234.6422332706263" y="539.7046300917575" width="236" height="26" rx="2"/>
+      <g class="column" data-table="oauth" data-column="provider_user_id">
+        <text x="1246.6422332706263" y="554.7046300917575" class="column-name">provider_user_id</text>
+        <text x="1462.6422332706263" y="554.7046300917575" text-anchor="end" class="column-type">varchar(255)</text>
+      </g>
+      <line class="col-sep" x1="1240.6422332706263" y1="566.7046300917575" x2="1464.6422332706263" y2="566.7046300917575"/>
+      <g class="column" data-table="oauth" data-column="access_token">
+        <text x="1246.6422332706263" y="580.7046300917575" class="column-name">access_token</text>
+        <text x="1462.6422332706263" y="580.7046300917575" text-anchor="end" class="column-type">text</text>
+      </g>
+      <line class="col-sep" x1="1240.6422332706263" y1="592.7046300917575" x2="1464.6422332706263" y2="592.7046300917575"/>
+      <rect class="col-row-alt" x="1234.6422332706263" y="591.7046300917575" width="236" height="26" rx="2"/>
+      <g class="column" data-table="oauth" data-column="refresh_token">
+        <text x="1246.6422332706263" y="606.7046300917575" class="column-name">refresh_token</text>
+        <text x="1462.6422332706263" y="606.7046300917575" text-anchor="end" class="column-type">text</text>
+      </g>
+      <line class="col-sep" x1="1240.6422332706263" y1="618.7046300917575" x2="1464.6422332706263" y2="618.7046300917575"/>
+      <g class="column" data-table="oauth" data-column="created_at">
+        <text x="1246.6422332706263" y="632.7046300917575" class="column-name">created_at</text>
+        <text x="1462.6422332706263" y="632.7046300917575" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="creatorprofiles" transform="">
+      <rect class="table-bg" x="1923.246659884056" y="457.78583906016047" width="240" height="344" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="1923.246659884056" y="457.78583906016047" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="1923.246659884056" y="487.78583906016047" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="1923.246659884056" y1="495.78583906016047" x2="2163.246659884056" y2="495.78583906016047" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="2043.246659884056" y="481.78583906016047" text-anchor="middle" class="table-header">creatorprofiles</text>
+
+      <g class="column" data-table="creatorprofiles" data-column="id">
+        <text x="1933.246659884056" y="518.7858390601605" class="pk-icon">🔑</text>
+        <text x="1951.246659884056" y="518.7858390601605" class="column-name">id</text>
+        <text x="2153.246659884056" y="518.7858390601605" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1931.246659884056" y1="530.7858390601605" x2="2155.246659884056" y2="530.7858390601605"/>
+      <rect class="col-row-alt" x="1925.246659884056" y="529.7858390601605" width="236" height="26" rx="2"/>
+      <g class="column" data-table="creatorprofiles" data-column="user_id">
+        <text x="1933.246659884056" y="544.7858390601605" class="fk-icon">🔗</text>
+        <text x="1951.246659884056" y="544.7858390601605" class="column-name">user_id</text>
+        <text x="2153.246659884056" y="544.7858390601605" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1931.246659884056" y1="556.7858390601605" x2="2155.246659884056" y2="556.7858390601605"/>
+      <g class="column" data-table="creatorprofiles" data-column="ext_id">
+        <text x="1937.246659884056" y="570.7858390601605" class="column-name">ext_id</text>
+        <text x="2153.246659884056" y="570.7858390601605" text-anchor="end" class="column-type">int</text>
+      </g>
+      <line class="col-sep" x1="1931.246659884056" y1="582.7858390601605" x2="2155.246659884056" y2="582.7858390601605"/>
+      <rect class="col-row-alt" x="1925.246659884056" y="581.7858390601605" width="236" height="26" rx="2"/>
+      <g class="column" data-table="creatorprofiles" data-column="headline">
+        <text x="1937.246659884056" y="596.7858390601605" class="column-name">headline</text>
+        <text x="2153.246659884056" y="596.7858390601605" text-anchor="end" class="column-type">varchar(150)</text>
+      </g>
+      <line class="col-sep" x1="1931.246659884056" y1="608.7858390601605" x2="2155.246659884056" y2="608.7858390601605"/>
+      <g class="column" data-table="creatorprofiles" data-column="credentials">
+        <text x="1937.246659884056" y="622.7858390601605" class="column-name">credentials</text>
+        <text x="2153.246659884056" y="622.7858390601605" text-anchor="end" class="column-type">text</text>
+      </g>
+      <line class="col-sep" x1="1931.246659884056" y1="634.7858390601605" x2="2155.246659884056" y2="634.7858390601605"/>
+      <rect class="col-row-alt" x="1925.246659884056" y="633.7858390601605" width="236" height="26" rx="2"/>
+      <g class="column" data-table="creatorprofiles" data-column="primary_topics">
+        <text x="1937.246659884056" y="648.7858390601605" class="column-name">primary_topics</text>
+        <text x="2153.246659884056" y="648.7858390601605" text-anchor="end" class="column-type">jsonb</text>
+      </g>
+      <line class="col-sep" x1="1931.246659884056" y1="660.7858390601605" x2="2155.246659884056" y2="660.7858390601605"/>
+      <g class="column" data-table="creatorprofiles" data-column="authority_score">
+        <text x="1937.246659884056" y="674.7858390601605" class="column-name">authority_score</text>
+        <text x="2153.246659884056" y="674.7858390601605" text-anchor="end" class="column-type">float</text>
+      </g>
+      <line class="col-sep" x1="1931.246659884056" y1="686.7858390601605" x2="2155.246659884056" y2="686.7858390601605"/>
+      <rect class="col-row-alt" x="1925.246659884056" y="685.7858390601605" width="236" height="26" rx="2"/>
+      <g class="column" data-table="creatorprofiles" data-column="follower_count">
+        <text x="1937.246659884056" y="700.7858390601605" class="column-name">follower_count</text>
+        <text x="2153.246659884056" y="700.7858390601605" text-anchor="end" class="column-type">int</text>
+      </g>
+      <line class="col-sep" x1="1931.246659884056" y1="712.7858390601605" x2="2155.246659884056" y2="712.7858390601605"/>
+      <g class="column" data-table="creatorprofiles" data-column="avg_post_upvote_rate">
+        <text x="1937.246659884056" y="726.7858390601605" class="column-name">avg_post_upvote_rate</text>
+        <text x="2153.246659884056" y="726.7858390601605" text-anchor="end" class="column-type">float</text>
+      </g>
+      <line class="col-sep" x1="1931.246659884056" y1="738.7858390601605" x2="2155.246659884056" y2="738.7858390601605"/>
+      <rect class="col-row-alt" x="1925.246659884056" y="737.7858390601605" width="236" height="26" rx="2"/>
+      <g class="column" data-table="creatorprofiles" data-column="is_verified_educator">
+        <text x="1937.246659884056" y="752.7858390601605" class="column-name">is_verified_educator</text>
+        <text x="2153.246659884056" y="752.7858390601605" text-anchor="end" class="column-type">boolean</text>
+      </g>
+      <line class="col-sep" x1="1931.246659884056" y1="764.7858390601605" x2="2155.246659884056" y2="764.7858390601605"/>
+      <g class="column" data-table="creatorprofiles" data-column="created_at">
+        <text x="1937.246659884056" y="778.7858390601605" class="column-name">created_at</text>
+        <text x="2153.246659884056" y="778.7858390601605" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="creator_follows" transform="">
+      <rect class="table-bg" x="1591.2181345260494" y="673.474977924521" width="240" height="162" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="1591.2181345260494" y="673.474977924521" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="1591.2181345260494" y="703.474977924521" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="1591.2181345260494" y1="711.474977924521" x2="1831.2181345260494" y2="711.474977924521" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="1711.2181345260494" y="697.474977924521" text-anchor="middle" class="table-header">creator_follows</text>
+
+      <g class="column" data-table="creator_follows" data-column="id">
+        <text x="1601.2181345260494" y="734.474977924521" class="pk-icon">🔑</text>
+        <text x="1619.2181345260494" y="734.474977924521" class="column-name">id</text>
+        <text x="1821.2181345260494" y="734.474977924521" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1599.2181345260494" y1="746.474977924521" x2="1823.2181345260494" y2="746.474977924521"/>
+      <rect class="col-row-alt" x="1593.2181345260494" y="745.474977924521" width="236" height="26" rx="2"/>
+      <g class="column" data-table="creator_follows" data-column="follower_id">
+        <text x="1601.2181345260494" y="760.474977924521" class="fk-icon">🔗</text>
+        <text x="1619.2181345260494" y="760.474977924521" class="column-name">follower_id</text>
+        <text x="1821.2181345260494" y="760.474977924521" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1599.2181345260494" y1="772.474977924521" x2="1823.2181345260494" y2="772.474977924521"/>
+      <g class="column" data-table="creator_follows" data-column="creator_id">
+        <text x="1601.2181345260494" y="786.474977924521" class="fk-icon">🔗</text>
+        <text x="1619.2181345260494" y="786.474977924521" class="column-name">creator_id</text>
+        <text x="1821.2181345260494" y="786.474977924521" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1599.2181345260494" y1="798.474977924521" x2="1823.2181345260494" y2="798.474977924521"/>
+      <rect class="col-row-alt" x="1593.2181345260494" y="797.474977924521" width="236" height="26" rx="2"/>
+      <g class="column" data-table="creator_follows" data-column="created_at">
+        <text x="1605.2181345260494" y="812.474977924521" class="column-name">created_at</text>
+        <text x="1821.2181345260494" y="812.474977924521" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="topics" transform="">
+      <rect class="table-bg" x="1235.3368238184821" y="1567.614754098361" width="240" height="136" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="1235.3368238184821" y="1567.614754098361" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="1235.3368238184821" y="1597.614754098361" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="1235.3368238184821" y1="1605.614754098361" x2="1475.3368238184821" y2="1605.614754098361" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="1355.3368238184821" y="1591.614754098361" text-anchor="middle" class="table-header">topics</text>
+
+      <g class="column" data-table="topics" data-column="id">
+        <text x="1245.3368238184821" y="1628.614754098361" class="pk-icon">🔑</text>
+        <text x="1263.3368238184821" y="1628.614754098361" class="column-name">id</text>
+        <text x="1465.3368238184821" y="1628.614754098361" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1243.3368238184821" y1="1640.614754098361" x2="1467.3368238184821" y2="1640.614754098361"/>
+      <rect class="col-row-alt" x="1237.3368238184821" y="1639.614754098361" width="236" height="26" rx="2"/>
+      <g class="column" data-table="topics" data-column="name">
+        <text x="1249.3368238184821" y="1654.614754098361" class="column-name">name</text>
+        <text x="1465.3368238184821" y="1654.614754098361" text-anchor="end" class="column-type">varchar(80)</text>
+      </g>
+      <line class="col-sep" x1="1243.3368238184821" y1="1666.614754098361" x2="1467.3368238184821" y2="1666.614754098361"/>
+      <g class="column" data-table="topics" data-column="parent_id">
+        <text x="1245.3368238184821" y="1680.614754098361" class="fk-icon">🔗</text>
+        <text x="1263.3368238184821" y="1680.614754098361" class="column-name">parent_id</text>
+        <text x="1465.3368238184821" y="1680.614754098361" text-anchor="end" class="column-type">uuid</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="user_topic_interests" transform="">
+      <rect class="table-bg" x="649.240593926364" y="1494.1080738664723" width="240" height="214" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="649.240593926364" y="1494.1080738664723" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="649.240593926364" y="1524.1080738664723" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="649.240593926364" y1="1532.1080738664723" x2="889.240593926364" y2="1532.1080738664723" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="769.240593926364" y="1518.1080738664723" text-anchor="middle" class="table-header">user_topic_interests</text>
+
+      <g class="column" data-table="user_topic_interests" data-column="id">
+        <text x="659.240593926364" y="1555.1080738664723" class="pk-icon">🔑</text>
+        <text x="677.240593926364" y="1555.1080738664723" class="column-name">id</text>
+        <text x="879.240593926364" y="1555.1080738664723" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="657.240593926364" y1="1567.1080738664723" x2="881.240593926364" y2="1567.1080738664723"/>
+      <rect class="col-row-alt" x="651.240593926364" y="1566.1080738664723" width="236" height="26" rx="2"/>
+      <g class="column" data-table="user_topic_interests" data-column="user_id">
+        <text x="659.240593926364" y="1581.1080738664723" class="fk-icon">🔗</text>
+        <text x="677.240593926364" y="1581.1080738664723" class="column-name">user_id</text>
+        <text x="879.240593926364" y="1581.1080738664723" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="657.240593926364" y1="1593.1080738664723" x2="881.240593926364" y2="1593.1080738664723"/>
+      <g class="column" data-table="user_topic_interests" data-column="topic_id">
+        <text x="659.240593926364" y="1607.1080738664723" class="fk-icon">🔗</text>
+        <text x="677.240593926364" y="1607.1080738664723" class="column-name">topic_id</text>
+        <text x="879.240593926364" y="1607.1080738664723" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="657.240593926364" y1="1619.1080738664723" x2="881.240593926364" y2="1619.1080738664723"/>
+      <rect class="col-row-alt" x="651.240593926364" y="1618.1080738664723" width="236" height="26" rx="2"/>
+      <g class="column" data-table="user_topic_interests" data-column="affinity_score">
+        <text x="663.240593926364" y="1633.1080738664723" class="column-name">affinity_score</text>
+        <text x="879.240593926364" y="1633.1080738664723" text-anchor="end" class="column-type">float</text>
+      </g>
+      <line class="col-sep" x1="657.240593926364" y1="1645.1080738664723" x2="881.240593926364" y2="1645.1080738664723"/>
+      <g class="column" data-table="user_topic_interests" data-column="source">
+        <text x="663.240593926364" y="1659.1080738664723" class="column-name">source</text>
+        <text x="879.240593926364" y="1659.1080738664723" text-anchor="end" class="column-type">varchar(30)</text>
+      </g>
+      <line class="col-sep" x1="657.240593926364" y1="1671.1080738664723" x2="881.240593926364" y2="1671.1080738664723"/>
+      <rect class="col-row-alt" x="651.240593926364" y="1670.1080738664723" width="236" height="26" rx="2"/>
+      <g class="column" data-table="user_topic_interests" data-column="updated_at">
+        <text x="663.240593926364" y="1685.1080738664723" class="column-name">updated_at</text>
+        <text x="879.240593926364" y="1685.1080738664723" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="posts" transform="">
+      <rect class="table-bg" x="1584.792663262564" y="1103.0066802318884" width="240" height="604" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="1584.792663262564" y="1103.0066802318884" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="1584.792663262564" y="1133.0066802318884" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="1584.792663262564" y1="1141.0066802318884" x2="1824.792663262564" y2="1141.0066802318884" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="1704.792663262564" y="1127.0066802318884" text-anchor="middle" class="table-header">posts</text>
+
+      <g class="column" data-table="posts" data-column="id">
+        <text x="1594.792663262564" y="1164.0066802318884" class="pk-icon">🔑</text>
+        <text x="1612.792663262564" y="1164.0066802318884" class="column-name">id</text>
+        <text x="1814.792663262564" y="1164.0066802318884" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1176.0066802318884" x2="1816.792663262564" y2="1176.0066802318884"/>
+      <rect class="col-row-alt" x="1586.792663262564" y="1175.0066802318884" width="236" height="26" rx="2"/>
+      <g class="column" data-table="posts" data-column="ext_id">
+        <text x="1598.792663262564" y="1190.0066802318884" class="column-name">ext_id</text>
+        <text x="1814.792663262564" y="1190.0066802318884" text-anchor="end" class="column-type">int</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1202.0066802318884" x2="1816.792663262564" y2="1202.0066802318884"/>
+      <g class="column" data-table="posts" data-column="creator_id">
+        <text x="1594.792663262564" y="1216.0066802318884" class="fk-icon">🔗</text>
+        <text x="1612.792663262564" y="1216.0066802318884" class="column-name">creator_id</text>
+        <text x="1814.792663262564" y="1216.0066802318884" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1228.0066802318884" x2="1816.792663262564" y2="1228.0066802318884"/>
+      <rect class="col-row-alt" x="1586.792663262564" y="1227.0066802318884" width="236" height="26" rx="2"/>
+      <g class="column" data-table="posts" data-column="content_type">
+        <text x="1598.792663262564" y="1242.0066802318884" class="column-name">content_type</text>
+        <text x="1814.792663262564" y="1242.0066802318884" text-anchor="end" class="column-type">contenttype</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1254.0066802318884" x2="1816.792663262564" y2="1254.0066802318884"/>
+      <g class="column" data-table="posts" data-column="title">
+        <text x="1598.792663262564" y="1268.0066802318884" class="column-name">title</text>
+        <text x="1814.792663262564" y="1268.0066802318884" text-anchor="end" class="column-type">varchar(200)</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1280.0066802318884" x2="1816.792663262564" y2="1280.0066802318884"/>
+      <rect class="col-row-alt" x="1586.792663262564" y="1279.0066802318884" width="236" height="26" rx="2"/>
+      <g class="column" data-table="posts" data-column="body">
+        <text x="1598.792663262564" y="1294.0066802318884" class="column-name">body</text>
+        <text x="1814.792663262564" y="1294.0066802318884" text-anchor="end" class="column-type">text</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1306.0066802318884" x2="1816.792663262564" y2="1306.0066802318884"/>
+      <g class="column" data-table="posts" data-column="word_count">
+        <text x="1598.792663262564" y="1320.0066802318884" class="column-name">word_count</text>
+        <text x="1814.792663262564" y="1320.0066802318884" text-anchor="end" class="column-type">int</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1332.0066802318884" x2="1816.792663262564" y2="1332.0066802318884"/>
+      <rect class="col-row-alt" x="1586.792663262564" y="1331.0066802318884" width="236" height="26" rx="2"/>
+      <g class="column" data-table="posts" data-column="est_read_seconds">
+        <text x="1598.792663262564" y="1346.0066802318884" class="column-name">est_read_seconds</text>
+        <text x="1814.792663262564" y="1346.0066802318884" text-anchor="end" class="column-type">int</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1358.0066802318884" x2="1816.792663262564" y2="1358.0066802318884"/>
+      <g class="column" data-table="posts" data-column="difficulty">
+        <text x="1598.792663262564" y="1372.0066802318884" class="column-name">difficulty</text>
+        <text x="1814.792663262564" y="1372.0066802318884" text-anchor="end" class="column-type">float</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1384.0066802318884" x2="1816.792663262564" y2="1384.0066802318884"/>
+      <rect class="col-row-alt" x="1586.792663262564" y="1383.0066802318884" width="236" height="26" rx="2"/>
+      <g class="column" data-table="posts" data-column="topic_id">
+        <text x="1594.792663262564" y="1398.0066802318884" class="fk-icon">🔗</text>
+        <text x="1612.792663262564" y="1398.0066802318884" class="column-name">topic_id</text>
+        <text x="1814.792663262564" y="1398.0066802318884" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1410.0066802318884" x2="1816.792663262564" y2="1410.0066802318884"/>
+      <g class="column" data-table="posts" data-column="status">
+        <text x="1598.792663262564" y="1424.0066802318884" class="column-name">status</text>
+        <text x="1814.792663262564" y="1424.0066802318884" text-anchor="end" class="column-type">varchar(20)</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1436.0066802318884" x2="1816.792663262564" y2="1436.0066802318884"/>
+      <rect class="col-row-alt" x="1586.792663262564" y="1435.0066802318884" width="236" height="26" rx="2"/>
+      <g class="column" data-table="posts" data-column="published_at">
+        <text x="1598.792663262564" y="1450.0066802318884" class="column-name">published_at</text>
+        <text x="1814.792663262564" y="1450.0066802318884" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1462.0066802318884" x2="1816.792663262564" y2="1462.0066802318884"/>
+      <g class="column" data-table="posts" data-column="created_at">
+        <text x="1598.792663262564" y="1476.0066802318884" class="column-name">created_at</text>
+        <text x="1814.792663262564" y="1476.0066802318884" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1488.0066802318884" x2="1816.792663262564" y2="1488.0066802318884"/>
+      <rect class="col-row-alt" x="1586.792663262564" y="1487.0066802318884" width="236" height="26" rx="2"/>
+      <g class="column" data-table="posts" data-column="updated_at">
+        <text x="1598.792663262564" y="1502.0066802318884" class="column-name">updated_at</text>
+        <text x="1814.792663262564" y="1502.0066802318884" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1514.0066802318884" x2="1816.792663262564" y2="1514.0066802318884"/>
+      <g class="column" data-table="posts" data-column="impression_count">
+        <text x="1598.792663262564" y="1528.0066802318884" class="column-name">impression_count</text>
+        <text x="1814.792663262564" y="1528.0066802318884" text-anchor="end" class="column-type">int</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1540.0066802318884" x2="1816.792663262564" y2="1540.0066802318884"/>
+      <rect class="col-row-alt" x="1586.792663262564" y="1539.0066802318884" width="236" height="26" rx="2"/>
+      <g class="column" data-table="posts" data-column="read_complete_count">
+        <text x="1598.792663262564" y="1554.0066802318884" class="column-name">read_complete_count</text>
+        <text x="1814.792663262564" y="1554.0066802318884" text-anchor="end" class="column-type">int</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1566.0066802318884" x2="1816.792663262564" y2="1566.0066802318884"/>
+      <g class="column" data-table="posts" data-column="upvote_count">
+        <text x="1598.792663262564" y="1580.0066802318884" class="column-name">upvote_count</text>
+        <text x="1814.792663262564" y="1580.0066802318884" text-anchor="end" class="column-type">int</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1592.0066802318884" x2="1816.792663262564" y2="1592.0066802318884"/>
+      <rect class="col-row-alt" x="1586.792663262564" y="1591.0066802318884" width="236" height="26" rx="2"/>
+      <g class="column" data-table="posts" data-column="downvote_count">
+        <text x="1598.792663262564" y="1606.0066802318884" class="column-name">downvote_count</text>
+        <text x="1814.792663262564" y="1606.0066802318884" text-anchor="end" class="column-type">int</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1618.0066802318884" x2="1816.792663262564" y2="1618.0066802318884"/>
+      <g class="column" data-table="posts" data-column="comment_count">
+        <text x="1598.792663262564" y="1632.0066802318884" class="column-name">comment_count</text>
+        <text x="1814.792663262564" y="1632.0066802318884" text-anchor="end" class="column-type">int</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1644.0066802318884" x2="1816.792663262564" y2="1644.0066802318884"/>
+      <rect class="col-row-alt" x="1586.792663262564" y="1643.0066802318884" width="236" height="26" rx="2"/>
+      <g class="column" data-table="posts" data-column="save_count">
+        <text x="1598.792663262564" y="1658.0066802318884" class="column-name">save_count</text>
+        <text x="1814.792663262564" y="1658.0066802318884" text-anchor="end" class="column-type">int</text>
+      </g>
+      <line class="col-sep" x1="1592.792663262564" y1="1670.0066802318884" x2="1816.792663262564" y2="1670.0066802318884"/>
+      <g class="column" data-table="posts" data-column="share_count">
+        <text x="1598.792663262564" y="1684.0066802318884" class="column-name">share_count</text>
+        <text x="1814.792663262564" y="1684.0066802318884" text-anchor="end" class="column-type">int</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="mcqs" transform="">
+      <rect class="table-bg" x="1916.397233846508" y="1491.3545897800132" width="240" height="214" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="1916.397233846508" y="1491.3545897800132" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="1916.397233846508" y="1521.3545897800132" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="1916.397233846508" y1="1529.3545897800132" x2="2156.3972338465082" y2="1529.3545897800132" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="2036.397233846508" y="1515.3545897800132" text-anchor="middle" class="table-header">mcqs</text>
+
+      <g class="column" data-table="mcqs" data-column="id">
+        <text x="1926.397233846508" y="1552.3545897800132" class="pk-icon">🔑</text>
+        <text x="1944.397233846508" y="1552.3545897800132" class="column-name">id</text>
+        <text x="2146.3972338465082" y="1552.3545897800132" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1924.397233846508" y1="1564.3545897800132" x2="2148.3972338465082" y2="1564.3545897800132"/>
+      <rect class="col-row-alt" x="1918.397233846508" y="1563.3545897800132" width="236" height="26" rx="2"/>
+      <g class="column" data-table="mcqs" data-column="post_id">
+        <text x="1926.397233846508" y="1578.3545897800132" class="fk-icon">🔗</text>
+        <text x="1944.397233846508" y="1578.3545897800132" class="column-name">post_id</text>
+        <text x="2146.3972338465082" y="1578.3545897800132" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1924.397233846508" y1="1590.3545897800132" x2="2148.3972338465082" y2="1590.3545897800132"/>
+      <g class="column" data-table="mcqs" data-column="question">
+        <text x="1930.397233846508" y="1604.3545897800132" class="column-name">question</text>
+        <text x="2146.3972338465082" y="1604.3545897800132" text-anchor="end" class="column-type">text</text>
+      </g>
+      <line class="col-sep" x1="1924.397233846508" y1="1616.3545897800132" x2="2148.3972338465082" y2="1616.3545897800132"/>
+      <rect class="col-row-alt" x="1918.397233846508" y="1615.3545897800132" width="236" height="26" rx="2"/>
+      <g class="column" data-table="mcqs" data-column="options">
+        <text x="1930.397233846508" y="1630.3545897800132" class="column-name">options</text>
+        <text x="2146.3972338465082" y="1630.3545897800132" text-anchor="end" class="column-type">jsonb</text>
+      </g>
+      <line class="col-sep" x1="1924.397233846508" y1="1642.3545897800132" x2="2148.3972338465082" y2="1642.3545897800132"/>
+      <g class="column" data-table="mcqs" data-column="correct_index">
+        <text x="1930.397233846508" y="1656.3545897800132" class="column-name">correct_index</text>
+        <text x="2146.3972338465082" y="1656.3545897800132" text-anchor="end" class="column-type">smallint</text>
+      </g>
+      <line class="col-sep" x1="1924.397233846508" y1="1668.3545897800132" x2="2148.3972338465082" y2="1668.3545897800132"/>
+      <rect class="col-row-alt" x="1918.397233846508" y="1667.3545897800132" width="236" height="26" rx="2"/>
+      <g class="column" data-table="mcqs" data-column="explanation">
+        <text x="1930.397233846508" y="1682.3545897800132" class="column-name">explanation</text>
+        <text x="2146.3972338465082" y="1682.3545897800132" text-anchor="end" class="column-type">text</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="flashcards" transform="">
+      <rect class="table-bg" x="1918.3875206357743" y="1287.9059008715012" width="240" height="188" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="1918.3875206357743" y="1287.9059008715012" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="1918.3875206357743" y="1317.9059008715012" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="1918.3875206357743" y1="1325.9059008715012" x2="2158.3875206357743" y2="1325.9059008715012" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="2038.3875206357743" y="1311.9059008715012" text-anchor="middle" class="table-header">flashcards</text>
+
+      <g class="column" data-table="flashcards" data-column="id">
+        <text x="1928.3875206357743" y="1348.9059008715012" class="pk-icon">🔑</text>
+        <text x="1946.3875206357743" y="1348.9059008715012" class="column-name">id</text>
+        <text x="2148.3875206357743" y="1348.9059008715012" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1926.3875206357743" y1="1360.9059008715012" x2="2150.3875206357743" y2="1360.9059008715012"/>
+      <rect class="col-row-alt" x="1920.3875206357743" y="1359.9059008715012" width="236" height="26" rx="2"/>
+      <g class="column" data-table="flashcards" data-column="post_id">
+        <text x="1928.3875206357743" y="1374.9059008715012" class="fk-icon">🔗</text>
+        <text x="1946.3875206357743" y="1374.9059008715012" class="column-name">post_id</text>
+        <text x="2148.3875206357743" y="1374.9059008715012" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1926.3875206357743" y1="1386.9059008715012" x2="2150.3875206357743" y2="1386.9059008715012"/>
+      <g class="column" data-table="flashcards" data-column="front">
+        <text x="1932.3875206357743" y="1400.9059008715012" class="column-name">front</text>
+        <text x="2148.3875206357743" y="1400.9059008715012" text-anchor="end" class="column-type">text</text>
+      </g>
+      <line class="col-sep" x1="1926.3875206357743" y1="1412.9059008715012" x2="2150.3875206357743" y2="1412.9059008715012"/>
+      <rect class="col-row-alt" x="1920.3875206357743" y="1411.9059008715012" width="236" height="26" rx="2"/>
+      <g class="column" data-table="flashcards" data-column="back">
+        <text x="1932.3875206357743" y="1426.9059008715012" class="column-name">back</text>
+        <text x="2148.3875206357743" y="1426.9059008715012" text-anchor="end" class="column-type">text</text>
+      </g>
+      <line class="col-sep" x1="1926.3875206357743" y1="1438.9059008715012" x2="2150.3875206357743" y2="1438.9059008715012"/>
+      <g class="column" data-table="flashcards" data-column="flip_threshold_sec">
+        <text x="1932.3875206357743" y="1452.9059008715012" class="column-name">flip_threshold_sec</text>
+        <text x="2148.3875206357743" y="1452.9059008715012" text-anchor="end" class="column-type">float</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="tags" transform="">
+      <rect class="table-bg" x="929.0432583406924" y="1364.389939340423" width="240" height="162" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="929.0432583406924" y="1364.389939340423" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="929.0432583406924" y="1394.389939340423" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="929.0432583406924" y1="1402.389939340423" x2="1169.0432583406923" y2="1402.389939340423" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="1049.0432583406923" y="1388.389939340423" text-anchor="middle" class="table-header">tags</text>
+
+      <g class="column" data-table="tags" data-column="id">
+        <text x="939.0432583406924" y="1425.389939340423" class="pk-icon">🔑</text>
+        <text x="957.0432583406924" y="1425.389939340423" class="column-name">id</text>
+        <text x="1159.0432583406923" y="1425.389939340423" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="937.0432583406924" y1="1437.389939340423" x2="1161.0432583406923" y2="1437.389939340423"/>
+      <rect class="col-row-alt" x="931.0432583406924" y="1436.389939340423" width="236" height="26" rx="2"/>
+      <g class="column" data-table="tags" data-column="name">
+        <text x="943.0432583406924" y="1451.389939340423" class="column-name">name</text>
+        <text x="1159.0432583406923" y="1451.389939340423" text-anchor="end" class="column-type">varchar(80)</text>
+      </g>
+      <line class="col-sep" x1="937.0432583406924" y1="1463.389939340423" x2="1161.0432583406923" y2="1463.389939340423"/>
+      <g class="column" data-table="tags" data-column="primary_topic_id">
+        <text x="939.0432583406924" y="1477.389939340423" class="fk-icon">🔗</text>
+        <text x="957.0432583406924" y="1477.389939340423" class="column-name">primary_topic_id</text>
+        <text x="1159.0432583406923" y="1477.389939340423" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="937.0432583406924" y1="1489.389939340423" x2="1161.0432583406923" y2="1489.389939340423"/>
+      <rect class="col-row-alt" x="931.0432583406924" y="1488.389939340423" width="236" height="26" rx="2"/>
+      <g class="column" data-table="tags" data-column="created_at">
+        <text x="943.0432583406924" y="1503.389939340423" class="column-name">created_at</text>
+        <text x="1159.0432583406923" y="1503.389939340423" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="post_tags" transform="">
+      <rect class="table-bg" x="1233.287643490613" y="1416.3164951817866" width="240" height="136" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="1233.287643490613" y="1416.3164951817866" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="1233.287643490613" y="1446.3164951817866" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="1233.287643490613" y1="1454.3164951817866" x2="1473.287643490613" y2="1454.3164951817866" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="1353.287643490613" y="1440.3164951817866" text-anchor="middle" class="table-header">post_tags</text>
+
+      <g class="column" data-table="post_tags" data-column="id">
+        <text x="1243.287643490613" y="1477.3164951817866" class="pk-icon">🔑</text>
+        <text x="1261.287643490613" y="1477.3164951817866" class="column-name">id</text>
+        <text x="1463.287643490613" y="1477.3164951817866" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1241.287643490613" y1="1489.3164951817866" x2="1465.287643490613" y2="1489.3164951817866"/>
+      <rect class="col-row-alt" x="1235.287643490613" y="1488.3164951817866" width="236" height="26" rx="2"/>
+      <g class="column" data-table="post_tags" data-column="post_id">
+        <text x="1243.287643490613" y="1503.3164951817866" class="fk-icon">🔗</text>
+        <text x="1261.287643490613" y="1503.3164951817866" class="column-name">post_id</text>
+        <text x="1463.287643490613" y="1503.3164951817866" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1241.287643490613" y1="1515.3164951817866" x2="1465.287643490613" y2="1515.3164951817866"/>
+      <g class="column" data-table="post_tags" data-column="tag_id">
+        <text x="1243.287643490613" y="1529.3164951817866" class="fk-icon">🔗</text>
+        <text x="1261.287643490613" y="1529.3164951817866" class="column-name">tag_id</text>
+        <text x="1463.287643490613" y="1529.3164951817866" text-anchor="end" class="column-type">uuid</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="interactions" transform="">
+      <rect class="table-bg" x="1922.2220697201212" y="822.2143433024914" width="240" height="448" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="1922.2220697201212" y="822.2143433024914" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="1922.2220697201212" y="852.2143433024914" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="1922.2220697201212" y1="860.2143433024914" x2="2162.222069720121" y2="860.2143433024914" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="2042.2220697201212" y="846.2143433024914" text-anchor="middle" class="table-header">interactions</text>
+
+      <g class="column" data-table="interactions" data-column="id">
+        <text x="1932.2220697201212" y="883.2143433024914" class="pk-icon">🔑</text>
+        <text x="1950.2220697201212" y="883.2143433024914" class="column-name">id</text>
+        <text x="2152.222069720121" y="883.2143433024914" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="895.2143433024914" x2="2154.222069720121" y2="895.2143433024914"/>
+      <rect class="col-row-alt" x="1924.2220697201212" y="894.2143433024914" width="236" height="26" rx="2"/>
+      <g class="column" data-table="interactions" data-column="user_id">
+        <text x="1932.2220697201212" y="909.2143433024914" class="fk-icon">🔗</text>
+        <text x="1950.2220697201212" y="909.2143433024914" class="column-name">user_id</text>
+        <text x="2152.222069720121" y="909.2143433024914" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="921.2143433024914" x2="2154.222069720121" y2="921.2143433024914"/>
+      <g class="column" data-table="interactions" data-column="post_id">
+        <text x="1932.2220697201212" y="935.2143433024914" class="fk-icon">🔗</text>
+        <text x="1950.2220697201212" y="935.2143433024914" class="column-name">post_id</text>
+        <text x="2152.222069720121" y="935.2143433024914" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="947.2143433024914" x2="2154.222069720121" y2="947.2143433024914"/>
+      <rect class="col-row-alt" x="1924.2220697201212" y="946.2143433024914" width="236" height="26" rx="2"/>
+      <g class="column" data-table="interactions" data-column="surface">
+        <text x="1936.2220697201212" y="961.2143433024914" class="column-name">surface</text>
+        <text x="2152.222069720121" y="961.2143433024914" text-anchor="end" class="column-type">interactionsurface</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="973.2143433024914" x2="2154.222069720121" y2="973.2143433024914"/>
+      <g class="column" data-table="interactions" data-column="feed_position">
+        <text x="1936.2220697201212" y="987.2143433024914" class="column-name">feed_position</text>
+        <text x="2152.222069720121" y="987.2143433024914" text-anchor="end" class="column-type">int</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="999.2143433024914" x2="2154.222069720121" y2="999.2143433024914"/>
+      <rect class="col-row-alt" x="1924.2220697201212" y="998.2143433024914" width="236" height="26" rx="2"/>
+      <g class="column" data-table="interactions" data-column="dwell_time_sec">
+        <text x="1936.2220697201212" y="1013.2143433024914" class="column-name">dwell_time_sec</text>
+        <text x="2152.222069720121" y="1013.2143433024914" text-anchor="end" class="column-type">float</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="1025.2143433024914" x2="2154.222069720121" y2="1025.2143433024914"/>
+      <g class="column" data-table="interactions" data-column="scroll_depth">
+        <text x="1936.2220697201212" y="1039.2143433024914" class="column-name">scroll_depth</text>
+        <text x="2152.222069720121" y="1039.2143433024914" text-anchor="end" class="column-type">float</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="1051.2143433024914" x2="2154.222069720121" y2="1051.2143433024914"/>
+      <rect class="col-row-alt" x="1924.2220697201212" y="1050.2143433024914" width="236" height="26" rx="2"/>
+      <g class="column" data-table="interactions" data-column="completion_ratio">
+        <text x="1936.2220697201212" y="1065.2143433024914" class="column-name">completion_ratio</text>
+        <text x="2152.222069720121" y="1065.2143433024914" text-anchor="end" class="column-type">float</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="1077.2143433024914" x2="2154.222069720121" y2="1077.2143433024914"/>
+      <g class="column" data-table="interactions" data-column="is_completed">
+        <text x="1936.2220697201212" y="1091.2143433024914" class="column-name">is_completed</text>
+        <text x="2152.222069720121" y="1091.2143433024914" text-anchor="end" class="column-type">boolean</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="1103.2143433024914" x2="2154.222069720121" y2="1103.2143433024914"/>
+      <rect class="col-row-alt" x="1924.2220697201212" y="1102.2143433024914" width="236" height="26" rx="2"/>
+      <g class="column" data-table="interactions" data-column="engagement_weight">
+        <text x="1936.2220697201212" y="1117.2143433024914" class="column-name">engagement_weight</text>
+        <text x="2152.222069720121" y="1117.2143433024914" text-anchor="end" class="column-type">float</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="1129.2143433024914" x2="2154.222069720121" y2="1129.2143433024914"/>
+      <g class="column" data-table="interactions" data-column="quiz_answered">
+        <text x="1936.2220697201212" y="1143.2143433024914" class="column-name">quiz_answered</text>
+        <text x="2152.222069720121" y="1143.2143433024914" text-anchor="end" class="column-type">boolean</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="1155.2143433024914" x2="2154.222069720121" y2="1155.2143433024914"/>
+      <rect class="col-row-alt" x="1924.2220697201212" y="1154.2143433024914" width="236" height="26" rx="2"/>
+      <g class="column" data-table="interactions" data-column="quiz_correct">
+        <text x="1936.2220697201212" y="1169.2143433024914" class="column-name">quiz_correct</text>
+        <text x="2152.222069720121" y="1169.2143433024914" text-anchor="end" class="column-type">boolean</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="1181.2143433024914" x2="2154.222069720121" y2="1181.2143433024914"/>
+      <g class="column" data-table="interactions" data-column="card_flipped">
+        <text x="1936.2220697201212" y="1195.2143433024914" class="column-name">card_flipped</text>
+        <text x="2152.222069720121" y="1195.2143433024914" text-anchor="end" class="column-type">boolean</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="1207.2143433024914" x2="2154.222069720121" y2="1207.2143433024914"/>
+      <rect class="col-row-alt" x="1924.2220697201212" y="1206.2143433024914" width="236" height="26" rx="2"/>
+      <g class="column" data-table="interactions" data-column="flip_time_sec">
+        <text x="1936.2220697201212" y="1221.2143433024914" class="column-name">flip_time_sec</text>
+        <text x="2152.222069720121" y="1221.2143433024914" text-anchor="end" class="column-type">float</text>
+      </g>
+      <line class="col-sep" x1="1930.2220697201212" y1="1233.2143433024914" x2="2154.222069720121" y2="1233.2143433024914"/>
+      <g class="column" data-table="interactions" data-column="created_at">
+        <text x="1936.2220697201212" y="1247.2143433024914" class="column-name">created_at</text>
+        <text x="2152.222069720121" y="1247.2143433024914" text-anchor="end" class="column-type">timestamptz</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="votes" transform="">
+      <rect class="table-bg" x="1588.4670691442395" y="868.4045283525934" width="240" height="214" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="1588.4670691442395" y="868.4045283525934" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="1588.4670691442395" y="898.4045283525934" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="1588.4670691442395" y1="906.4045283525934" x2="1828.4670691442395" y2="906.4045283525934" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="1708.4670691442395" y="892.4045283525934" text-anchor="middle" class="table-header">votes</text>
+
+      <g class="column" data-table="votes" data-column="id">
+        <text x="1598.4670691442395" y="929.4045283525934" class="pk-icon">🔑</text>
+        <text x="1616.4670691442395" y="929.4045283525934" class="column-name">id</text>
+        <text x="1818.4670691442395" y="929.4045283525934" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1596.4670691442395" y1="941.4045283525934" x2="1820.4670691442395" y2="941.4045283525934"/>
+      <rect class="col-row-alt" x="1590.4670691442395" y="940.4045283525934" width="236" height="26" rx="2"/>
+      <g class="column" data-table="votes" data-column="user_id">
+        <text x="1598.4670691442395" y="955.4045283525934" class="fk-icon">🔗</text>
+        <text x="1616.4670691442395" y="955.4045283525934" class="column-name">user_id</text>
+        <text x="1818.4670691442395" y="955.4045283525934" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1596.4670691442395" y1="967.4045283525934" x2="1820.4670691442395" y2="967.4045283525934"/>
+      <g class="column" data-table="votes" data-column="post_id">
+        <text x="1598.4670691442395" y="981.4045283525934" class="fk-icon">🔗</text>
+        <text x="1616.4670691442395" y="981.4045283525934" class="column-name">post_id</text>
+        <text x="1818.4670691442395" y="981.4045283525934" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1596.4670691442395" y1="993.4045283525934" x2="1820.4670691442395" y2="993.4045283525934"/>
+      <rect class="col-row-alt" x="1590.4670691442395" y="992.4045283525934" width="236" height="26" rx="2"/>
+      <g class="column" data-table="votes" data-column="value">
+        <text x="1602.4670691442395" y="1007.4045283525934" class="column-name">value</text>
+        <text x="1818.4670691442395" y="1007.4045283525934" text-anchor="end" class="column-type">smallint</text>
+      </g>
+      <line class="col-sep" x1="1596.4670691442395" y1="1019.4045283525934" x2="1820.4670691442395" y2="1019.4045283525934"/>
+      <g class="column" data-table="votes" data-column="created_at">
+        <text x="1602.4670691442395" y="1033.4045283525934" class="column-name">created_at</text>
+        <text x="1818.4670691442395" y="1033.4045283525934" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+      <line class="col-sep" x1="1596.4670691442395" y1="1045.4045283525934" x2="1820.4670691442395" y2="1045.4045283525934"/>
+      <rect class="col-row-alt" x="1590.4670691442395" y="1044.4045283525934" width="236" height="26" rx="2"/>
+      <g class="column" data-table="votes" data-column="updated_at">
+        <text x="1602.4670691442395" y="1059.4045283525934" class="column-name">updated_at</text>
+        <text x="1818.4670691442395" y="1059.4045283525934" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="saved_posts" transform="">
+      <rect class="table-bg" x="1239.6401025070068" y="932.9254712634854" width="240" height="162" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="1239.6401025070068" y="932.9254712634854" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="1239.6401025070068" y="962.9254712634854" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="1239.6401025070068" y1="970.9254712634854" x2="1479.6401025070068" y2="970.9254712634854" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="1359.6401025070068" y="956.9254712634854" text-anchor="middle" class="table-header">saved_posts</text>
+
+      <g class="column" data-table="saved_posts" data-column="id">
+        <text x="1249.6401025070068" y="993.9254712634854" class="pk-icon">🔑</text>
+        <text x="1267.6401025070068" y="993.9254712634854" class="column-name">id</text>
+        <text x="1469.6401025070068" y="993.9254712634854" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1247.6401025070068" y1="1005.9254712634854" x2="1471.6401025070068" y2="1005.9254712634854"/>
+      <rect class="col-row-alt" x="1241.6401025070068" y="1004.9254712634854" width="236" height="26" rx="2"/>
+      <g class="column" data-table="saved_posts" data-column="user_id">
+        <text x="1249.6401025070068" y="1019.9254712634854" class="fk-icon">🔗</text>
+        <text x="1267.6401025070068" y="1019.9254712634854" class="column-name">user_id</text>
+        <text x="1469.6401025070068" y="1019.9254712634854" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1247.6401025070068" y1="1031.9254712634854" x2="1471.6401025070068" y2="1031.9254712634854"/>
+      <g class="column" data-table="saved_posts" data-column="post_id">
+        <text x="1249.6401025070068" y="1045.9254712634854" class="fk-icon">🔗</text>
+        <text x="1267.6401025070068" y="1045.9254712634854" class="column-name">post_id</text>
+        <text x="1469.6401025070068" y="1045.9254712634854" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1247.6401025070068" y1="1057.9254712634854" x2="1471.6401025070068" y2="1057.9254712634854"/>
+      <rect class="col-row-alt" x="1241.6401025070068" y="1056.9254712634854" width="236" height="26" rx="2"/>
+      <g class="column" data-table="saved_posts" data-column="created_at">
+        <text x="1253.6401025070068" y="1071.9254712634854" class="column-name">created_at</text>
+        <text x="1469.6401025070068" y="1071.9254712634854" text-anchor="end" class="column-type">timestamptz</text>
+      </g>
+    </g>
+    <g class="table draggable" data-table="comments" transform="">
+      <rect class="table-bg" x="1240.1959630667634" y="1118.3621722271278" width="240" height="214" fill="var(--erd-table-bg)" stroke="#3498db" stroke-width="2" rx="8" ry="8" filter="url(#shadow)"/>
+      
+      <rect class="table-header-bg" x="1240.1959630667634" y="1118.3621722271278" width="240" height="38" fill="#3498db" rx="8" ry="8"/>
+      <rect x="1240.1959630667634" y="1148.3621722271278" width="240" height="8" fill="#3498db"/>
+      
+      <line x1="1240.1959630667634" y1="1156.3621722271278" x2="1480.1959630667634" y2="1156.3621722271278" stroke="#3498db" stroke-width="1" opacity="0.5"/>
+      
+      <text x="1360.1959630667634" y="1142.3621722271278" text-anchor="middle" class="table-header">comments</text>
+
+      <g class="column" data-table="comments" data-column="id">
+        <text x="1250.1959630667634" y="1179.3621722271278" class="pk-icon">🔑</text>
+        <text x="1268.1959630667634" y="1179.3621722271278" class="column-name">id</text>
+        <text x="1470.1959630667634" y="1179.3621722271278" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1248.1959630667634" y1="1191.3621722271278" x2="1472.1959630667634" y2="1191.3621722271278"/>
+      <rect class="col-row-alt" x="1242.1959630667634" y="1190.3621722271278" width="236" height="26" rx="2"/>
+      <g class="column" data-table="comments" data-column="post_id">
+        <text x="1250.1959630667634" y="1205.3621722271278" class="fk-icon">🔗</text>
+        <text x="1268.1959630667634" y="1205.3621722271278" class="column-name">post_id</text>
+        <text x="1470.1959630667634" y="1205.3621722271278" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1248.1959630667634" y1="1217.3621722271278" x2="1472.1959630667634" y2="1217.3621722271278"/>
+      <g class="column" data-table="comments" data-column="user_id">
+        <text x="1250.1959630667634" y="1231.3621722271278" class="fk-icon">🔗</text>
+        <text x="1268.1959630667634" y="1231.3621722271278" class="column-name">user_id</text>
+        <text x="1470.1959630667634" y="1231.3621722271278" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1248.1959630667634" y1="1243.3621722271278" x2="1472.1959630667634" y2="1243.3621722271278"/>
+      <rect class="col-row-alt" x="1242.1959630667634" y="1242.3621722271278" width="236" height="26" rx="2"/>
+      <g class="column" data-table="comments" data-column="parent_comment_id">
+        <text x="1250.1959630667634" y="1257.3621722271278" class="fk-icon">🔗</text>
+        <text x="1268.1959630667634" y="1257.3621722271278" class="column-name">parent_comment_id</text>
+        <text x="1470.1959630667634" y="1257.3621722271278" text-anchor="end" class="column-type">uuid</text>
+      </g>
+      <line class="col-sep" x1="1248.1959630667634" y1="1269.3621722271278" x2="1472.1959630667634" y2="1269.3621722271278"/>
+      <g class="column" data-table="comments" data-column="body">
+        <text x="1254.1959630667634" y="1283.3621722271278" class="column-name">body</text>
+        <text x="1470.1959630667634" y="1283.3621722271278" text-anchor="end" class="column-type">text</text>
+      </g>
+      <line class="col-sep" x1="1248.1959630667634" y1="1295.3621722271278" x2="1472.1959630667634" y2="1295.3621722271278"/>
+      <rect class="col-row-alt" x="1242.1959630667634" y="1294.3621722271278" width="236" height="26" rx="2"/>
+      <g class="column" data-table="comments" data-column="created_at">
+        <text x="1254.1959630667634" y="1309.3621722271278" class="column-name">created_at</text>
+        <text x="1470.1959630667634" y="1309.3621722271278" text-anchor="end" class="column-type">timestamp</text>
+      </g>
+    </g>  </g>
+</svg>
