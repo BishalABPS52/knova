@@ -54,6 +54,13 @@ class Settings(BaseSettings):
     ML_MODELS_PATH: Path = BASE_DIR / "models"
     ML_DATA_PATH: Path = BASE_DIR / "data"
 
+    # Serve ranker features from live per-user telemetry instead of frozen training
+    # medians (recommendation/features.py). Off => every feature but als/topic/tag
+    # similarity is the training median, identical for every user. See TELEMETRY_PLAN
+    # Phase 4: the ranker was trained on synthetic data, so this shifts its input
+    # distribution — keep it flag-gated so it can be A/B'd against the frozen feed.
+    LIVE_FEATURES_ENABLED: bool = True
+
     # External LLM providers for content generation. Google is primary,
     # OpenRouter is the fallback; a provider with an empty key is skipped.
     GOOGLE_API_KEY: str = ""

@@ -1,9 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { motion, type PanInfo } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { ChevronUp, X, Bell } from 'lucide-react';
+import { ChevronUp, Sparkles, X } from 'lucide-react';
 import FlashCard from '@/components/cards/FlashCard';
 import McqCard from '@/components/cards/McqCard';
 import TextCard from '@/components/cards/TextContentCard';
@@ -11,6 +11,7 @@ import { CommentsSection } from '@/components/cards/Shared';
 import TrackedCard from '@/components/feed/TrackedCard';
 import { spacePosts } from '@/data/mockData';
 import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
 import { PostService } from '@/lib/posts';
 import { telemetry } from '@/lib/telemetry';
 import type { Post } from '@/types/post';
@@ -19,6 +20,8 @@ import type { Post } from '@/types/post';
 interface SpaceItem {
   id: string | number;
   type: string;
+  /** Topic this card belongs to — the key for the left-swipe "quiz this topic" filter. */
+  topicId?: string;
   author: string;
   time: string;
   upvotes: string | number;
@@ -41,6 +44,11 @@ interface SpaceItem {
 const postService = new PostService();
 
 const PAGE_SIZE = 15;
+
+/** Horizontal travel (px) past which a drag commits to a swipe. */
+const SWIPE_TRIGGER = 90;
+/** A quick horizontal flick (px/s) commits even below the distance threshold. */
+const SWIPE_VELOCITY = 500;
 
 /**
  * Consecutive empty batches tolerated before the reel stops paging. The server
@@ -73,6 +81,7 @@ function mapPostToSpaceItem(post: Post, index: number): SpaceItem {
   const base: SpaceItem = {
     id: post.id,
     type,
+    topicId: post.topic_id,
     author: post.creator?.user?.username || 'Unknown',
     time: relativeTime(post.published_at),
     upvotes: post.upvote_count || 0,
@@ -110,7 +119,7 @@ function mapPostToSpaceItem(post: Post, index: number): SpaceItem {
 
 export default function SpaceReel() {
   const router = useRouter();
-  const { user, initializing } = useAuth();
+  const { initializing } = useAuth();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [cards, setCards] = useState<SpaceItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -123,6 +132,15 @@ export default function SpaceReel() {
   const [hasScrolled, setHasScrolled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [useMockData, setUseMockData] = useState(false);
+
+  // Left-swipe on a card enters "quiz mode": the reel is replaced by that card's
+  // topic's MCQs so the reader can drill it. Answers still flow through the normal
+  // trackQuiz telemetry (surface 'topic'), which feeds mastery / kg_readiness.
+  const [quizTopic, setQuizTopic] = useState<{ id: string; label: string } | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  // Bumped to force the loader effect to re-run without changing the topic (used
+  // after on-demand question generation).
+  const [reloadNonce, setReloadNonce] = useState(0);
 
   const seenIdsRef = useRef<Set<string>>(new Set());
   // Guards the endless loader against concurrent/duplicate requests, and backs
@@ -226,43 +244,116 @@ export default function SpaceReel() {
     telemetry.trackScroll(postId, depth);
   }, [trackingEnabled]);
 
+  const enterQuizMode = useCallback((topicId?: string, label?: string) => {
+    // Needs a real topic and real (non-mock) data — mock ids can't be filtered server-side.
+    if (!topicId || useMockData) return;
+    setCommentsOpen(false);
+    setQuizTopic({ id: topicId, label: label || 'this topic' });
+  }, [useMockData]);
+
+  const exitQuizMode = useCallback(() => setQuizTopic(null), []);
+
+  // Horizontal drag on a card: left = drill this card's topic as a quiz; right
+  // (while in quiz mode) = back to the feed. motion's drag="x" sets touch-action
+  // to pan-y, so vertical scroll-snap keeps working and the card springs back.
+  const handleCardDragEnd = useCallback(
+    (topicId?: string, label?: string) =>
+      (_event: unknown, info: PanInfo) => {
+        const left = info.offset.x < -SWIPE_TRIGGER || info.velocity.x < -SWIPE_VELOCITY;
+        const right = info.offset.x > SWIPE_TRIGGER || info.velocity.x > SWIPE_VELOCITY;
+        if (left && !quizTopic) enterQuizMode(topicId, label);
+        else if (right && quizTopic) exitQuizMode();
+      },
+    [quizTopic, enterQuizMode, exitQuizMode],
+  );
+
   // Leaving the reel by client-side navigation fires neither pagehide nor
   // visibilitychange, so the buffered batch has to be pushed on unmount.
   useEffect(() => () => { void telemetry.flush(); }, []);
 
-  // Initial load: hit the personalized feed; fall back to mock data (mirrors the
-  // home feed's behavior) when the endpoint can't be reached.
+  /** Reset paging bookkeeping before a fresh (re)load of the reel. */
+  const resetPaging = useCallback(() => {
+    seenIdsRef.current = new Set();
+    exhaustedRef.current = false;
+    emptyBatchesRef.current = 0;
+    retryAfterRef.current = 0;
+    loadingMoreRef.current = false;
+  }, []);
+
+  /** Generate practice questions for the current topic on demand, then reload. */
+  const handleGenerate = useCallback(async () => {
+    if (!quizTopic || isGenerating) return;
+    setIsGenerating(true);
+    try {
+      await api(`/api/v1/quiz/topics/${quizTopic.id}/generate-now`, { method: 'POST' });
+      setReloadNonce((n) => n + 1);
+    } catch (error) {
+      console.error('Failed to generate quiz for topic:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [quizTopic, isGenerating]);
+
+  // Load the reel for the current mode. Normal mode pulls the personalized feed
+  // (with mock fallback, mirroring the home feed); quiz mode pulls only the
+  // selected topic's MCQs — a finite set, so paging is disabled.
   useEffect(() => {
     // Wait for the session to settle rather than racing it — the feed needs a
     // cookie, and a premature 401 would drop the reel onto mock data.
     if (initializing) return;
+    let cancelled = false;
 
-    const bootstrap = async () => {
+    const load = async () => {
       setIsLoading(true);
+      resetPaging();
+      setActiveIndex(0);
       try {
-        const response = await postService.getFeed({ size: PAGE_SIZE });
+        const response = quizTopic
+          ? await postService.getPosts({
+              topic_id: quizTopic.id,
+              content_type: 'mcq',
+              size: PAGE_SIZE,
+              sort_by: 'new',
+            })
+          : await postService.getFeed({ size: PAGE_SIZE });
+        if (cancelled) return;
+
         const initial = response.items.map(mapPostToSpaceItem);
         seenIdsRef.current = new Set(initial.map((item) => String(item.id)));
         setCards(initial);
         setUseMockData(false);
+        // A topic's MCQ set is finite — there's nothing to page in quiz mode.
+        if (quizTopic) exhaustedRef.current = true;
+        requestAnimationFrame(() => scrollerRef.current?.scrollTo({ top: 0 }));
       } catch (error) {
-        console.error('Failed to load learn space, using mock data:', error);
-        setCards(
-          spacePosts.map((post, index) => ({
-            ...post,
-            id: String(post.id),
-            time: post.time,
-            theme: index % 2 === 0 ? 'orange' : 'blue',
-          })),
-        );
-        exhaustedRef.current = true;
-        setUseMockData(true);
+        if (cancelled) return;
+        if (quizTopic) {
+          // Quiz mode has no mock fallback — show an empty state and let the reader
+          // generate questions or swipe back out.
+          console.error('Failed to load topic quiz:', error);
+          setCards([]);
+          exhaustedRef.current = true;
+        } else {
+          console.error('Failed to load learn space, using mock data:', error);
+          setCards(
+            spacePosts.map((post, index) => ({
+              ...post,
+              id: String(post.id),
+              time: post.time,
+              theme: index % 2 === 0 ? 'orange' : 'blue',
+            })),
+          );
+          exhaustedRef.current = true;
+          setUseMockData(true);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
-    void bootstrap();
-  }, [initializing]);
+
+    void load();
+    return () => { cancelled = true; };
+  }, [initializing, quizTopic, reloadNonce, resetPaging]);
 
   // Track the card on screen (drives the comments panel and keyboard nav) and
   // append the next batch before the reader can reach the end.
@@ -334,47 +425,6 @@ export default function SpaceReel() {
         <div className="absolute -bottom-1/4 -right-1/4 w-[70vw] h-[70vw] rounded-full bg-[#00afef] opacity-[0.18] blur-[120px]" />
       </div>
 
-      {/* Top bar */}
-      <header className="fixed top-0 left-0 w-full z-50 pointer-events-none">
-        <div className="h-24 bg-gradient-to-b from-black/70 via-black/30 to-transparent" />
-        <div className="absolute inset-x-0 top-0 h-20 flex items-center justify-between px-4 md:px-6">
-          <div className="flex items-center gap-3 pointer-events-auto">
-            <button
-              aria-label="Close learn space"
-              onClick={() => router.push('/')}
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors"
-            >
-              <X size={22} />
-            </button>
-            <p className="text-sm font-bold font-display">Learn Space</p>
-          </div>
-
-          <div className="flex items-center gap-3 pointer-events-auto">
-            <Link
-              href="/notifications"
-              aria-label="Notifications"
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-            >
-              <Bell size={20} />
-            </Link>
-            <div className="w-10 h-10 rounded-full border-2 border-white/40 hover:border-white overflow-hidden bg-white/10 cursor-pointer transition-colors">
-              {user?.avatar_url ? (
-                <img
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                  src={user.avatar_url}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white/90">
-                  {user?.username?.slice(0, 2).toUpperCase() || 'ME'}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-      </header>
-
       {/* The reel */}
       <div
         ref={scrollerRef}
@@ -383,6 +433,24 @@ export default function SpaceReel() {
         {isLoading ? (
           <div className="h-full flex items-center justify-center">
             <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-[#f36710] animate-spin" />
+          </div>
+        ) : cards.length === 0 && quizTopic ? (
+          // Quiz mode with no questions yet for this topic.
+          <div className="h-full flex flex-col items-center justify-center gap-4 px-8 text-center">
+            <Sparkles size={32} className="text-[#f36710]" />
+            <p className="text-white/80 max-w-xs">
+              No practice questions for <span className="font-semibold">{quizTopic.label}</span> yet.
+            </p>
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className="rounded-full bg-[#f36710] px-5 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
+            >
+              {isGenerating ? 'Generating…' : 'Generate questions'}
+            </button>
+            <button onClick={exitQuizMode} className="text-sm text-white/60 hover:text-white/90">
+              Back to feed
+            </button>
           </div>
         ) : (
           cards.map((post, index) => {
@@ -404,34 +472,64 @@ export default function SpaceReel() {
             else if (type === 'text') card = <TextCard {...cardProps} />;
             if (!card) return null;
 
-            // The wrapper becomes the scroller's child, so it carries the snap and
-            // height rules the card's own <section> would otherwise own.
+            // The wrapper is the scroller's child, so it carries the snap/height
+            // rules and the drag gesture; TrackedCard fills it for dwell tracking.
+            // Only cards with a real topic are draggable (mock/organic-less cards aren't).
+            const draggable = !useMockData && !!post.topicId;
             return (
-              <TrackedCard
+              <motion.div
                 key={post.id}
-                postId={String(post.id)}
-                feedPosition={index}
-                enabled={trackingEnabled}
                 className="h-[100svh] w-full snap-start"
+                drag={draggable ? 'x' : false}
+                dragDirectionLock
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.7}
+                dragMomentum={false}
+                onDragEnd={draggable ? handleCardDragEnd(post.topicId, post.tag) : undefined}
+                whileDrag={{ scale: 0.97, cursor: 'grabbing' }}
+                transition={{ type: 'spring', stiffness: 500, damping: 40 }}
               >
-                {card}
-              </TrackedCard>
+                <TrackedCard
+                  postId={String(post.id)}
+                  feedPosition={index}
+                  surface={quizTopic ? 'topic' : 'feed'}
+                  enabled={trackingEnabled}
+                  className="h-full w-full"
+                >
+                  {card}
+                </TrackedCard>
+              </motion.div>
             );
           })
         )}
       </div>
 
+      {/* Quiz-mode banner: shows which topic is being drilled, with a way back out. */}
+      {quizTopic && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 rounded-full bg-[#f36710] px-4 py-2 shadow-lg">
+          <Sparkles size={16} className="text-white" />
+          <span className="text-sm font-semibold text-white">Quiz: {quizTopic.label}</span>
+          <button
+            aria-label="Exit quiz"
+            onClick={exitQuizMode}
+            className="ml-1 rounded-full p-0.5 hover:bg-white/20 transition-colors"
+          >
+            <X size={16} className="text-white" />
+          </button>
+        </div>
+      )}
+
       {/* Swipe hint — retires once the reader moves past the first card */}
       <div
         className={`absolute bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-1 transition-opacity duration-500 ${
-          hasScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          hasScrolled || quizTopic ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
       >
         <ChevronUp size={20} className="animate-bounce text-white/80" />
         <p className="text-[11px] font-medium text-white/70">
-          <span className="md:hidden">Swipe up for the next card</span>
+          <span className="md:hidden">Swipe up for the next · swipe left to quiz this topic</span>
           <span className="hidden md:inline">
-            Scroll, or use <kbd className="font-sans">↑</kbd> <kbd className="font-sans">↓</kbd>
+            Scroll <kbd className="font-sans">↑</kbd> <kbd className="font-sans">↓</kbd>, swipe left to quiz this topic
           </span>
         </p>
       </div>

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FeedActions, ReelActions, CommentsSection } from './Shared';
+import { FeedActions, ReelActions, CommentsSection, ExploreCardShell } from './Shared';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import FollowButton from '@/components/ui/FollowButton';
 import PostMenu from '@/components/ui/PostMenu';
@@ -350,32 +350,67 @@ function MCQReel({ id, question, options, correctIndex, explanation, tags, autho
   );
 }
 
-function MCQExplore({ tag, question, options, author, upvotes, correctIndex = -1 }: McqProps) {
+function MCQExplore({ id, tag, question, options, explanation, author, creatorId, upvotes, comments, correctIndex = -1, userVote, userSaved, isOwner, onVote, onSave, onShare, onDelete, onQuizAnswer }: McqProps) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const answered = selected !== null;
+
+  const choose = (i: number) => {
+    if (answered) return;
+    setSelected(i);
+    if (id) onQuizAnswer?.(String(id), i === correctIndex);
+  };
+
+  const chip = (
+    <span className="inline-block text-[10px] font-bold uppercase tracking-wide text-[#8d7165] bg-[#f3f1ef] px-2 py-0.5 rounded-full">{tag || 'General'}</span>
+  );
+
   return (
-    <div className="h-75 bg-white rounded-xl flex flex-col p-5 hover-lift cursor-pointer border border-surface-container-high relative overflow-hidden">
-      <div className="absolute inset-0 bg-[#00afef]/5 pointer-events-none" />
-      <div className="flex justify-between items-start mb-3 relative z-10">
-        <span className="text-xs font-bold text-secondary uppercase tracking-widest">{tag || 'General'}</span>
+    <ExploreCardShell
+      id={id}
+      author={author}
+      creatorId={creatorId}
+      chip={chip}
+      upvotes={upvotes}
+      comments={comments}
+      userVote={userVote}
+      userSaved={userSaved}
+      isOwner={isOwner}
+      onVote={onVote}
+      onSave={onSave}
+      onShare={onShare}
+      onDelete={onDelete}
+    >
+      <h3 className="text-[14px] md:text-[15px] font-semibold text-[#1b1c1c] line-clamp-2 mb-3 leading-snug">{question || 'Question'}</h3>
+      <div className="space-y-1.5">
+        {options?.map((opt, i) => {
+          const isCorrect = i === correctIndex;
+          const isChosen = selected === i;
+          let cls = 'bg-[#f7f5f4] text-[#594137]/80 hover:bg-[#efeae7]';
+          if (answered) {
+            if (isCorrect) cls = 'bg-green-50 text-green-800 ring-1 ring-green-500/40';
+            else if (isChosen) cls = 'bg-red-50 text-red-700 ring-1 ring-red-400/40';
+            else cls = 'bg-[#f7f5f4] text-[#8d7165]';
+          }
+          return (
+            <button
+              key={opt}
+              type="button"
+              disabled={answered}
+              onClick={() => choose(i)}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[12px] flex items-center gap-2 transition-colors ${cls}`}
+            >
+              <span className="font-bold text-[#f36710] text-[11px] shrink-0">{String.fromCharCode(65 + i)}</span>
+              <span className="line-clamp-1 flex-1">{opt}</span>
+              {answered && isCorrect && <CheckCircle2 size={14} className="text-green-600 shrink-0" />}
+              {answered && isChosen && !isCorrect && <XCircle size={14} className="text-red-500 shrink-0" />}
+            </button>
+          );
+        })}
       </div>
-      <h3 className="text-[18px] font-semibold text-on-surface line-clamp-2 mb-4 relative z-10 leading-snug">{question || 'Question'}</h3>
-      <div className="space-y-2 flex-1 relative z-10 overflow-hidden">
-        {options?.map((opt, i) => (
-          <div key={opt} className={`px-3 py-2 rounded-lg text-sm flex items-center gap-2 border ${i === correctIndex ? 'border-primary/30 font-bold bg-primary/5' : 'border-outline-variant/20 bg-surface-container-low text-on-surface-variant'}`}>
-            <span className="font-bold text-primary">{String.fromCharCode(65 + i)}</span> {opt}
-          </div>
-        ))}
-      </div>
-      <div className="pt-3 mt-auto flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-secondary-fixed"></div>
-          <span className="text-sm text-on-surface-variant font-medium">{author || 'Unknown'}</span>
-        </div>
-        <div className="flex items-center gap-1 text-primary">
-          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>arrow_upward</span>
-          <span className="text-sm font-bold">{upvotes || 0}</span>
-        </div>
-      </div>
-    </div>
+      {answered && explanation && (
+        <p className="mt-2.5 text-[12px] text-[#594137]/80 bg-[#f7f5f4] rounded-lg p-2.5 leading-relaxed">{explanation}</p>
+      )}
+    </ExploreCardShell>
   );
 }
 

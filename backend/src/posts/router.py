@@ -120,6 +120,7 @@ async def vote(
     result = await service.cast_vote(db, user_id, post_id, body.value)
     # Vote changes this user's feed ordering AND the post's counts.
     await cache_delete_prefix(f"feed:{user_id}:")
+    await cache_delete_prefix(f"explore:{user_id}:")
     await invalidate_post_related(post_id)
     return result
 
@@ -133,6 +134,7 @@ async def save(
     user_id = uuid.UUID(token_payload["sub"])
     result = await service.toggle_save(db, user_id, post_id)
     await cache_delete_prefix(f"feed:{user_id}:")
+    await cache_delete_prefix(f"explore:{user_id}:")
     await invalidate_post_related(post_id)
     return result
 
@@ -166,6 +168,7 @@ async def create_comment(
     # comment_count changed, so the post detail and every list showing it are
     # stale; commenting is also an engagement signal, so drop this user's feed.
     await cache_delete_prefix(f"feed:{user_id}:")
+    await cache_delete_prefix(f"explore:{user_id}:")
     await invalidate_post_related(post_id)
     return result
 
@@ -183,4 +186,5 @@ async def delete_comment(
     user_id = uuid.UUID(token_payload["sub"])
     post_id = await service.delete_comment(db, user_id, comment_id)
     await cache_delete_prefix(f"feed:{user_id}:")
+    await cache_delete_prefix(f"explore:{user_id}:")
     await invalidate_post_related(post_id)

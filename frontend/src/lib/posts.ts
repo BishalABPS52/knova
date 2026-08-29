@@ -9,6 +9,7 @@ import {
   SaveResponse,
   CreatePostRequest,
   UpdatePostRequest,
+  ExploreResponse,
 } from "@/types/post";
 
 export class PostService {
@@ -35,11 +36,32 @@ export class PostService {
   // Personalized recommendation feed (interest/CF/Thompson/creator retrieval +
   // LightGBM ranking). Requires an authenticated session. Paging is repeated
   // requests: each call re-runs retrieval excluding already-seen posts.
-  async getFeed(params: { size?: number } = {}): Promise<PostListResponse> {
+  async getFeed(
+    params: { size?: number; exclude_ids?: string[] } = {}
+  ): Promise<PostListResponse> {
     const query = new URLSearchParams();
     if (params.size !== undefined) query.append("size", String(params.size));
+    // Repeated ?exclude_ids= params: posts already shown this session, so the
+    // server pages through fresh posts instead of re-serving the top ranks.
+    params.exclude_ids?.forEach((id) => query.append("exclude_ids", id));
     const qs = query.toString();
     return api<PostListResponse>(`/api/v1/posts/feed${qs ? `?${qs}` : ""}`);
+  }
+
+  // Explore page: the personalized "For You" feed plus per-topic rails, in one
+  // call. Requires an authenticated session (like getFeed). Per-topic "see all"
+  // pages via getPosts({ topic_id }).
+  async getExplore(
+    params: { for_you_size?: number; topic_size?: number; topics_limit?: number } = {}
+  ): Promise<ExploreResponse> {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        query.append(key, String(value));
+      }
+    });
+    const qs = query.toString();
+    return api<ExploreResponse>(`/api/v1/posts/explore${qs ? `?${qs}` : ""}`);
   }
 
   async getPost(postId: string): Promise<Post> {

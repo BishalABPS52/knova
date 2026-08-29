@@ -1,0 +1,46 @@
+{
+  "model_version": "synthetic-v3",
+  "synced_at": "2026-08-24T09:13:30.563457+00:00",
+  "artifacts": {
+    "knova_als.pkl": {
+      "sha256": "c8c0ee93d63f9af65b9708280cbe11d1d97e21a412e00f2b9b84d8aa351d3f29",
+      "bytes": 2394021
+    },
+    "knova_als_content_ids.pkl": {
+      "sha256": "1a98c773c632fe38dc40f006d2212765553ab1304bb42e4cb6bf2f706a663a2d",
+      "bytes": 80047
+    },
+    "knova_als_user_ids.pkl": {
+      "sha256": "93122b438b5d46d95e6f7605754a45b4994dd4f7d9b3e4f8fce765ac583b4aa7",
+      "bytes": 16311
+    },
+    "knova_content_ids.pkl": {
+      "sha256": "cb8c6b5cad8a3e0a365e8a877c8f9dfe9653aaf7444f9edbff7019c26eb5b6ee",
+      "bytes": 80225
+    },
+    "knova_content_ranker.pkl": {
+      "sha256": "f1eaaf627fa94a5dbcea04e222e7df863c0a6af2cc2f3416ebdc65f2787f5e32",
+      "bytes": 499952
+    },
+    "knova_feature_scaler.pkl": {
+      "sha256": "e3355acfd99e79c65a20f1e7db6d9b01e1879d01c4d2ea34bfda6a90aba2fe49",
+      "bytes": 1151
+    },
+    "knova_tfidf.pkl": {
+      "sha256": "800bfba2c6aa3d3a40c591c900a9a812356cdc4ee9a1201cb914789f623c2028",
+      "bytes": 205837
+    },
+    "knova_tfidf_matrix.pkl": {
+      "sha256": "16a5b4177892bcf3685364ba6de2969e2fc11f17be54808e469c04a4c1aad5dc",
+      "bytes": 2228219
+    },
+    "knova_thompson_sampler.pkl": {
+      "sha256": "f6280736728707e1beff77f11f4fef90c872bc23d4e50a155311611387e170e1",
+      "bytes": 438339
+    },
+    "knova_type_encoder.pkl": {
+      "sha256": "f2ac30b175ff41ece15f90e0db32acda29f1a334959f761d08004e95d6db8f84",
+      "bytes": 519
+    }
+  }
+}

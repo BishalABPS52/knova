@@ -49,7 +49,7 @@ SCALE_FEATURES = [
 # for an unseen (user, post) pair. Mirrors df_features[FEATURES_ALL].median().
 FEATURE_MEDIANS = {
     "dwell_norm_by_type": -0.293515,
-    "read_velocity": -0.381948,
+    "read_velocity": -0.380358,
     "mastery_score": 0.5,
     "kg_readiness": -0.016,
     "depth_alignment": 0.767,
@@ -62,7 +62,7 @@ FEATURE_MEDIANS = {
     "creator_trust": 0.0,
     "user_topic_upvote_rate": 0.092499,
     "user_topic_interaction_count": 0.0,
-    "similarity_weighted_engagement": 0.003568,
+    "similarity_weighted_engagement": 0.003555,
 }
 
 # Cold-start fill for als_score (mean, not median — matches the notebook's als_mean).
@@ -71,7 +71,85 @@ ALS_MEAN = 0.04676
 # Identifies the artifact set that produced a ranking, stamped onto every
 # interaction row. Bump this whenever backend/models/*.pkl is replaced, so
 # telemetry can be attributed to the model that actually served it.
-MODEL_VERSION = "synthetic-v1"
+MODEL_VERSION = "synthetic-v3"
+
+# --- Live feature serving (Phase 4) -----------------------------------------
+# Feature values computed per-user from real telemetry instead of the frozen
+# medians above. Gated in features.build_feature_frame behind LIVE_FEATURES_ENABLED
+# and, per feature, behind a minimum history so a new user's feed is identical to
+# the flag-off feed. Regenerate the z-score params below whenever the pipeline is
+# retrained (see regenerate_constants.py): they are grouped mean/std over
+# knova_features_final.csv of the per-type-clipped `dwell_ratio_actual` and of
+# `read_velocity_raw = word_count / actual_dwell_sec`.
+
+# Min interactions in a topic before a live per-topic value is trusted over the median.
+MIN_HISTORY = 3
+# Min quiz answers in a topic before live mastery_score / kg_readiness are trusted.
+# Kept low on purpose: the product goal is that answering a quiz visibly moves the
+# feed for that topic. Raise it to trade responsiveness for stability.
+MASTERY_MIN_QUIZ = 1
+
+# The training `type` labels differ from the DB ContentType values in one case:
+# the ML data's 'text_content' collapses to ContentType.TEXT ('text') at seed time.
+# Map DB label -> training label before touching the type_encoder / z-score dicts.
+_CONTENT_TYPE_TRAIN_LABEL = {"text": "text_content"}
+
+# Per-type clip applied to dwell_ratio_actual before z-scoring (verbatim from the
+# notebook's clip_limits); values below the floor are lifted to it.
+DWELL_CLIP_BY_TYPE = {"flashcard": 2.0, "short_note": 2.2, "mcq": 3.0, "text_content": 2.5}
+DWELL_CLIP_FLOOR = 0.1
+# z-scores are clipped to +/- this in training (.clip(-3, 3)).
+Z_CLIP = 3.0
+
+# dwell_ratio_actual (per-type clipped) mean/std, by training type label.
+DWELL_MEAN_BY_TYPE = {
+    "flashcard": 0.719126,
+    "mcq": 0.647329,
+    "short_note": 0.647375,
+    "text_content": 0.656545,
+}
+DWELL_STD_BY_TYPE = {
+    "flashcard": 0.568951,
+    "mcq": 0.450842,
+    "short_note": 0.451272,
+    "text_content": 0.456181,
+}
+# read_velocity_raw (word_count / actual_dwell_sec) mean/std, by training type label.
+VELOCITY_MEAN_BY_TYPE = {
+    "flashcard": 14.595512,
+    "mcq": 9.581552,
+    "short_note": 11.37895,
+    "text_content": 7.439515,
+}
+VELOCITY_STD_BY_TYPE = {
+    "flashcard": 10.522042,
+    "mcq": 8.620989,
+    "short_note": 8.706735,
+    "text_content": 6.990085,
+}
+
+# Expertise nudge: after a quiz-bearing telemetry flush, User.estimated_expertise
+# drifts toward the user's demonstrated quiz accuracy at this rate (0..1 per flush).
+EXPERTISE_LEARNING_RATE = 0.2
+
+
+def content_type_train_label(db_type: str) -> str:
+    """Map a DB ContentType value to the training `type` label (identity except 'text')."""
+    return _CONTENT_TYPE_TRAIN_LABEL.get(db_type, db_type)
+
+
+def zscore_clip(value: float, mean: float, std: float) -> float:
+    """(value - mean)/std, clipped to +/- Z_CLIP. Returns 0.0 when std is ~0 (matches
+    the notebook's .fillna(0) for degenerate groups)."""
+    if not std:
+        return 0.0
+    z = (value - mean) / std
+    return max(-Z_CLIP, min(Z_CLIP, z))
+
+
+def blend_expertise(old: float, target: float, lr: float = EXPERTISE_LEARNING_RATE) -> float:
+    """EWMA step of estimated_expertise toward demonstrated quiz accuracy, clamped 0..1."""
+    return max(0.0, min(1.0, old * (1.0 - lr) + target * lr))
 
 # --- Telemetry contract (must mirror ml/notebook/synthetic_data.py) ----------
 # Kept here so capture, export and the training pipeline cannot drift apart.

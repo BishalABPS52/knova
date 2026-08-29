@@ -4,7 +4,6 @@
 import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { Plus, Loader2 } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
-import CreatorCard from '@/components/cards/CreatorCard';
 import FlashCard from '@/components/cards/FlashCard';
 import TextCard from '@/components/cards/TextContentCard';
 import McqCard from '@/components/cards/McqCard';
@@ -14,6 +13,7 @@ import CreatePostModal from '@/components/ui/CreatePostModal';
 import { feedItems, FeedItem } from '@/data/feedData';
 import TrackedCard from '@/components/feed/TrackedCard';
 import { PostService } from '@/lib/posts';
+import { feedCache } from '@/lib/feedCache';
 import { telemetry } from '@/lib/telemetry';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -81,9 +81,13 @@ export default function HomePage() {
         setIsLoadingMore(true);
       }
 
-      // Personalized recommendation feed. Paging re-runs retrieval, so we filter
-      // out any post already shown and stop when a batch yields nothing new.
-      const response = await postService.getFeed({ size: 15 });
+      // Personalized recommendation feed. Paging re-runs retrieval; we pass the
+      // ids already shown so the server returns fresh posts, and stop when a batch
+      // comes back empty (the pool is genuinely exhausted).
+      const response = await postService.getFeed({
+        size: 15,
+        exclude_ids: append ? Array.from(seenIdsRef.current) : undefined,
+      });
       const mapped = response.items.map(mapPostToFeedItem);
 
       if (!append) {
@@ -92,11 +96,12 @@ export default function HomePage() {
         setTotal(mapped.length);
         setHasNext(mapped.length > 0);
       } else {
+        // The server already excluded shown ids; dedupe defensively anyway.
         const fresh = mapped.filter(it => !seenIdsRef.current.has(String(it.id)));
         fresh.forEach(it => seenIdsRef.current.add(String(it.id)));
         setFeed(prev => [...prev, ...fresh]);
         setTotal(prev => prev + fresh.length);
-        setHasNext(fresh.length > 0);
+        setHasNext(mapped.length > 0);
       }
 
       setPage(pageNum);
@@ -123,9 +128,29 @@ export default function HomePage() {
   }, [mapPostToFeedItem]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      loadFeed(1, false);
-    }, 500);
+    // Restore the feed from the in-memory cache when returning to this page,
+    // instead of refetching and flashing the skeleton. A hard reload clears the
+    // module cache, so it never stands in the way of a genuinely fresh feed.
+    const cached = feedCache.get();
+    const cacheHit = cached !== null && cached.userId === (user?.id ?? null) && cached.items.length > 0;
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    if (cacheHit) {
+      seenIdsRef.current = new Set(cached!.seenIds);
+      setFeed(cached!.items);
+      setTotal(cached!.items.length);
+      setPage(cached!.page);
+      setHasNext(cached!.hasNext);
+      setUseMockData(false);
+      setIsLoading(false);
+      // Restore scroll position after the list has painted.
+      const y = cached!.scrollY;
+      requestAnimationFrame(() => window.scrollTo(0, y));
+    } else {
+      timer = setTimeout(() => {
+        loadFeed(1, false);
+      }, 500);
+    }
 
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -150,7 +175,33 @@ export default function HomePage() {
       window.removeEventListener('resize', checkScreenSize);
       window.removeEventListener('open-create-modal', handleOpen);
     };
-  }, [loadFeed]);
+  }, [loadFeed, user]);
+
+  // Keep the in-memory cache in step with the live feed, so returning to this
+  // page restores it instead of refetching. Skip the loading and mock-fallback
+  // states — neither is real, cacheable feed data.
+  useEffect(() => {
+    if (isLoading || useMockData || feed.length === 0) return;
+    feedCache.set({
+      userId: user?.id ?? null,
+      items: feed,
+      seenIds: Array.from(seenIdsRef.current),
+      page,
+      hasNext,
+      scrollY: feedCache.get()?.scrollY ?? 0,
+    });
+  }, [feed, page, hasNext, isLoading, useMockData, user]);
+
+  // Persist scroll position when leaving (unmount) or hiding the tab, so the
+  // restored feed lands where the reader left off.
+  useEffect(() => {
+    const save = () => feedCache.setScroll(window.scrollY);
+    window.addEventListener('pagehide', save);
+    return () => {
+      save();
+      window.removeEventListener('pagehide', save);
+    };
+  }, []);
 
   // Load more when scrolling
   useEffect(() => {
@@ -368,13 +419,11 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-screen">
-      <main className={`flex-1 ${isMobile ? 'px-4 py-4 pb-[100px]' : 'px-4 md:px-[64px] py-12 pt-32 pb-12'}`}>
-        <CreatorCard onCreateClick={() => setCreateModalOpen(true)} />
-
+      <main className={`flex-1 ${isMobile ? 'px-4 pt-2 pb-[100px]' : 'px-4 md:px-[64px] pt-4 pb-12'}`}>
         {isLoading ? (
           <FeedSkeleton />
         ) : (
-          <div className={`${isMobile ? 'flex flex-col gap-6 mt-6' : 'max-w-4xl mx-auto space-y-8'}`}>
+          <div className={`${isMobile ? 'flex flex-col gap-6' : 'max-w-4xl mx-auto space-y-8'}`}>
             {feed.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-500">No posts yet. Be the first to create one!</p>

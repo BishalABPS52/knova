@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FeedActions, ReelActions, CommentsSection } from './Shared';
+import { FeedActions, ReelActions, CommentsSection, ExploreCardShell } from './Shared';
 import FollowButton from '@/components/ui/FollowButton';
 import PostMenu from '@/components/ui/PostMenu';
 
@@ -261,27 +261,50 @@ function FlashCardReel({ id, question, answer, subtitle, theme, tag, author, tim
   );
 }
 
-function FlashCardExplore({ question, author, upvotes, bg = "bg-[#fef3ea]" }: CardProps) {
+function FlashCardExplore({ id, tag, question, answer, author, creatorId, upvotes, comments, userVote, userSaved, isOwner, onVote, onSave, onShare, onDelete, onFlip }: CardProps) {
+  const [flipped, setFlipped] = useState(false);
+
+  const toggle = () => {
+    const next = !flipped;
+    setFlipped(next);
+    if (next && id) onFlip?.(String(id));
+  };
+
+  const chip = (
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[#f36710] bg-[#fef3ea] px-2 py-0.5 rounded-full">
+      <span className="material-symbols-outlined text-[12px]">style</span>
+      {tag || 'Flashcard'}
+    </span>
+  );
+
   return (
-    <div className={`h-[340px] rounded-xl relative flex flex-col p-6 hover-lift cursor-pointer border border-primary/10 ${bg}`}>
-      <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <span className="material-symbols-outlined text-primary-container text-4xl mb-4 opacity-50">help_center</span>
-        <h3 className="text-headline-md font-semibold text-on-primary-container leading-tight px-2">{question || 'Question'}</h3>
+    <ExploreCardShell
+      id={id}
+      author={author}
+      creatorId={creatorId}
+      chip={chip}
+      upvotes={upvotes}
+      comments={comments}
+      userVote={userVote}
+      userSaved={userSaved}
+      isOwner={isOwner}
+      onVote={onVote}
+      onSave={onSave}
+      onShare={onShare}
+      onDelete={onDelete}
+    >
+      <div onClick={toggle} className="cursor-pointer">
+        {!flipped ? (
+          <h3 className="text-[14px] md:text-[15px] font-semibold text-[#1b1c1c] leading-snug line-clamp-4">{question || 'Question'}</h3>
+        ) : (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-[#f36710] mb-1">Answer</p>
+            <p className="text-[13px] text-[#594137] leading-relaxed line-clamp-5">{answer || 'No answer'}</p>
+          </div>
+        )}
+        <p className="text-[11px] text-[#b0a49d] mt-2">{flipped ? 'Tap to hide answer' : 'Tap to reveal answer'}</p>
       </div>
-      <div className="pt-4 border-t border-primary/10 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-primary-fixed"></div>
-          <span className="text-sm text-on-primary-container/70 font-semibold">{author || 'Unknown'}</span>
-        </div>
-        <div className="flex items-center gap-1 text-primary-container">
-          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>arrow_upward</span>
-          <span className="text-sm font-bold">{upvotes || 0}</span>
-        </div>
-      </div>
-      <div className="absolute bottom-16 left-0 right-0 flex justify-center opacity-30">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-primary-container">Tap to flip</span>
-      </div>
-    </div>
+    </ExploreCardShell>
   );
 }
 

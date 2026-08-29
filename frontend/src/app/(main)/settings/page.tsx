@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "motion/react";
 import {
   IdCard,
   Lock,
@@ -17,17 +18,32 @@ import {
   Plus,
   Search,
   Loader2,
+  Check,
 } from "lucide-react";
 import { getTopics, Topic } from "@/lib/reference";
 import { getMyInterests, updateMyInterests } from "@/lib/interests";
+import { getMyProfile, updateProfile } from "@/lib/profile";
+import { changePassword } from "@/lib/auth";
+import { useAuth } from "@/context/AuthContext";
 
 type ModalType = "personal" | "password" | "topics" | null;
 
 export default function SettingsPage() {
   const router = useRouter();
+  const { logout } = useAuth();
   const [activeModal, setActiveModal] = useState<ModalType>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const closeModal = () => setActiveModal(null);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await logout();
+    } finally {
+      setLoggingOut(false);
+    }
+  };
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -43,16 +59,21 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] text-[#1a1a1a] pb-24 font-sans selection:bg-orange-100">
-      <main className="max-w-2xl mx-auto pt-10 px-4 sm:px-6 space-y-10">
-        <h1 className="text-3xl font-bold text-[#1a1a1a] tracking-tight">
-          Settings
-        </h1>
+      <main className="max-w-2xl mx-auto pt-10 px-4 sm:px-6 space-y-8">
+        <header className="space-y-1">
+          <h1 className="text-3xl font-bold text-[#1a1a1a] tracking-tight">
+            Settings
+          </h1>
+          <p className="text-sm text-[#8d7165]">
+            Manage your account, security and learning preferences.
+          </p>
+        </header>
 
         <section className="space-y-3">
           <h2 className="text-xs font-bold text-[#5c5c5c] uppercase tracking-wider px-1">
             Account
           </h2>
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-black/[0.04] overflow-hidden">
             <SettingsButton
               icon={<IdCard size={20} className="text-[#594137]" />}
               label="Personal Information"
@@ -77,7 +98,7 @@ export default function SettingsPage() {
           <h2 className="text-xs font-bold text-[#5c5c5c] uppercase tracking-wider px-1">
             Support
           </h2>
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-black/[0.04] overflow-hidden">
             <SettingsButton
               icon={<HelpCircle size={20} className="text-[#594137]" />}
               label="Help / FAQ"
@@ -99,28 +120,44 @@ export default function SettingsPage() {
         </section>
 
         <section>
-          <button className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4 hover:bg-red-50/50 transition-colors group">
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="w-full bg-white rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-black/[0.04] p-4 flex items-center gap-4 hover:bg-red-50/50 transition-colors group disabled:opacity-60 disabled:cursor-not-allowed"
+          >
             <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
-              <LogOut size={18} className="text-red-600 ml-1" />
+              {loggingOut ? (
+                <Loader2 size={18} className="text-red-600 animate-spin" />
+              ) : (
+                <LogOut size={18} className="text-red-600 ml-0.5" />
+              )}
             </div>
-            <span className="text-red-600 font-semibold text-sm">Log Out</span>
+            <span className="text-red-600 font-semibold text-sm">
+              {loggingOut ? "Logging out…" : "Log Out"}
+            </span>
           </button>
+
+          <p className="text-center text-xs text-[#b8b0ab] mt-6">
+            Knova · Learn a little every day
+          </p>
         </section>
       </main>
 
-      {activeModal && (
-        <ModalWrapper onClose={closeModal}>
-          {activeModal === "personal" && (
-            <PersonalInfoModal onClose={closeModal} />
-          )}
-          {activeModal === "password" && (
-            <ChangePasswordModal onClose={closeModal} />
-          )}
-          {activeModal === "topics" && (
-            <PreferredTopicsModal onClose={closeModal} />
-          )}
-        </ModalWrapper>
-      )}
+      <AnimatePresence>
+        {activeModal && (
+          <ModalWrapper onClose={closeModal}>
+            {activeModal === "personal" && (
+              <PersonalInfoModal onClose={closeModal} />
+            )}
+            {activeModal === "password" && (
+              <ChangePasswordModal onClose={closeModal} />
+            )}
+            {activeModal === "topics" && (
+              <PreferredTopicsModal onClose={closeModal} />
+            )}
+          </ModalWrapper>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -168,13 +205,22 @@ function ModalWrapper({
 }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div
+      <motion.div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
       />
-      <div className="relative w-full max-w-[512px] max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+      <motion.div
+        className="relative w-full max-w-[512px] max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ type: "spring", stiffness: 320, damping: 28 }}
+      >
         {children}
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -182,6 +228,58 @@ function ModalWrapper({
 // --- Specific Modals ---
 
 function PersonalInfoModal({ onClose }: { onClose: () => void }) {
+  const { refreshUser } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [bio, setBio] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    getMyProfile()
+      .then((p) => {
+        if (!active) return;
+        setUsername(p.username);
+        setEmail(p.email);
+        setBio(p.bio ?? "");
+      })
+      .catch((e) => {
+        if (active)
+          setError(e instanceof Error ? e.message : "Failed to load profile");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleSave = async () => {
+    if (!username.trim()) {
+      setError("Username cannot be empty");
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      await updateProfile({
+        username: username.trim(),
+        email: email.trim(),
+        bio,
+      });
+      await refreshUser();
+      onClose();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to save changes");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <>
       <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
@@ -195,38 +293,131 @@ function PersonalInfoModal({ onClose }: { onClose: () => void }) {
           <X size={20} className="text-gray-500" />
         </button>
       </div>
-      <div className="p-6 space-y-5 overflow-y-auto">
-        <InfoField label="Username" value="@arivera_learns" />
-        <InfoField label="Full Name" value="Alex Rivera" />
-        <InfoField label="Email" value="alex.rivera@example.com" />
-        <InfoField label="Date of Birth" value="August 12, 1995" />
-      </div>
-      <div className="px-6 py-5 bg-gray-50/80 border-t border-gray-100 flex justify-end">
+
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+        </div>
+      ) : (
+        <div className="p-6 space-y-5 overflow-y-auto">
+          {error && (
+            <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+              {error}
+            </div>
+          )}
+          <TextField
+            label="Username"
+            value={username}
+            onChange={setUsername}
+            disabled={saving}
+          />
+          <TextField
+            label="Email"
+            type="email"
+            value={email}
+            onChange={setEmail}
+            disabled={saving}
+          />
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+              Bio
+            </label>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              disabled={saving}
+              rows={3}
+              placeholder="Tell others what you're learning…"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#f36710] focus:ring-1 focus:ring-[#f36710] outline-none text-gray-900 transition-colors bg-gray-50/50 text-sm font-medium resize-none"
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="px-6 py-5 bg-gray-50/80 border-t border-gray-100 flex justify-end gap-3">
         <button
           onClick={onClose}
-          className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-[#f36710] text-white hover:bg-[#d45600] active:scale-95 transition-all shadow-sm shadow-orange-500/20"
+          disabled={saving}
+          className="px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-60"
         >
-          Close
+          Cancel
+        </button>
+        <button
+          onClick={handleSave}
+          disabled={saving || loading}
+          className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-[#f36710] text-white hover:bg-[#d45600] active:scale-95 transition-all shadow-sm shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+          Save Changes
         </button>
       </div>
     </>
   );
 }
 
-function InfoField({ label, value }: { label: string; value: string }) {
+function TextField({
+  label,
+  value,
+  onChange,
+  type = "text",
+  disabled,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  disabled?: boolean;
+}) {
   return (
     <div className="space-y-1.5">
       <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
         {label}
       </label>
-      <div className="px-4 py-3 rounded-xl bg-gray-50 text-gray-900 text-sm border border-gray-100 font-medium">
-        {value}
-      </div>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-[#f36710] focus:ring-1 focus:ring-[#f36710] outline-none text-gray-900 transition-colors bg-gray-50/50 text-sm font-medium disabled:opacity-60"
+      />
     </div>
   );
 }
 
 function ChangePasswordModal({ onClose }: { onClose: () => void }) {
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+
+  const handleSubmit = async () => {
+    setError(null);
+    if (!current || !next || !confirm) {
+      setError("Please fill in all fields");
+      return;
+    }
+    if (next.length < 8) {
+      setError("New password must be at least 8 characters");
+      return;
+    }
+    if (next !== confirm) {
+      setError("New passwords do not match");
+      return;
+    }
+    setSaving(true);
+    try {
+      await changePassword({ current_password: current, new_password: next });
+      setDone(true);
+      setTimeout(onClose, 1200);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to update password");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <>
       <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
@@ -240,30 +431,81 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
           <X size={20} className="text-gray-500" />
         </button>
       </div>
-      <div className="p-6 space-y-5 overflow-y-auto">
-        <PasswordInput label="Current Password" />
-        <PasswordInput label="New Password" />
-        <PasswordInput label="Confirm New Password" />
-      </div>
-      <div className="px-6 py-5 bg-gray-50/80 border-t border-gray-100 flex justify-end gap-3 sticky bottom-0">
-        <button
-          onClick={onClose}
-          className="px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={onClose}
-          className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-[#f36710] text-white hover:bg-[#d45600] active:scale-95 transition-all shadow-sm shadow-orange-500/20"
-        >
-          Update Password
-        </button>
-      </div>
+
+      {done ? (
+        <div className="flex flex-col items-center justify-center py-14 px-6 text-center">
+          <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mb-4">
+            <Check size={28} className="text-green-600" strokeWidth={3} />
+          </div>
+          <p className="font-bold text-gray-900">Password updated</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Your new password is now active.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="p-6 space-y-5 overflow-y-auto">
+            {error && (
+              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+                {error}
+              </div>
+            )}
+            <PasswordInput
+              label="Current Password"
+              value={current}
+              onChange={setCurrent}
+              disabled={saving}
+            />
+            <PasswordInput
+              label="New Password"
+              value={next}
+              onChange={setNext}
+              disabled={saving}
+              hint="At least 8 characters"
+            />
+            <PasswordInput
+              label="Confirm New Password"
+              value={confirm}
+              onChange={setConfirm}
+              disabled={saving}
+            />
+          </div>
+          <div className="px-6 py-5 bg-gray-50/80 border-t border-gray-100 flex justify-end gap-3 sticky bottom-0">
+            <button
+              onClick={onClose}
+              disabled={saving}
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={saving}
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-[#f36710] text-white hover:bg-[#d45600] active:scale-95 transition-all shadow-sm shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+              Update Password
+            </button>
+          </div>
+        </>
+      )}
     </>
   );
 }
 
-function PasswordInput({ label }: { label: string }) {
+function PasswordInput({
+  label,
+  value,
+  onChange,
+  disabled,
+  hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+  hint?: string;
+}) {
   const [show, setShow] = useState(false);
   return (
     <div className="space-y-1.5">
@@ -273,8 +515,11 @@ function PasswordInput({ label }: { label: string }) {
       <div className="relative">
         <input
           type={show ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
           placeholder="••••••••"
-          className="w-full h-12 px-4 pr-12 rounded-xl border border-gray-200 focus:border-[#f36710] focus:ring-1 focus:ring-[#f36710] outline-none text-gray-900 transition-colors bg-gray-50/50 text-sm tracking-wider font-medium placeholder:tracking-normal"
+          className="w-full h-12 px-4 pr-12 rounded-xl border border-gray-200 focus:border-[#f36710] focus:ring-1 focus:ring-[#f36710] outline-none text-gray-900 transition-colors bg-gray-50/50 text-sm tracking-wider font-medium placeholder:tracking-normal disabled:opacity-60"
         />
         <button
           type="button"
@@ -284,6 +529,7 @@ function PasswordInput({ label }: { label: string }) {
           {show ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
       </div>
+      {hint && <p className="text-xs text-gray-400 pl-1">{hint}</p>}
     </div>
   );
 }

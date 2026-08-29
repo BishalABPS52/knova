@@ -1,9 +1,16 @@
+import uuid
+
 from fastapi import APIRouter, Cookie, Depends, Response, HTTPException
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.deps import get_db
-from .schemas import RegisterRequest, LoginRequest
-from .service import register_user, login_user, refresh_user_session
+from src.deps import get_db, is_authenticated
+from .schemas import RegisterRequest, LoginRequest, ChangePasswordRequest
+from .service import (
+    register_user,
+    login_user,
+    refresh_user_session,
+    change_user_password,
+)
 
 
 router = APIRouter(tags=["auth"])
@@ -28,6 +35,17 @@ async def refresh(
     if not refresh_token:
         raise HTTPException(status_code=401, detail="Missing refresh token")
     return await refresh_user_session(response, db, refresh_token)
+
+
+@router.post("/change-password")
+async def change_password(
+    body: ChangePasswordRequest,
+    db: AsyncSession = Depends(get_db),
+    token_payload: dict = Depends(is_authenticated),
+):
+    user_id = uuid.UUID(token_payload["sub"])
+    await change_user_password(db, user_id, body.current_password, body.new_password)
+    return {"detail": "Password updated successfully"}
 
 
 @router.post("/logout")

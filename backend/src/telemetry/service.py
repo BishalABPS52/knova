@@ -29,7 +29,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ml import constants as C
-from src.db.models import Interaction, InteractionSurface, Post, Vote
+from src.db.models import Interaction, InteractionSurface, Post, User, Vote
 
 from .schemas import InteractionBatch
 
@@ -78,6 +78,35 @@ def _recompute_derived(user_id: UUID, post_ids: list[UUID]):
             is_completed=ratio >= C.COMPLETION_RATIO_THRESHOLD,
             engagement_weight=engagement,
         )
+        .execution_options(synchronize_session=False)
+    )
+
+
+def _nudge_expertise(user_id: UUID):
+    """Drift User.estimated_expertise toward the user's demonstrated quiz accuracy.
+
+    Called after a telemetry flush that carried a quiz answer. `estimated_expertise`
+    is the persisted base_skill_level that feeds both the ranker and the serve-time
+    difficulty_gap snapshot — so answering quizzes well raises the difficulty of what
+    the feed surfaces. An EWMA step (not a hard set) keeps a single lucky/unlucky
+    answer from swinging it. Point-in-time correctness holds: past impression rows
+    already froze the value they were served under.
+    """
+    target = (
+        select(func.avg(case((Interaction.quiz_correct.is_(True), 1.0), else_=0.0)))
+        .where(Interaction.user_id == user_id, Interaction.quiz_answered.is_(True))
+        .scalar_subquery()
+    )
+    # NULL target (no quiz history yet) coalesces to the current value -> no change.
+    target = func.coalesce(target, User.estimated_expertise)
+    blended = (
+        User.estimated_expertise * (1.0 - C.EXPERTISE_LEARNING_RATE)
+        + target * C.EXPERTISE_LEARNING_RATE
+    )
+    return (
+        update(User)
+        .where(User.id == user_id)
+        .values(estimated_expertise=func.least(1.0, func.greatest(0.0, blended)))
         .execution_options(synchronize_session=False)
     )
 
@@ -297,6 +326,13 @@ async def record_batch(db: AsyncSession, user_id: UUID, batch: InteractionBatch)
     post_ids = list(by_post)
     await db.execute(_recompute_derived(user_id, post_ids))
     await db.execute(_refresh_post_counters(post_ids))
+
+    # A quiz answer in this flush is fresh evidence about the user's skill, so let it
+    # move their persisted expertise. Recomputed from all quiz history (set-based), not
+    # incremented, so it can't drift under retries.
+    if any(e.quiz_answered for e in by_post.values()):
+        await db.execute(_nudge_expertise(user_id))
+
     await db.commit()
 
     return len(post_ids), len(unknown)

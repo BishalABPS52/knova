@@ -3,33 +3,37 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { followCreator, unfollowCreator } from '@/lib/creator';
+import { followStore, useFollowing } from '@/lib/followStore';
 import { cn } from '@/lib/utils';
 
 interface FollowButtonProps {
   /** Creator profile id. Omit on mock/demo screens to toggle locally only. */
   creatorId?: string;
   author?: string;
-  initialFollowing?: boolean;
   /** Hidden entirely for your own posts. */
   hidden?: boolean;
   className?: string;
 }
 
 /**
- * Compact follow pill for post headers. Updates optimistically and rolls back
- * if the request fails, so the count in the header never lies for long.
+ * Compact follow pill for post headers. Reads follow state from the shared
+ * `followStore`, so every button for the same creator stays in sync and the
+ * state survives navigation. Updates optimistically and rolls back on failure.
  */
 export default function FollowButton({
   creatorId,
   author,
-  initialFollowing = false,
   hidden = false,
   className,
 }: FollowButtonProps) {
-  const [following, setFollowing] = useState(initialFollowing);
+  const storeFollowing = useFollowing(creatorId);
+  // Demo screens without a real creator id fall back to purely local state.
+  const [localFollowing, setLocalFollowing] = useState(false);
   const [pending, setPending] = useState(false);
 
   if (hidden) return null;
+
+  const following = creatorId ? storeFollowing : localFollowing;
 
   const toggle = async (event: React.MouseEvent) => {
     // Headers are often inside clickable cards.
@@ -38,15 +42,18 @@ export default function FollowButton({
     if (pending) return;
 
     const next = !following;
-    setFollowing(next);
 
-    if (!creatorId) return;   // demo data: local state is all there is
+    if (!creatorId) {
+      setLocalFollowing(next); // demo data: local state is all there is
+      return;
+    }
 
+    followStore.set(creatorId, next); // optimistic, updates every button at once
     setPending(true);
     try {
       await (next ? followCreator(creatorId) : unfollowCreator(creatorId));
     } catch {
-      setFollowing(!next);
+      followStore.set(creatorId, !next);
       toast.error(next ? 'Could not follow, try again' : 'Could not unfollow, try again');
     } finally {
       setPending(false);
