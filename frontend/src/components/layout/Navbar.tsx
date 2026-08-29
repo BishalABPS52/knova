@@ -125,7 +125,7 @@ export default function Navbar() {
                   className="w-full h-full object-cover"
                   src={
                     user.avatar_url ||
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuCEu-3t0uD8i4XHinactyZVIgU5H7GfzqCbS8sWTAWqp4bu2FT6BQazk7xznnRfgM79DLGKmUOMfhSZ7ZltOxkaZa4BoxVzMoWBZN7lWq7-H6-zOpZ9cKOQ5DLXJwgCf1DA_64LXRFB-k5-ObAh7PVKgli4I3MLEGQJypaipzHqdLm8T22ZAA8J9LaS4pj7subHocFLNZZuTFi7B_raIxHTm8roMmUnzUmkzQZ0Qdb3ISzIyr9Lherefvbt-zrfl6GK2WBp1rfXz5g'
+                    '/logos/default-avatar.png'
                   }
                   width={36}
                   height={36}
